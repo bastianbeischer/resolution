@@ -16,14 +16,13 @@ public:
   ~RES_RunManager();
 
 public:
-  RES_DataHandler* GetDataHandler() {return m_dataHandler;}
-
   void SetStoreResults(G4bool value);
+
+  RES_DataHandler* GetDataHandler()  {return m_dataHandler;}
+  G4bool           GetStoreResults() {return m_storeResults;}
 
   void StartGenerationRun(G4int nEvents);
   void StartReconstructionRun();
-
-  void TestDataHandler();
 
 private:
   void SetActionsForGeneration();

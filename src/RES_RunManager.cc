@@ -57,17 +57,3 @@ void RES_RunManager::SetActionsForReconstruction()
 {
   SetUserAction(m_eventActionRec);
 }
-
-void RES_RunManager::TestDataHandler()
-{
-  // TESTING DATA HANDLER
-  m_dataHandler->SetFileName("test.root");
-  m_dataHandler->InitNewEvent();
-  m_dataHandler->SetEventType(reconstructed);
-  RES_FiberHit* hit = new RES_FiberHit();
-  hit->SetPosition(G4ThreeVector(2.4,0,0));
-  m_dataHandler->AddHitInformation(hit);
-  delete hit;
-  m_dataHandler->FinalizeEvent();
-  m_dataHandler->WriteFile();
-}

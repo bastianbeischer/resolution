@@ -19,9 +19,6 @@
 #/RES/Field/SetInhomFieldFrom tables/perdaix_07_jul_2009.table
 /RES/Field/SetUniformField 0.3 0.0 0.0 tesla
 
-/RES/Data/SetFileName test.root
-/RES/Run/StoreResults
-
 /run/initialize
 
 /vis/scene/create
