@@ -11,7 +11,7 @@ RES_StepperMessenger::RES_StepperMessenger(RES_FieldManager* manager)
 {
   m_manager = manager;
 
-  m_directory = new G4UIdirectory("/RES/MyStepper");
+  m_directory = new G4UIdirectory("/RES/MyStepper/");
   m_directory->SetGuidance("Commands to alter the integration stepper");
 
   m_activateMyStepperCmd = new G4UIcmdWithoutParameter("/RES/MyStepper/Activate", this);

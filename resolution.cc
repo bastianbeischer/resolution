@@ -1,9 +1,10 @@
-#include "G4RunManager.hh"
-
+#include "RES_RunManager.hh"
 #include "RES_DetectorConstruction.hh"
 #include "RES_PhysicsList.hh"
 #include "RES_PrimaryGeneratorAction.hh"
 #include "RES_FieldManager.hh"
+#include "RES_DataHandler.hh"
+#include "RES_FiberHit.hh"
 
 #include "G4TransportationManager.hh"
 #include "G4UIsession.hh"
@@ -17,7 +18,7 @@
 int main(int argc, char** argv)
 {
   // create a new RunManager
-  G4RunManager* runManager = new G4RunManager();
+  RES_RunManager* runManager = new RES_RunManager();
 
   // set user initializations
   RES_DetectorConstruction* detectorConstruction = new RES_DetectorConstruction();
@@ -29,6 +30,8 @@ int main(int argc, char** argv)
 
   RES_FieldManager* fieldManager = new RES_FieldManager();
   G4TransportationManager::GetTransportationManager()->SetFieldManager(fieldManager);
+
+  runManager->TestDataHandler();
 
 #ifdef G4VIS_USE
   // visualization manager

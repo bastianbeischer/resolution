@@ -14,7 +14,7 @@ RES_FieldMessenger::RES_FieldMessenger(RES_FieldManager* manager)
 {
   m_manager = manager;
 
-  m_directory = new G4UIdirectory("/RES/Field");
+  m_directory = new G4UIdirectory("/RES/Field/");
   m_directory->SetGuidance("Commands for the magnetic field");
 
   m_setInhomFieldFromFileCmd = new G4UIcmdWithAString("/RES/Field/SetInhomFieldFrom", this);

@@ -11,7 +11,7 @@ RES_PrimaryGeneratorMessenger::RES_PrimaryGeneratorMessenger(RES_PrimaryGenerato
 {
   m_generator = generator;
 
-  m_directory = new G4UIdirectory("/RES/Gun");
+  m_directory = new G4UIdirectory("/RES/Gun/");
 
   m_randomOriginCmd = new G4UIcmdWithABool("/RES/Gun/RandomOrigin", this);
   m_randomOriginCmd->SetGuidance("Set random origin for the particle?");
