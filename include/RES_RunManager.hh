@@ -7,6 +7,7 @@ class RES_RunMessenger;
 class RES_DataHandler;
 class RES_EventActionGeneration;
 class RES_EventActionReconstruction;
+class RES_TrackFitter;
 
 class RES_RunManager : public G4RunManager
 {
@@ -34,6 +35,8 @@ private:
 
   RES_EventActionGeneration*      m_eventActionGen;
   RES_EventActionReconstruction*  m_eventActionRec;
+
+  RES_TrackFitter*                m_trackFitter;
 
   G4bool                          m_storeResults;
 

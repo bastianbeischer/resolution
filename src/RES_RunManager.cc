@@ -4,8 +4,8 @@
 #include "RES_DataHandler.hh"
 #include "RES_EventActionGeneration.hh"
 #include "RES_EventActionReconstruction.hh"
-
-#include "RES_FiberHit.hh"
+#include "RES_TrackFitter.hh"
+#include "RES_Event.hh"
 
 RES_RunManager::RES_RunManager() :
   G4RunManager()
@@ -14,6 +14,7 @@ RES_RunManager::RES_RunManager() :
   m_dataHandler = new RES_DataHandler();
   m_eventActionGen = new RES_EventActionGeneration();
   m_eventActionRec = new RES_EventActionReconstruction();
+  m_trackFitter = new RES_TrackFitter();
 
   SetActionsForGeneration();
 }
@@ -40,12 +41,17 @@ void RES_RunManager::StartReconstructionRun()
 {
   m_dataHandler->Initialize();
   SetActionsForReconstruction();
-  /*******************************************
-   * - LOOP OVER ALL GENERATED EVENTS
-   * --- READ generated event
-   * --- IVOKE minimizer
-   * --- STORE reconstructed event
-   */
+
+  int Nevents = m_dataHandler->GetNumberOfGeneratedEvents();
+  for (int i = 0; i < Nevents; i++) {
+    m_dataHandler->LoadGeneratedEntry(i);
+    RES_Event event = m_dataHandler->GetCurrentEvent();
+    RES_Event recEvent = m_trackFitter->Fit(event);
+    if (m_storeResults) {
+      m_dataHandler->AddEvent(recEvent);
+      m_dataHandler->WriteFile();
+    }
+  }
 }
 
 void RES_RunManager::SetActionsForGeneration()

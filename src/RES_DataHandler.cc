@@ -57,9 +57,33 @@ void RES_DataHandler::Initialize()
   m_initialized = true;
 }
 
+G4int RES_DataHandler::GetNumberOfGeneratedEvents()
+{
+  return m_genTree->GetEntries();
+}
+
+void RES_DataHandler::LoadGeneratedEntry(G4int i)
+{
+  m_genTree->GetEntry(i);
+}
+
+RES_Event RES_DataHandler::GetCurrentEvent()
+{
+  RES_Event currentEvent = *m_event;
+  return currentEvent;
+}
+
 void RES_DataHandler::InitNewEvent()
 {
+  delete m_event;
   m_event = new RES_Event();
+}
+
+void RES_DataHandler::AddEvent(RES_Event event)
+{
+  InitNewEvent();
+  *m_event = event;
+  FinalizeEvent();
 }
 
 void RES_DataHandler::SetEventType(EventType type)

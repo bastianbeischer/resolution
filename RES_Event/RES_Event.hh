@@ -16,7 +16,9 @@ class RES_Event : public TObject
 
 public:
   RES_Event();
+  RES_Event(const RES_Event& other);
   ~RES_Event();
+  const RES_Event& operator=(const RES_Event& right);
 
 public:
   inline void SetID(int ID) {m_ID = ID;}

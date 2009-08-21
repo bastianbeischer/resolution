@@ -22,9 +22,14 @@ public:
 public:
   void SetFileName(G4String fileName) {m_fileName = fileName;}
 
+  G4int GetNumberOfGeneratedEvents();
+  void LoadGeneratedEntry(G4int i);
+  RES_Event GetCurrentEvent();
+
   void Initialize();
 
   void InitNewEvent();
+  void AddEvent(RES_Event event);
   void SetEventType(EventType type);
   void AddHitInformation(RES_FiberHit* hit);
   void FinalizeEvent();
