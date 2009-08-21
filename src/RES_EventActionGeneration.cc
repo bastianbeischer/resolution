@@ -19,7 +19,7 @@ RES_EventActionGeneration::~RES_EventActionGeneration()
 
 void RES_EventActionGeneration::BeginOfEventAction(const G4Event* event)
 {
-  if( event->GetEventID() % 100 == 0 )
+  if( (event->GetEventID() > 0) && (event->GetEventID() % 100 == 0) )
     G4cout << ">>> Event " << event->GetEventID() << G4endl;
 }
 

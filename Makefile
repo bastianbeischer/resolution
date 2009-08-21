@@ -11,6 +11,11 @@ EXTRALIBS += -L./$(RES_EventDir) -lRES_Event
 CPPFLAGS += -I$(RES_EventDir)
 EXTRA_LINK_DEPENDENCIES += $(RES_EventLib)
 
+BlobelDir := ./blobel
+BlobelLib := $(BlobelDir)/libBlobel.so
+EXTRALIBS += -L./$(BlobelDir) -lBlobel
+CPPFLAGS += -I$(BlobelDir)
+EXTRA_LINK_DEPENDENCIES += $(BlobelLib)
 
 .PHONY: all
 all: lib bin TAGS
@@ -26,6 +31,9 @@ $(RES_EventLib):
 
 clean_ams_event:
 	$(MAKE) -C $(RES_EventDir) clean
+
+$(BlobelLib):
+	$(MAKE) -C $(BlobelDir)
 
 test: test.cc
 	g++ -o test.o -I$(ROOTSYS)/include -IRES_Event -c test.cc

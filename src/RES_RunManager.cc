@@ -12,10 +12,10 @@ RES_RunManager::RES_RunManager() :
 {
   m_messenger = new RES_RunMessenger(this);
   m_dataHandler = new RES_DataHandler();
-  m_eventActionGen = new RES_EventActionGeneration();
-  m_eventActionRec = new RES_EventActionReconstruction();
   m_trackFitter = new RES_TrackFitter();
-
+  m_eventActionGen = new RES_EventActionGeneration();
+  m_eventActionRec = new RES_EventActionReconstruction(m_trackFitter);
+  
   SetActionsForGeneration();
 }
 
@@ -45,12 +45,14 @@ void RES_RunManager::StartReconstructionRun()
   int Nevents = m_dataHandler->GetNumberOfGeneratedEvents();
   for (int i = 0; i < Nevents; i++) {
     m_dataHandler->LoadGeneratedEntry(i);
-    RES_Event event = m_dataHandler->GetCurrentEvent();
-    RES_Event recEvent = m_trackFitter->Fit(event);
+    RES_Event genEvent = m_dataHandler->GetCurrentEvent();
+    RES_Event recEvent = m_trackFitter->Fit(genEvent);
     if (m_storeResults) {
       m_dataHandler->AddEvent(recEvent);
-      m_dataHandler->WriteFile();
     }
+  }
+  if (m_storeResults) {
+    m_dataHandler->WriteFile();
   }
 }
 

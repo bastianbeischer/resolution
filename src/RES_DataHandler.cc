@@ -72,8 +72,11 @@ void RES_DataHandler::LoadGeneratedEntry(G4int i)
 
 RES_Event RES_DataHandler::GetCurrentEvent()
 {
-  RES_Event currentEvent = *m_event;
+
+  RES_Event currentEvent;
+  if (m_event) currentEvent = *m_event;
   return currentEvent;
+
 }
 
 void RES_DataHandler::AddEvent(RES_Event event)

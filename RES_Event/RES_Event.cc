@@ -12,6 +12,7 @@ RES_Event::RES_Event() :
 RES_Event::RES_Event(const RES_Event& other)
 {
   m_ID = other.m_ID;
+  m_hits.clear();
   for (unsigned int i = 0; i < other.m_hits.size(); i++) {
     m_hits.push_back(other.m_hits.at(i));
   }
@@ -26,6 +27,7 @@ RES_Event::~RES_Event()
 const RES_Event& RES_Event::operator=(const RES_Event& right)
 {
   m_ID = right.m_ID;
+  m_hits.clear();
   for (unsigned int i = 0; i < right.m_hits.size(); i++) {
     m_hits.push_back(right.m_hits.at(i));
   }
