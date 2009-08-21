@@ -36,7 +36,7 @@ void RES_DataHandler::Initialize()
     m_genTree = (TTree*) m_file->Get("resolution_gen_tree");
     m_recTree = (TTree*) m_file->Get("resolution_rec_tree");
 
-    InitNewEvent();
+    m_event = new RES_Event();
 
     if (!m_genTree) {
       m_genTree = new TTree("resolution_gen_tree", "tree for momentum resolution calculation");
@@ -73,43 +73,11 @@ RES_Event RES_DataHandler::GetCurrentEvent()
   return currentEvent;
 }
 
-void RES_DataHandler::InitNewEvent()
-{
-  delete m_event;
-  m_event = new RES_Event();
-}
-
 void RES_DataHandler::AddEvent(RES_Event event)
 {
-  InitNewEvent();
-  *m_event = event;
-  FinalizeEvent();
-}
-
-void RES_DataHandler::SetEventType(EventType type)
-{
   if (m_initialized) {
-    m_event->SetEventType(type);
-  }
-  else {
-    G4cerr << "Data Handler not initialized! (Call SetFileName or construct with string parameter)" << G4endl;
-  }
-}
-
-void RES_DataHandler::AddHitInformation(RES_FiberHit* hit)
-{
-  if (m_initialized) {
-    G4ThreeVector pos = hit->GetPosition();
-    m_event->AddHit(pos.x(), pos.y(), pos.z());
-  }
-  else {
-    G4cerr << "Data Handler not initialized! (Call SetFileName or construct with string parameter)" << G4endl;
-  }
-}
-
-void RES_DataHandler::FinalizeEvent()
-{
-  if (m_initialized) {
+    m_event = new RES_Event();
+    *m_event = event;
     if (m_event->GetEventType() == generated) {
       m_event->SetID(m_genTree->GetEntries());
       m_genTree->Fill();
@@ -120,9 +88,6 @@ void RES_DataHandler::FinalizeEvent()
     }
     delete m_event;
     m_event = 0;
-  }
-  else {
-    G4cerr << "Data Handler not initialized! (Call SetFileName or construct with string parameter)" << G4endl;
   }
 }
 

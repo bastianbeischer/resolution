@@ -1,6 +1,7 @@
 /control/verbose 1
 /run/verbose 1
 /tracking/verbose 1
+/tracking/storeTrajectory
 
 /RES/Det/AddModule 0. -6.912 18.5 cm
 /RES/Det/AddModule 0. 0. 18.5 cm

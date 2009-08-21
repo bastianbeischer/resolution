@@ -3,7 +3,7 @@ DICT = RES_EventDict
 
 LD = g++
 
-CXXFLAGS	+= -I. -I$(ROOTSYS)/include
+CXXFLAGS	+= -fPIC -I. -I$(ROOTSYS)/include
 
 all: $(LIB)
 

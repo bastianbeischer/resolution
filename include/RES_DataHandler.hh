@@ -28,11 +28,7 @@ public:
 
   void Initialize();
 
-  void InitNewEvent();
   void AddEvent(RES_Event event);
-  void SetEventType(EventType type);
-  void AddHitInformation(RES_FiberHit* hit);
-  void FinalizeEvent();
   void WriteFile();
 
 private:
