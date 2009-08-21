@@ -20,6 +20,7 @@ int main(int argc, char** argv)
     genTree->GetEntry(i);
     for (unsigned int j = 0; j < genEvent->GetNbOfHits(); j++) {
       std::cout << "ID: " << genEvent->GetID() << " --> "
+                << " p: " << genEvent->GetMomentum()
                 << " x: " << genEvent->GetHit(j).x() 
                 << " y: " << genEvent->GetHit(j).y()
                 << " z: " << genEvent->GetHit(j).z() << std::endl;
@@ -32,6 +33,7 @@ int main(int argc, char** argv)
     recTree->GetEntry(i);
     for (unsigned int j = 0; j < recEvent->GetNbOfHits(); j++) {
       std::cout << "ID: " << recEvent->GetID() << " --> "
+                << " p: " << recEvent->GetMomentum()
                 << " x: " << recEvent->GetHit(j).x() 
                 << " y: " << recEvent->GetHit(j).y()
                 << " z: " << recEvent->GetHit(j).z() << std::endl;

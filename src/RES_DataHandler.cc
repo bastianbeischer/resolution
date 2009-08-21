@@ -25,6 +25,7 @@ RES_DataHandler::RES_DataHandler(G4String fileName)
 
 RES_DataHandler::~RES_DataHandler()
 {
+  if (m_file) m_file->Close();
   delete m_file;
   delete m_event;
 }
@@ -59,11 +60,13 @@ void RES_DataHandler::Initialize()
 
 G4int RES_DataHandler::GetNumberOfGeneratedEvents()
 {
-  return m_genTree->GetEntries();
+  G4int nEntries = m_genTree->GetEntries();
+  return nEntries;
 }
 
 void RES_DataHandler::LoadGeneratedEntry(G4int i)
 {
+  assert(i < m_genTree->GetEntries());
   m_genTree->GetEntry(i);
 }
 
@@ -97,7 +100,6 @@ void RES_DataHandler::WriteFile()
     m_genTree->Write();
     m_recTree->Write();
     m_file->Write();
-    m_file->Close();
   }
   else {
     G4cerr << "Data Handler not initialized! (Call SetFileName or construct with string parameter)" << G4endl;
