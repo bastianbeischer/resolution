@@ -31,8 +31,6 @@ int main(int argc, char** argv)
   RES_FieldManager* fieldManager = new RES_FieldManager();
   G4TransportationManager::GetTransportationManager()->SetFieldManager(fieldManager);
 
-  runManager->TestDataHandler();
-
 #ifdef G4VIS_USE
   // visualization manager
   G4VisManager* visManager = 0;

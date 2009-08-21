@@ -7,6 +7,7 @@
 #include "RES_Event.hh"
 
 class RES_FiberHit;
+class RES_DataMessenger;
 class TTree;
 class TFile;
 
@@ -19,7 +20,9 @@ public:
   ~RES_DataHandler();
 
 public:
-  void SetFileName(G4String fileName) {m_fileName = fileName; Initialize();}
+  void SetFileName(G4String fileName) {m_fileName = fileName;}
+
+  void Initialize();
 
   void InitNewEvent();
   void SetEventType(EventType type);
@@ -28,14 +31,15 @@ public:
   void WriteFile();
 
 private:
-  void Initialize();
+  RES_DataMessenger* m_messenger;
 
-private:
-  G4String   m_fileName;
-  TFile*     m_file;
-  TTree*     m_genTree;
-  TTree*     m_recTree;
-  RES_Event* m_event;
+  G4String           m_fileName;
+  TFile*             m_file;
+  TTree*             m_genTree;
+  TTree*             m_recTree;
+  RES_Event*         m_event;
+
+  G4bool             m_initialized;
 
 };
 

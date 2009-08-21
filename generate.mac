@@ -1,6 +1,6 @@
 /control/verbose 1
 /run/verbose 1
-/tracking/verbose 1
+/tracking/verbose 0
 
 /RES/Det/AddModule 0. -6.912 18.5 cm
 /RES/Det/AddModule 0. 0. 18.5 cm
@@ -24,16 +24,5 @@
 
 /run/initialize
 
-/vis/scene/create
-/vis/scene/add/volume world
-/vis/scene/add/trajectories
-
-/vis/open OGLIX
-
-/vis/scene/endOfEventAction accumulate
-/vis/viewer/set/viewpointThetaPhi 90 0
-/vis/viewer/set/upVector 0 0 1
-/vis/viewer/zoom 1.5
-
-/RES/Run/Generate
+/RES/Run/Generate 1000
 #/RES/Run/Reconstruct

@@ -7,7 +7,7 @@
 
 int main(int argc, char** argv)
 {
-  TFile* file = new TFile("output.root", "READ");
+  TFile* file = new TFile("test.root", "READ");
   TTree* genTree = (TTree*) file->Get("resolution_gen_tree");
   TTree* recTree = (TTree*) file->Get("resolution_rec_tree");
   RES_Event* genEvent = new RES_Event();
