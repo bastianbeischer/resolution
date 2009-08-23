@@ -17,6 +17,7 @@ public:
 
 public:
   void GeneratePrimaries(G4Event* event);
+  G4ParticleGun* GetParticleGun() const {return m_particleGun;}
   
 public:
   inline void SetRandomOrigin(G4bool value) {m_randomOrigin = value;}

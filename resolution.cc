@@ -33,8 +33,7 @@ int main(int argc, char** argv)
 
 #ifdef G4VIS_USE
   // visualization manager
-  G4VisManager* visManager = 0;
-  visManager = new G4VisExecutive;
+  G4VisManager* visManager = new G4VisExecutive;
   visManager->Initialize();
 #endif
 
