@@ -18,7 +18,10 @@
 /RES/Det/AddModule 0. 6.912 -18.5 cm
 
 #/RES/Field/SetInhomFieldFrom tables/perdaix_07_jul_2009.table
-/RES/Field/SetUniformField 0.3 0.0 0.0 tesla
+/RES/Field/SetDummyField 0.3 0.0 0.0 tesla
+#/RES/Field/SetUniformField 1.5 0.0 0.0 tesla
+
+/RES/Gun/Energy 1 GeV
 
 /run/initialize
 

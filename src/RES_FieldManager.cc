@@ -3,6 +3,7 @@
 #include "RES_FieldMessenger.hh"
 #include "RES_StepperMessenger.hh"
 #include "RES_InhomField.hh"
+#include "RES_DummyField.hh"
 
 #include "G4ChordFinder.hh"
 #include "G4MagIntegratorDriver.hh"
@@ -24,6 +25,12 @@ RES_FieldManager::~RES_FieldManager()
 void RES_FieldManager::SwitchOnInhomField(G4String dataFileName)
 {
   SetDetectorField(new RES_InhomField(dataFileName));
+  CreateChordFinder((G4MagneticField*) GetDetectorField());
+}
+
+void RES_FieldManager::SwitchOnDummyField(G4ThreeVector fieldVector)
+{
+  SetDetectorField(new RES_DummyField(fieldVector));
   CreateChordFinder((G4MagneticField*) GetDetectorField());
 }
 

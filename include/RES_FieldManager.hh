@@ -18,6 +18,7 @@ public:
 
 public:
   void SwitchOnInhomField(G4String dataFileName);
+  void SwitchOnDummyField(G4ThreeVector fieldVector);
   void SwitchOnUniformField(G4ThreeVector fieldVector);
 
   void ActivateMyStepper();

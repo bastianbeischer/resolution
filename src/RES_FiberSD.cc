@@ -28,7 +28,7 @@ void RES_FiberSD::Initialize(G4HCofThisEvent* HCE)
 G4bool RES_FiberSD::ProcessHits(G4Step* aStep, G4TouchableHistory*)
 {
   RES_FiberHit* newHit = new RES_FiberHit();
-  newHit->SetPosition(aStep->GetPostStepPoint()->GetPosition());
+  newHit->SetPosition(aStep->GetPreStepPoint()->GetPosition());
   fiberHitsCollection->insert(newHit);
   newHit->Draw();
 

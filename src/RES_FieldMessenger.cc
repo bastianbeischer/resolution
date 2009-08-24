@@ -21,6 +21,10 @@ RES_FieldMessenger::RES_FieldMessenger(RES_FieldManager* manager)
   m_setInhomFieldFromFileCmd->SetGuidance("Read the field map from the specified data file");
   m_setInhomFieldFromFileCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
 
+  m_setDummyFieldCmd = new G4UIcmdWith3VectorAndUnit("/RES/Field/SetDummyField", this);
+  m_setDummyFieldCmd->SetGuidance("Set a dummy magnetic field with the value given by the specified ThreeVector");
+  m_setDummyFieldCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
+
   m_setUniformFieldCmd = new G4UIcmdWith3VectorAndUnit("/RES/Field/SetUniformField", this);
   m_setUniformFieldCmd->SetGuidance("Set a uniform magnetic field with the value given by the specified ThreeVector");
   m_setUniformFieldCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
@@ -29,12 +33,18 @@ RES_FieldMessenger::RES_FieldMessenger(RES_FieldManager* manager)
 RES_FieldMessenger::~RES_FieldMessenger()
 {
   delete m_directory;
+  delete m_setInhomFieldFromFileCmd;
+  delete m_setDummyFieldCmd;
+  delete m_setUniformFieldCmd;
 }
 
 void RES_FieldMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
 {
   if (command == m_setInhomFieldFromFileCmd) {
     m_manager->SwitchOnInhomField(newValue);
+  }
+  if (command == m_setDummyFieldCmd) {
+    m_manager->SwitchOnDummyField(m_setDummyFieldCmd->GetNew3VectorValue(newValue));
   }
   if (command == m_setUniformFieldCmd) {
     m_manager->SwitchOnUniformField(m_setUniformFieldCmd->GetNew3VectorValue(newValue));

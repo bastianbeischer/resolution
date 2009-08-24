@@ -25,6 +25,9 @@ public:
   inline G4double GetWorldY() {return m_world_y;}
   inline G4double GetWorldZ() {return m_world_z;}
 
+  inline G4double GetModuleLength() {return m_moduleLength;}
+  inline G4double GetStereoAngle()  {return m_moduleStereoAngle;}
+
   inline void AddModulePlacement(G4ThreeVector where) {
     m_modulePlacements.push_back(where);
   }

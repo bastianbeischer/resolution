@@ -3,6 +3,7 @@
 #include "RES_TrackFitMessenger.hh"
 #include "RES_Event.hh"
 #include "RES_RunManager.hh"
+#include "RES_DetectorConstruction.hh"
 #include "RES_PrimaryGeneratorAction.hh"
 
 #include "G4RunManager.hh"
@@ -24,38 +25,55 @@ RES_TrackFitter::~RES_TrackFitter()
 
 RES_Event RES_TrackFitter::Fit(RES_Event genEvent)
 {
-  G4double sigmaX = 1.*mm;
+
+  RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
+
+  G4double moduleLength = det->GetModuleLength();
+  G4double stereoAngle  = det->GetStereoAngle();
+  //G4double stereoAngle  = M_PI/2.;
+
+  G4double sigmaX = moduleLength/sqrt(12.);
   G4double sigmaY = 50.*um;
   G4double sigmaZ = 0.*um;
-
-  // G4double sigmaX = 0.;
-  // G4double sigmaY = 0.;
-  // G4double sigmaZ = 0.;
 
   G4int nHits = genEvent.GetNbOfHits();
 
   G4ThreeVector* pos = new G4ThreeVector[nHits];
   for (G4int i = 0; i < nHits; i++) {
-    G4double x = CLHEP::RandGauss::shoot(genEvent.GetHit(i).x(), sigmaX);
-    G4double y = CLHEP::RandGauss::shoot(genEvent.GetHit(i).y(), sigmaY);
+    G4double angle;
+    if (i % 2) angle = 0.;
+    else       angle = stereoAngle;
+    G4double s = sin(angle);
+    G4double c = cos(angle);
+      
+    double localSigmaX = sqrt(c*c*sigmaX*sigmaX + s*s*sigmaY*sigmaY);
+    double localSigmaY = sqrt(s*s*sigmaX*sigmaX + c*c*sigmaY*sigmaY);
+
+    G4double x = CLHEP::RandGauss::shoot(genEvent.GetHit(i).x(), localSigmaX);
+    G4double y = CLHEP::RandGauss::shoot(genEvent.GetHit(i).y(), localSigmaY);
     G4double z = CLHEP::RandGauss::shoot(genEvent.GetHit(i).z(), sigmaZ);
+
     pos[i] = G4ThreeVector(x,y,z);
   }
 
+  // G4double theta = (pos[6].y() - pos[4].y()) / (pos[6].z() - pos[4].z()) - (pos[2].y() - pos[0].y()) / (pos[2].z() - pos[0].z());
+  // G4double pSagitta = 0.3 * 0.3 * sqrt(pow(pos[4].y() - pos[2].y(),2.) + pow(pos[4].z() - pos[2].z(), 2.))/m / theta;
+  // G4cout << " p: " << pSagitta << G4endl;
+  
   G4double parameter[5];
   parameter[0] = pos[0].x();
   parameter[1] = pos[0].y();
-  parameter[2] = (pos[1] - pos[0]).theta();
-  parameter[3] = (pos[1] - pos[0]).phi();
-  //  parameter[4] = genEvent.GetMomentum();
-  parameter[4] = 100.*GeV;
+  parameter[2] = (pos[2] - pos[0]).theta();
+  parameter[3] = (pos[2] - pos[0]).phi();
+  // parameter[4] = pSagitta;
+  parameter[4] = 2.0 * GeV;
 
   G4double step[5];
   step[0] = 0.01*parameter[0];
   step[1] = 0.01*parameter[1];
   step[2] = 0.01*parameter[2];
   step[3] = 0.01*parameter[3];
-  step[4] = 0.01*parameter[4];
+  step[4] = 0.1*parameter[4];
 
   G4int npar = 5; // negative to suppress printout
   G4int nflim = 3*abs(npar)*(abs(npar)+10); // dito
@@ -86,11 +104,26 @@ RES_Event RES_TrackFitter::Fit(RES_Event genEvent)
     gun->SetParticleEnergy(parameter[4]);
     runManager->BeamOn(1);
 
-    assert(nHits == m_currentRecEvent.GetNbOfHits());
+    G4int nRecHits = m_currentRecEvent.GetNbOfHits();
+    assert(nHits == nRecHits);
 
+    // TODO: exception handling for sigmaX = sigmaY = 0.
     for( G4int i = 0 ; i < nHits ; i++ ) {
-      chi2 += pow( genEvent.GetHit(i).x() - m_currentRecEvent.GetHit(i).x(), 2.) / (sigmaX*sigmaX);
-      chi2 += pow( genEvent.GetHit(i).y() - m_currentRecEvent.GetHit(i).y(), 2.) / (sigmaY*sigmaY);
+      G4double angle;
+      if (i % 2) angle = 0.;
+      else       angle = stereoAngle;
+      G4double s = sin(angle);
+      G4double c = cos(angle);
+      G4double dx = pos[i].x() - m_currentRecEvent.GetHit(i).x();
+      G4double dy = pos[i].y() - m_currentRecEvent.GetHit(i).y();
+
+      chi2 += pow(dx*sigmaX*s, 2.);
+      chi2 += pow(dy*sigmaY*s, 2.);
+      chi2 += pow(dx*sigmaY*c, 2.);
+      chi2 += pow(dy*sigmaX*c, 2.);
+      chi2 += 2.*dx*dy*s*c*(pow(sigmaY,2.) - pow(sigmaX, 2.));
+
+      chi2 /= pow(sigmaX*sigmaY, 2.);
     }
 
     DVALLEY(chi2,parameter,conv);
