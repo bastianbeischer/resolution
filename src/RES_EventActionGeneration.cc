@@ -40,14 +40,14 @@ void RES_EventActionGeneration::EndOfEventAction(const G4Event* event)
     G4int NbHits = fiberHC->entries();
     for (int i = 0; i < NbHits; i++) {
       RES_FiberHit* hit = (*fiberHC)[i];
-      newEvent.AddHit(hit->GetPosition().x()/cm,hit->GetPosition().y()/cm, hit->GetPosition().z()/cm);
+      newEvent.AddHit(hit->GetPosition().x(),hit->GetPosition().y(), hit->GetPosition().z());
     }
 
     newEvent.SetEventType(generated);
 
     G4PrimaryParticle* primary = event->GetPrimaryVertex()->GetPrimary();
     G4double momentum = primary->GetMomentum().mag();
-    newEvent.SetMomentum(momentum/GeV);
+    newEvent.SetMomentum(momentum);
 
     dataHandler->AddEvent(newEvent);
   }

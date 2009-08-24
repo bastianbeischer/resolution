@@ -12,6 +12,7 @@ RES_RunMessenger::RES_RunMessenger(RES_RunManager* manager)
   m_manager = manager;
 
   m_directory = new G4UIdirectory("/RES/Run/");
+  m_directory->SetGuidance("Commands for the run manager");
 
   m_setStoreResultsCmd = new G4UIcmdWithABool("/RES/Run/StoreResults", this);
   m_setStoreResultsCmd->SetGuidance("Store results?");

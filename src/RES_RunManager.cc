@@ -44,6 +44,10 @@ void RES_RunManager::StartReconstructionRun()
 
   int Nevents = m_dataHandler->GetNumberOfGeneratedEvents();
   for (int i = 0; i < Nevents; i++) {
+
+    if( (i > 0) && (i % 100 == 0) )
+      G4cout << ">>> Event " << i << G4endl;
+
     m_dataHandler->LoadGeneratedEntry(i);
     RES_Event genEvent = m_dataHandler->GetCurrentEvent();
     RES_Event recEvent = m_trackFitter->Fit(genEvent);

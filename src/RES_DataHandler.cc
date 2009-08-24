@@ -7,6 +7,7 @@
 #include "TTree.h"
 
 RES_DataHandler::RES_DataHandler() :
+  m_overwriteFile(false),
   m_fileName("output.root"),
   m_file(0),
   m_genTree(0),
@@ -33,7 +34,12 @@ RES_DataHandler::~RES_DataHandler()
 void RES_DataHandler::Initialize()
 {
   if (!m_initialized) {
-    m_file = new TFile(m_fileName.c_str(), "UPDATE");
+
+    if (m_overwriteFile)
+      m_file = new TFile(m_fileName.c_str(), "RECREATE");
+    else
+      m_file = new TFile(m_fileName.c_str(), "UPDATE");
+
     m_genTree = (TTree*) m_file->Get("resolution_gen_tree");
     m_recTree = (TTree*) m_file->Get("resolution_rec_tree");
 

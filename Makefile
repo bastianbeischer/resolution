@@ -26,15 +26,18 @@ TAGS: $(G4TARGET).cc src/*.cc include/*.hh
 	@rm -f TAGS;
 	etags $(G4TARGET).cc src/*.cc include/*.hh
 
-$(RES_EventLib):
+$(RES_EventLib): $(RES_EventDir)/*.hh $(RES_EventDir)/*.cc
 	$(MAKE) -C $(RES_EventDir)
 
 clean_ams_event:
 	$(MAKE) -C $(RES_EventDir) clean
 
-$(BlobelLib):
+$(BlobelLib): $(BlobelDir)/*.h $(BlobelDir)/*.f 
 	$(MAKE) -C $(BlobelDir)
 
 test: test.cc
 	g++ -o test.o -I$(ROOTSYS)/include -IRES_Event -c test.cc
 	g++ -o test $(shell root-config --libs) -LRES_Event -l RES_Event test.o
+
+clean_test:
+	rm -f test.o test

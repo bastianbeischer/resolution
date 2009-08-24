@@ -20,6 +20,7 @@ public:
   ~RES_DataHandler();
 
 public:
+  void SetOverWriteFile(G4bool overwrite) {m_overwriteFile = overwrite;}
   void SetFileName(G4String fileName) {m_fileName = fileName;}
 
   G4int GetNumberOfGeneratedEvents();
@@ -34,6 +35,7 @@ public:
 private:
   RES_DataMessenger* m_messenger;
 
+  G4bool             m_overwriteFile;
   G4String           m_fileName;
   TFile*             m_file;
   TTree*             m_genTree;

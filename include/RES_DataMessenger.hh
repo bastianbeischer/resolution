@@ -5,6 +5,7 @@
 
 class RES_DataHandler;
 class G4UIdirectory;
+class G4UIcmdWithABool;
 class G4UIcmdWithAString;
 
 class RES_DataMessenger : public G4UImessenger
@@ -22,6 +23,7 @@ private:
   
   G4UIdirectory*      m_directory;
 
+  G4UIcmdWithABool*   m_overwriteFileCmd;
   G4UIcmdWithAString* m_setFileNameCmd;
 };
 

@@ -1,6 +1,7 @@
-/control/verbose 0
+/control/verbose 1
 /run/verbose 0
 /tracking/verbose 0
+/RES/Fit/Verbose 0
 
 /RES/Det/AddModule 0. -6.912 18.5 cm
 /RES/Det/AddModule 0. 0. 18.5 cm
@@ -19,10 +20,11 @@
 #/RES/Field/SetInhomFieldFrom tables/perdaix_07_jul_2009.table
 /RES/Field/SetUniformField 0.3 0.0 0.0 tesla
 
+/RES/Data/OverWriteFile true
 /RES/Data/SetFileName test.root
 /RES/Run/StoreResults
 
 /run/initialize
 
-/RES/Run/Generate 10000
+/RES/Run/Generate 1000
 /RES/Run/Reconstruct
