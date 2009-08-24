@@ -18,9 +18,8 @@
 /RES/Det/AddModule 0. 6.912 -18.5 cm
 
 #/RES/Field/SetInhomFieldFrom tables/perdaix_07_jul_2009.table
-/RES/Field/SetUniformField 0.3 0.0 0.0 tesla
-
-/RES/MyStepper/Activate
+/RES/Field/SetDummyField 0.3 0.0 0.0 tesla
+#/RES/Field/SetUniformField 0.3 0.0 0.0 tesla
 
 /RES/Data/OverWriteFile true
 /RES/Data/SetFileName results/test.root

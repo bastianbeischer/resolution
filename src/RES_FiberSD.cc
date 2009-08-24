@@ -37,7 +37,7 @@ G4bool RES_FiberSD::ProcessHits(G4Step* aStep, G4TouchableHistory*)
 
 void RES_FiberSD::EndOfEvent(G4HCofThisEvent*)
 {
-  if (verboseLevel>0) { 
+  if (verboseLevel>=0) { 
     G4int NbHits = fiberHitsCollection->entries();
     G4cout << "\n-------->Hits Collection: in this event there are " << NbHits 
 	   << " hits in the tracker fibers: " << G4endl;

@@ -46,34 +46,41 @@ RES_Event RES_TrackFitter::Fit(RES_Event genEvent)
     G4double s = sin(angle);
     G4double c = cos(angle);
       
-    double localSigmaX = sqrt(c*c*sigmaX*sigmaX + s*s*sigmaY*sigmaY);
-    double localSigmaY = sqrt(s*s*sigmaX*sigmaX + c*c*sigmaY*sigmaY);
+    double currentSigmaX = sqrt(c*c*sigmaX*sigmaX + s*s*sigmaY*sigmaY);
+    double currentSigmaY = sqrt(s*s*sigmaX*sigmaX + c*c*sigmaY*sigmaY);
 
-    G4double x = CLHEP::RandGauss::shoot(genEvent.GetHit(i).x(), localSigmaX);
-    G4double y = CLHEP::RandGauss::shoot(genEvent.GetHit(i).y(), localSigmaY);
+    //    G4double x = CLHEP::RandGauss::shoot(genEvent.GetHit(i).x(), currentSigmaX);
+    G4double x = genEvent.GetHit(i).x();
+    G4double y = CLHEP::RandGauss::shoot(genEvent.GetHit(i).y(), currentSigmaY);
     G4double z = CLHEP::RandGauss::shoot(genEvent.GetHit(i).z(), sigmaZ);
+
+    // G4double x = genEvent.GetHit(i).x();
+    // G4double y = genEvent.GetHit(i).y();
+    // G4double z = genEvent.GetHit(i).z();
 
     pos[i] = G4ThreeVector(x,y,z);
   }
 
-  // G4double theta = (pos[6].y() - pos[4].y()) / (pos[6].z() - pos[4].z()) - (pos[2].y() - pos[0].y()) / (pos[2].z() - pos[0].z());
-  // G4double pSagitta = 0.3 * 0.3 * sqrt(pow(pos[4].y() - pos[2].y(),2.) + pow(pos[4].z() - pos[2].z(), 2.))/m / theta;
-  // G4cout << " p: " << pSagitta << G4endl;
+  G4double theta = (pos[6].y() - pos[4].y()) / (pos[6].z() - pos[4].z()) - (pos[2].y() - pos[0].y()) / (pos[2].z() - pos[0].z());
+  G4double L = sqrt(pow(pos[4].y() - pos[3].y(),2.) + pow(pos[4].z() - pos[3].z(), 2.))/m;
+  G4double B = 0.3;
+  G4double pSagitta = 0.3 * B * L / theta * GeV;
+  G4cout << " pSagitta: " << pSagitta/GeV << " GeV" << G4endl;
   
   G4double parameter[5];
   parameter[0] = pos[0].x();
   parameter[1] = pos[0].y();
   parameter[2] = (pos[2] - pos[0]).theta();
-  parameter[3] = (pos[2] - pos[0]).phi();
-  // parameter[4] = pSagitta;
-  parameter[4] = 2.0 * GeV;
+  parameter[3] = M_PI/2.;
+  //  parameter[3] = (pos[2] - pos[0]).phi();
+  parameter[4] = pSagitta;
 
   G4double step[5];
-  step[0] = 0.01*parameter[0];
-  step[1] = 0.01*parameter[1];
-  step[2] = 0.01*parameter[2];
-  step[3] = 0.01*parameter[3];
-  step[4] = 0.1*parameter[4];
+  step[0] = 0.0*parameter[0];
+  step[1] = 0.0*parameter[1];
+  step[2] = 0.0*parameter[2];
+  step[3] = 0.0*parameter[3];
+  step[4] = 0.01*parameter[4];
 
   G4int npar = 5; // negative to suppress printout
   G4int nflim = 3*abs(npar)*(abs(npar)+10); // dito
