@@ -50,7 +50,8 @@ void RES_RunManager::StartReconstructionRun()
 
     m_dataHandler->LoadGeneratedEntry(i);
     RES_Event genEvent = m_dataHandler->GetCurrentEvent();
-    RES_Event recEvent = m_trackFitter->Fit(genEvent);
+    m_trackFitter->SetCurrentGenEvent(genEvent);
+    RES_Event recEvent = m_trackFitter->Fit();
     if (m_storeResults) {
       m_dataHandler->AddEvent(recEvent);
     }

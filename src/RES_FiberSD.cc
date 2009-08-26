@@ -2,6 +2,7 @@
 
 #include "G4HCofThisEvent.hh"
 #include "G4Step.hh"
+#include "G4VTouchable.hh"
 #include "G4ThreeVector.hh"
 #include "G4SDManager.hh"
 #include "G4HCofThisEvent.hh"
@@ -28,6 +29,12 @@ void RES_FiberSD::Initialize(G4HCofThisEvent* HCE)
 G4bool RES_FiberSD::ProcessHits(G4Step* aStep, G4TouchableHistory*)
 {
   RES_FiberHit* newHit = new RES_FiberHit();
+
+  const G4VTouchable* touchable = aStep->GetPreStepPoint()->GetTouchable();
+  G4int ownCopyNb = touchable->GetReplicaNumber(0);
+  G4int motherCopyNb = touchable->GetReplicaNumber(1);
+  newHit->SetModuleID(motherCopyNb);
+  newHit->SetFiberID(ownCopyNb);
   newHit->SetPosition(aStep->GetPreStepPoint()->GetPosition());
   fiberHitsCollection->insert(newHit);
   newHit->Draw();
@@ -37,7 +44,7 @@ G4bool RES_FiberSD::ProcessHits(G4Step* aStep, G4TouchableHistory*)
 
 void RES_FiberSD::EndOfEvent(G4HCofThisEvent*)
 {
-  if (verboseLevel>=0) { 
+  if (verboseLevel>0) { 
     G4int NbHits = fiberHitsCollection->entries();
     G4cout << "\n-------->Hits Collection: in this event there are " << NbHits 
 	   << " hits in the tracker fibers: " << G4endl;

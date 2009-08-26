@@ -2,6 +2,7 @@
 #define RES_DetectorConstruction_hh
 
 #include <vector>
+#include <assert.h>
 
 #include "G4VUserDetectorConstruction.hh"
 #include "G4ThreeVector.hh"
@@ -25,11 +26,15 @@ public:
   inline G4double GetWorldY() {return m_world_y;}
   inline G4double GetWorldZ() {return m_world_z;}
 
-  inline G4double GetModuleLength() {return m_moduleLength;}
-  inline G4double GetStereoAngle()  {return m_moduleStereoAngle;}
+  inline G4double GetModuleLength()       {return m_moduleLength;}
+  inline G4double GetModuleAngle(G4int i) {assert(i < m_moduleAngles.size()); return m_moduleAngles.at(i);}
 
   inline void AddModulePlacement(G4ThreeVector where) {
     m_modulePlacements.push_back(where);
+    m_moduleAngles.push_back(0);
+  }
+  inline void SetModuleAngle(G4int module, G4double angle) {
+    m_moduleAngles[module] = angle;
   }
 
 private:
@@ -45,7 +50,6 @@ private:
   G4double                        m_world_z;
 
   G4Material*                     m_module_material;
-  G4double                        m_moduleStereoAngle;
   G4double                        m_moduleWidth;
   G4double                        m_moduleLength;
   G4double                        m_moduleLayerThickness;
@@ -54,7 +58,8 @@ private:
 
   G4int                           m_numberOfModules;
   std::vector<G4ThreeVector>      m_modulePlacements;
-  
+  std::vector<G4double>           m_moduleAngles;
+
   G4Box*                          m_world_solid;
   G4LogicalVolume*                m_world_log;
   G4VPhysicalVolume*              m_world_phys;
@@ -63,13 +68,9 @@ private:
   G4LogicalVolume*                m_module_log;
   std::vector<G4VPhysicalVolume*> m_module_phys;
   
-  G4Box*                          m_module_upper_layer_solid;
-  G4LogicalVolume*                m_module_upper_layer_log;
-  G4VPhysicalVolume*              m_module_upper_layer_phys;
-
-  G4Box*                          m_module_lower_layer_solid;
-  G4LogicalVolume*                m_module_lower_layer_log;
-  G4VPhysicalVolume*              m_module_lower_layer_phys;
+  G4Box*                          m_module_fiber_solid;
+  G4LogicalVolume*                m_module_fiber_log;
+  std::vector<G4VPhysicalVolume*> m_module_fiber_phys;
 
   G4Box*                          m_module_bulk_solid;
   G4LogicalVolume*                m_module_bulk_log;

@@ -40,7 +40,7 @@ void RES_EventActionGeneration::EndOfEventAction(const G4Event* event)
     G4int NbHits = fiberHC->entries();
     for (int i = 0; i < NbHits; i++) {
       RES_FiberHit* hit = (*fiberHC)[i];
-      newEvent.AddHit(hit->GetPosition().x(),hit->GetPosition().y(), hit->GetPosition().z());
+      newEvent.AddHit(hit->GetModuleID(),hit->GetFiberID(),hit->GetPosition().x(),hit->GetPosition().y(),hit->GetPosition().z());
     }
 
     newEvent.SetEventType(generated);

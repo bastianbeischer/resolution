@@ -9,6 +9,7 @@ class RES_DetectorConstruction;
 class G4UIcommand;
 class G4UIdirectory;
 class G4UIcmdWith3VectorAndUnit;
+class G4UIcmdWithAString;
 
 class RES_DetectorMessenger : public G4UImessenger
 {
@@ -25,6 +26,7 @@ private:
   G4UIdirectory*             m_detDirectory;
   
   G4UIcmdWith3VectorAndUnit* m_addModulePlacementCmd;
+  G4UIcmdWithAString*        m_setModuleRotationCmd;
 
 };
 

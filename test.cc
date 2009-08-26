@@ -36,7 +36,8 @@ int main(int argc, char** argv)
                 << " p: " << recEvent->GetMomentum()
                 << " x: " << recEvent->GetHit(j).x() 
                 << " y: " << recEvent->GetHit(j).y()
-                << " z: " << recEvent->GetHit(j).z() << std::endl;
+                << " z: " << recEvent->GetHit(j).z()
+                << " -----> chi2/dof: " <<  recEvent->GetChi2OverDof() << std::endl;
     }
   }
 

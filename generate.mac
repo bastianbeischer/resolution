@@ -1,7 +1,7 @@
 /control/verbose 1
 /run/verbose 0
 /tracking/verbose 0
-/RES/Fit/Verbose 1
+/RES/Fit/Verbose 0
 
 /RES/Det/AddModule 0. -6.912 18.5 cm
 /RES/Det/AddModule 0. 0. 18.5 cm
@@ -27,5 +27,5 @@
 
 /run/initialize
 
-/RES/Run/Generate
+/RES/Run/Generate 10000
 /RES/Run/Reconstruct

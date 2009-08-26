@@ -22,9 +22,9 @@ all: lib bin TAGS
 
 include $(G4INSTALL)/config/binmake.gmk
 
-TAGS: $(G4TARGET).cc src/*.cc include/*.hh
+TAGS: $(G4TARGET).cc src/*.cc include/*.hh $(RES_EventDir)/*.cc $(RES_EventDir)/*.hh $(BlobelDir)/*.h $(BlobelDir)/*.f
 	@rm -f TAGS;
-	etags $(G4TARGET).cc src/*.cc include/*.hh
+	etags $^
 
 $(RES_EventLib): $(RES_EventDir)/*.hh $(RES_EventDir)/*.cc
 	$(MAKE) -C $(RES_EventDir)

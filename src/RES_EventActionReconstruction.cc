@@ -17,7 +17,7 @@ RES_EventActionReconstruction::~RES_EventActionReconstruction()
 {
 }
 
-void RES_EventActionReconstruction::BeginOfEventAction(const G4Event* event)
+void RES_EventActionReconstruction::BeginOfEventAction(const G4Event* /*event*/)
 {
 }
 
@@ -34,7 +34,7 @@ void RES_EventActionReconstruction::EndOfEventAction(const G4Event* event)
 
   for (int i = 0; i < NbHits; i++) {
     RES_FiberHit* hit = (*fiberHC)[i];
-    recEvent.AddHit(hit->GetPosition().x(),hit->GetPosition().y(), hit->GetPosition().z());
+    recEvent.AddHit(hit->GetModuleID(),hit->GetFiberID(),hit->GetPosition().x(),hit->GetPosition().y(),hit->GetPosition().z());
   }
 
   recEvent.SetEventType(reconstructed);
