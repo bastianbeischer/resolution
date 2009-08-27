@@ -22,7 +22,7 @@ RES_PrimaryGeneratorAction::RES_PrimaryGeneratorAction() :
   
   m_particleGun->SetParticleDefinition(G4ChargedGeantino::ChargedGeantino());
   m_particleGun->SetParticleEnergy(1.0*GeV);
-  m_particleGun->SetParticlePosition(G4ThreeVector(0.1*cm, 0.1*cm, m_z_start));
+  m_particleGun->SetParticlePosition(G4ThreeVector(0.0*cm, 0.0*cm, m_z_start));
   m_particleGun->SetParticleMomentumDirection(G4ThreeVector(0.0, 0.0, -1.0));
 }
 

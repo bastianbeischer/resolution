@@ -21,9 +21,10 @@ int main(int argc, char** argv)
     for (unsigned int j = 0; j < genEvent->GetNbOfHits(); j++) {
       std::cout << "ID: " << genEvent->GetID() << " --> "
                 << " p: " << genEvent->GetMomentum()
-                << " x: " << genEvent->GetHit(j).x() 
-                << " y: " << genEvent->GetHit(j).y()
-                << " z: " << genEvent->GetHit(j).z() << std::endl;
+                << " (i,j): (" << genEvent->GetModuleID(j) << ", " << genEvent->GetFiberID(j) << ")"
+                << " x: " << genEvent->GetHitPosition(j).x() 
+                << " y: " << genEvent->GetHitPosition(j).y()
+                << " z: " << genEvent->GetHitPosition(j).z() << std::endl;
 
     }
   }
@@ -34,9 +35,10 @@ int main(int argc, char** argv)
     for (unsigned int j = 0; j < recEvent->GetNbOfHits(); j++) {
       std::cout << "ID: " << recEvent->GetID() << " --> "
                 << " p: " << recEvent->GetMomentum()
-                << " x: " << recEvent->GetHit(j).x() 
-                << " y: " << recEvent->GetHit(j).y()
-                << " z: " << recEvent->GetHit(j).z()
+                << " (i,j): (" << recEvent->GetModuleID(j) << ", " << recEvent->GetFiberID(j) << ")"
+                << " x: " << recEvent->GetHitPosition(j).x() 
+                << " y: " << recEvent->GetHitPosition(j).y()
+                << " z: " << recEvent->GetHitPosition(j).z()
                 << " -----> chi2/dof: " <<  recEvent->GetChi2OverDof() << std::endl;
     }
   }

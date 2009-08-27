@@ -6,6 +6,7 @@
 #include "G4UIcommand.hh"
 #include "G4UIcmdWith3VectorAndUnit.hh"
 #include "G4UIcmdWithAString.hh"
+#include "G4UIcmdWithADoubleAndUnit.hh"
 #include "G4String.hh"
 
 RES_DetectorMessenger::RES_DetectorMessenger(RES_DetectorConstruction* detector)
@@ -29,6 +30,35 @@ RES_DetectorMessenger::RES_DetectorMessenger(RES_DetectorConstruction* detector)
   m_setModuleRotationCmd->SetGuidance("Set the rotation for the module.");
   m_setModuleRotationCmd->SetParameterName("rotationString", false);
   m_setModuleRotationCmd->AvailableForStates(G4State_PreInit);
+
+  m_setModuleWidthCmd = new G4UIcmdWithADoubleAndUnit("/RES/Det/ModuleWidth", this);
+  m_setModuleWidthCmd->SetGuidance("Set the module Width");
+  m_setModuleWidthCmd->SetParameterName("Width", false);
+  m_setModuleWidthCmd->SetDefaultUnit("cm");
+  m_setModuleWidthCmd->SetUnitCategory("Length");
+  m_setModuleWidthCmd->AvailableForStates(G4State_PreInit);
+
+  m_setModuleLengthCmd = new G4UIcmdWithADoubleAndUnit("/RES/Det/ModuleLength", this);
+  m_setModuleLengthCmd->SetGuidance("Set the module length");
+  m_setModuleLengthCmd->SetParameterName("length", false);
+  m_setModuleLengthCmd->SetDefaultUnit("cm");
+  m_setModuleLengthCmd->SetUnitCategory("Length");
+  m_setModuleLengthCmd->AvailableForStates(G4State_PreInit);
+
+  m_setModuleLayerThicknessCmd = new G4UIcmdWithADoubleAndUnit("/RES/Det/ModuleLayerThickness", this);
+  m_setModuleLayerThicknessCmd->SetGuidance("Set the module layerThickness");
+  m_setModuleLayerThicknessCmd->SetParameterName("layerThickness", false);
+  m_setModuleLayerThicknessCmd->SetDefaultUnit("cm");
+  m_setModuleLayerThicknessCmd->SetUnitCategory("Length");
+  m_setModuleLayerThicknessCmd->AvailableForStates(G4State_PreInit);
+
+  m_setModuleGapCmd = new G4UIcmdWithADoubleAndUnit("/RES/Det/ModuleGap", this);
+  m_setModuleGapCmd->SetGuidance("Set the module gap");
+  m_setModuleGapCmd->SetParameterName("gap", false);
+  m_setModuleGapCmd->SetDefaultUnit("cm");
+  m_setModuleGapCmd->SetUnitCategory("Length");
+  m_setModuleGapCmd->AvailableForStates(G4State_PreInit);
+
 }
 
 RES_DetectorMessenger::~RES_DetectorMessenger()
@@ -37,6 +67,10 @@ RES_DetectorMessenger::~RES_DetectorMessenger()
   delete m_detDirectory;
   delete m_addModulePlacementCmd;
   delete m_setModuleRotationCmd;
+  delete m_setModuleWidthCmd;
+  delete m_setModuleLengthCmd;
+  delete m_setModuleLayerThicknessCmd;
+  delete m_setModuleGapCmd;
 }
 
 void RES_DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
@@ -45,9 +79,21 @@ void RES_DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
     m_detector->AddModulePlacement(m_addModulePlacementCmd->GetNew3VectorValue(newValue));
   }
   if (command == m_setModuleRotationCmd) {
-    G4int iModule = m_setModuleRotationCmd->ConvertToInt(newValue.strip(0));
-    G4double angle = m_setModuleRotationCmd->ConvertToDouble(newValue.strip(1)) * M_PI/180.;;
+    G4int iModule = m_setModuleRotationCmd->ConvertToInt(newValue.substr(0,1).c_str());
+    G4double angle = m_setModuleRotationCmd->ConvertToDouble(newValue.substr(2,newValue.length()).c_str()) * M_PI/180.;
     m_detector->SetModuleAngle(iModule, angle);
+  }
+  if (command == m_setModuleWidthCmd) {
+    m_detector->SetModuleWidth(m_setModuleWidthCmd->GetNewDoubleValue(newValue));
+  }
+  if (command == m_setModuleLengthCmd) {
+    m_detector->SetModuleLength(m_setModuleLengthCmd->GetNewDoubleValue(newValue));
+  }
+  if (command == m_setModuleLayerThicknessCmd) {
+    m_detector->SetModuleLayerThickness(m_setModuleLayerThicknessCmd->GetNewDoubleValue(newValue));
+  }
+  if (command == m_setModuleGapCmd) {
+    m_detector->SetModuleGap(m_setModuleGapCmd->GetNewDoubleValue(newValue));
   }
 }
 

@@ -2,6 +2,9 @@ name := resolution
 G4TARGET := $(name)
 G4EXLIB := true
 
+#CPPVERBOSE := 1
+#CPPFLAGS += -Wno-unused-result
+
 CPPFLAGS += -I$(ROOTSYS)/include
 EXTRALIBS += $(shell root-config --libs)
 

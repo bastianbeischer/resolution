@@ -17,7 +17,11 @@
 RES_TrackFitter::RES_TrackFitter() :
   m_verbose(0),
   m_smearedHits(0),
-  m_fitMethod(blobel)
+  m_parameter(0),
+  m_fitMethod(blobel),
+  m_sigmaX(0.),
+  m_sigmaY(0.),
+  m_sigmaZ(0.)
 {
   m_messenger = new RES_TrackFitMessenger(this);
 }
@@ -39,7 +43,7 @@ RES_Event RES_TrackFitter::Fit()
 
   switch (m_fitMethod) {
   case blobel:
-    conv = DoBlobelFit();
+    conv = DoBlobelFitInPlane();
     break;
   case minuit:
     conv = DoMinuitFit();
@@ -139,6 +143,44 @@ G4int RES_TrackFitter::DoBlobelFit()
   return conv;
 }
 
+G4int RES_TrackFitter::DoBlobelFitInPlane()
+{
+  delete m_parameter;
+  m_parameter = new double[3];
+  m_parameter[0] = m_smearedHits[0].y();
+  m_parameter[1] = M_PI;
+  m_parameter[2] = 1.0*GeV;
+
+  G4double step[3];
+  step[0] = 0.01*m_parameter[0];
+  step[1] = 0.01*m_parameter[1];
+  step[2] = 0.01*m_parameter[2];
+
+  G4int npar = 3; // negative to suppress printout
+  G4int nflim = 3*abs(npar)*(abs(npar)+10); // dito
+  if( m_verbose == 0 ) {
+    npar = -npar;
+    nflim = -nflim;
+  }
+  DVALLIN(npar,step,nflim);
+
+  G4int conv = -1;
+  G4int iter = 0;
+  G4double chi2 = 0.;
+
+  while( conv <= 0 ){
+    ++iter;
+    chi2 = Chi2InPlane();
+    DVALLEY(chi2,m_parameter,conv);
+  }
+
+  int nHits = m_currentGenEvent.GetNbOfHits();
+  double dof = nHits - npar;
+  m_currentRecEvent.SetChi2OverDof(chi2/dof);
+
+  return conv;
+}
+
 G4int RES_TrackFitter::DoMinuitFit()
 {
   return -1;
@@ -182,6 +224,35 @@ G4double RES_TrackFitter::Chi2()
     chi2 += 2.*dx*dy*s*c*(pow(m_sigmaY,2.) - pow(m_sigmaX, 2.));
 
     chi2 /= pow(m_sigmaX*m_sigmaY, 2.);
+  }
+    
+  return chi2;
+}
+
+G4double RES_TrackFitter::Chi2InPlane()
+{
+  G4RunManager* runManager = G4RunManager::GetRunManager();
+  const RES_PrimaryGeneratorAction* genAction = (RES_PrimaryGeneratorAction*) runManager->GetUserPrimaryGeneratorAction();
+  G4ParticleGun* gun = genAction->GetParticleGun();
+
+  G4double chi2 = 0.;
+    
+  G4ThreeVector direction(0, sin(m_parameter[1]), cos(m_parameter[1]));
+  G4ThreeVector position(0., m_parameter[0], m_smearedHits[0].z());
+  position -= 1.*cm * direction;
+      
+  gun->SetParticlePosition(position);
+  gun->SetParticleMomentumDirection(direction);
+  gun->SetParticleEnergy(m_parameter[2]);
+  runManager->BeamOn(1);
+
+  G4int nHits = m_currentGenEvent.GetNbOfHits();
+  G4int nRecHits = m_currentRecEvent.GetNbOfHits();
+  assert(nHits == nRecHits);
+
+  for( G4int i = 0 ; i < nHits ; i++ ) {
+    G4double dy = m_smearedHits[i].y() - m_currentRecEvent.GetHitPosition(i).y();
+    chi2 += pow(dy/m_sigmaY, 2.0);
   }
     
   return chi2;

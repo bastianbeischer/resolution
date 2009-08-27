@@ -27,7 +27,7 @@ public:
   inline G4double GetWorldZ() {return m_world_z;}
 
   inline G4double GetModuleLength()       {return m_moduleLength;}
-  inline G4double GetModuleAngle(G4int i) {assert(i < m_moduleAngles.size()); return m_moduleAngles.at(i);}
+  inline G4double GetModuleAngle(unsigned int i) {assert(i < m_moduleAngles.size()); return m_moduleAngles.at(i);}
 
   inline void AddModulePlacement(G4ThreeVector where) {
     m_modulePlacements.push_back(where);
@@ -36,6 +36,10 @@ public:
   inline void SetModuleAngle(G4int module, G4double angle) {
     m_moduleAngles[module] = angle;
   }
+  inline void SetModuleWidth(G4double width) {m_moduleWidth = width;}
+  inline void SetModuleLength(G4double length) {m_moduleLength = length;}
+  inline void SetModuleLayerThickness(G4double layerThickness) {m_moduleLayerThickness = layerThickness;}
+  inline void SetModuleGap(G4double gap) {m_moduleGap = gap;}
 
 private:
   void ComputeParameters();

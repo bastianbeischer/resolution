@@ -10,6 +10,7 @@ class G4UIcommand;
 class G4UIdirectory;
 class G4UIcmdWith3VectorAndUnit;
 class G4UIcmdWithAString;
+class G4UIcmdWithADoubleAndUnit;
 
 class RES_DetectorMessenger : public G4UImessenger
 {
@@ -27,6 +28,10 @@ private:
   
   G4UIcmdWith3VectorAndUnit* m_addModulePlacementCmd;
   G4UIcmdWithAString*        m_setModuleRotationCmd;
+  G4UIcmdWithADoubleAndUnit* m_setModuleWidthCmd;
+  G4UIcmdWithADoubleAndUnit* m_setModuleLengthCmd;
+  G4UIcmdWithADoubleAndUnit* m_setModuleLayerThicknessCmd;
+  G4UIcmdWithADoubleAndUnit* m_setModuleGapCmd;
 
 };
 

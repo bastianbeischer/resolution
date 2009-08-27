@@ -6,16 +6,26 @@
 /RES/Det/AddModule 0. -6.912 18.5 cm
 /RES/Det/AddModule 0. 0. 18.5 cm
 /RES/Det/AddModule 0. 6.912 18.5 cm
+/RES/Det/SetModuleRotation 0 -2.5
+/RES/Det/SetModuleRotation 1 -2.5
+/RES/Det/SetModuleRotation 2 -2.5
 
 /RES/Det/AddModule 0. -3.456 4.5 cm
 /RES/Det/AddModule 0. 3.456 4.5 cm
+/RES/Det/SetModuleRotation 3 2.5
+/RES/Det/SetModuleRotation 4 2.5
 
 /RES/Det/AddModule 0. -3.456 -4.5 cm
 /RES/Det/AddModule 0. 3.456 -4.5 cm
+/RES/Det/SetModuleRotation 5 2.5
+/RES/Det/SetModuleRotation 6 2.5
 
 /RES/Det/AddModule 0. -6.912 -18.5 cm
 /RES/Det/AddModule 0. 0. -18.5 cm
 /RES/Det/AddModule 0. 6.912 -18.5 cm
+/RES/Det/SetModuleRotation 7 -2.5
+/RES/Det/SetModuleRotation 8 -2.5
+/RES/Det/SetModuleRotation 9 -2.5
 
 #/RES/Field/SetInhomFieldFrom tables/perdaix_07_jul_2009.table
 /RES/Field/SetDummyField 0.3 0.0 0.0 tesla
@@ -27,5 +37,5 @@
 
 /run/initialize
 
-/RES/Run/Generate 10000
-/RES/Run/Reconstruct
+/RES/Run/Generate 100
+#/RES/Run/Reconstruct

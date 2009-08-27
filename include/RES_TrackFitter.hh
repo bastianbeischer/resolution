@@ -33,8 +33,10 @@ private:
   void     SmearHits();
   void     CalculateStartParameters();
   G4int    DoBlobelFit();
+  G4int    DoBlobelFitInPlane();
   G4int    DoMinuitFit();
   G4double Chi2();
+  G4double Chi2InPlane();
 
 private:
   RES_TrackFitMessenger* m_messenger;
