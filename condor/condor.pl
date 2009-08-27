@@ -69,7 +69,7 @@ sub make_macro_file{
 /RES/Det/ModuleWidth 99.5 cm
 /RES/Det/ModuleLength 99.5 cm
 
-/RES/Gun/SetEnergy $energy
+/RES/Gun/Energy $energy
 
 #/RES/Field/SetInhomFieldFrom tables/perdaix_07_jul_2009.table
 #/RES/Field/SetDummyField 0.3 0.0 0.0 tesla

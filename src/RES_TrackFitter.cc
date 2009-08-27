@@ -72,7 +72,7 @@ void RES_TrackFitter::SmearHits()
 
   G4int nHits = m_currentGenEvent.GetNbOfHits();
 
-  delete m_smearedHits;
+  //delete m_smearedHits;
   m_smearedHits = new G4ThreeVector[nHits];
 
   for (G4int i = 0; i < nHits; i++) {
@@ -100,7 +100,7 @@ void RES_TrackFitter::CalculateStartParameters()
   G4double B = 0.3;
   G4double pStart = 0.3 * B * L / theta * GeV;
   
-  delete m_parameter;
+  //delete m_parameter;
   m_parameter = new G4double[5];
   m_parameter[0] = m_smearedHits[0].x();
   m_parameter[1] = m_smearedHits[0].y();
@@ -145,7 +145,7 @@ G4int RES_TrackFitter::DoBlobelFit()
 
 G4int RES_TrackFitter::DoBlobelFitInPlane()
 {
-  delete m_parameter;
+  //delete m_parameter;
   m_parameter = new double[3];
   m_parameter[0] = m_smearedHits[0].y();
   m_parameter[1] = M_PI;

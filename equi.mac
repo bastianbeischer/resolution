@@ -26,7 +26,7 @@
 /RES/Det/ModuleWidth 1. m
 /RES/Det/ModuleLength 1. m
 
-/RES/Gun/SetEnergy 2.0 GeV
+/RES/Gun/Energy 2.0 GeV
 
 #/RES/Field/SetInhomFieldFrom tables/perdaix_07_jul_2009.table
 #/RES/Field/SetDummyField 0.3 0.0 0.0 tesla
