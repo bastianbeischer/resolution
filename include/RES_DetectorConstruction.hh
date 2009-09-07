@@ -22,6 +22,8 @@ public:
 
   G4VPhysicalVolume* Construct();
 
+  G4bool TrackInAcceptance(G4ThreeVector position, G4ThreeVector direction);
+
   inline G4double GetWorldX() {return m_world_x;}
   inline G4double GetWorldY() {return m_world_y;}
   inline G4double GetWorldZ() {return m_world_z;}
@@ -38,7 +40,7 @@ public:
   }
   inline void SetModuleWidth(G4double width) {m_moduleWidth = width;}
   inline void SetModuleLength(G4double length) {m_moduleLength = length;}
-  inline void SetModuleLayerThickness(G4double layerThickness) {m_moduleLayerThickness = layerThickness;}
+  inline void SetModuleFiberThickness(G4double fiberThickness) {m_moduleFiberThickness = fiberThickness;}
   inline void SetModuleGap(G4double gap) {m_moduleGap = gap;}
 
 private:
@@ -56,7 +58,7 @@ private:
   G4Material*                     m_module_material;
   G4double                        m_moduleWidth;
   G4double                        m_moduleLength;
-  G4double                        m_moduleLayerThickness;
+  G4double                        m_moduleFiberThickness;
   G4double                        m_moduleGap; 
   G4double                        m_moduleHeight;
 

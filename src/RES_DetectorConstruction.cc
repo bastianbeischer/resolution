@@ -33,7 +33,7 @@ RES_DetectorConstruction::RES_DetectorConstruction() :
   m_moduleWidth = 6.912 * cm;
   m_moduleGap = 0.8 * cm;
   m_moduleLength = 30. * cm;
-  m_moduleLayerThickness = 0.1 * cm;
+  m_moduleFiberThickness = 0.1 * cm;
 }
 
 RES_DetectorConstruction::~RES_DetectorConstruction()
@@ -63,10 +63,10 @@ G4VPhysicalVolume* RES_DetectorConstruction::Construct()
   }
 
   // interior of modules
-  m_module_fiber_solid = new G4Box("module_fiber", 0.5*m_moduleLength, 0.5*m_moduleWidth, 0.5*m_moduleLayerThickness);
+  m_module_fiber_solid = new G4Box("module_fiber", 0.5*m_moduleLength, 0.5*m_moduleWidth, 0.5*m_moduleFiberThickness);
   m_module_fiber_log = new G4LogicalVolume(m_module_fiber_solid, m_world_material, "module_fiber", 0, 0, 0);
-  m_module_fiber_phys.push_back(new G4PVPlacement(0, G4ThreeVector(0, 0, 0.5*m_moduleGap + 0.5*m_moduleLayerThickness), m_module_fiber_log, "module_fiber", m_module_log, false, 0));
-  m_module_fiber_phys.push_back(new G4PVPlacement(0, G4ThreeVector(0, 0, -0.5*m_moduleGap - 0.5*m_moduleLayerThickness), m_module_fiber_log, "module_fiber", m_module_log, false, 1));
+  m_module_fiber_phys.push_back(new G4PVPlacement(0, G4ThreeVector(0, 0, 0.5*m_moduleGap + 0.5*m_moduleFiberThickness), m_module_fiber_log, "module_fiber", m_module_log, false, 0));
+  m_module_fiber_phys.push_back(new G4PVPlacement(0, G4ThreeVector(0, 0, -0.5*m_moduleGap - 0.5*m_moduleFiberThickness), m_module_fiber_log, "module_fiber", m_module_log, false, 1));
   
   m_module_bulk_solid = new G4Box("module_bulk", 0.5*m_moduleLength, 0.5*m_moduleWidth, 0.5*m_moduleGap);
   m_module_bulk_log = new G4LogicalVolume(m_module_bulk_solid, m_world_material, "module_bulk", 0, 0, 0);
@@ -92,7 +92,7 @@ G4VPhysicalVolume* RES_DetectorConstruction::Construct()
 
 void RES_DetectorConstruction::ComputeParameters()
 {
-  m_moduleHeight = 2. * m_moduleLayerThickness + m_moduleGap;
+  m_moduleHeight = 2. * m_moduleFiberThickness + m_moduleGap;
 }
 
 void RES_DetectorConstruction::SetVisibility()
@@ -105,4 +105,9 @@ void RES_DetectorConstruction::SetVisibility()
 
   vis_att = new G4VisAttributes(G4Colour(0.0, 1.0, 0.0)); // blue
   m_module_bulk_log->SetVisAttributes(vis_att);
+}
+
+G4bool RES_DetectorConstruction::TrackInAcceptance(G4ThreeVector position, G4ThreeVector direction)
+{
+  return true;
 }

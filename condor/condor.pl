@@ -14,7 +14,7 @@ my $numberOfEventsPerRun = 1000;
 my $maximumEnergy = 100; # GeV
 
 my $condor_dir = "/home/home4/institut_1b/beischer/src/geant4/resolution/condor";
-my $executable = "/home/home4/institut_1b/beischer/src/geant4/resolution/bin/moontrace";
+my $executable = "/home/home4/institut_1b/beischer/geant4/8.1.p02/slc4_ia32_gcc34/bin/Linux-g++/resolution";
 
 ################################################################################################################
 
@@ -37,7 +37,7 @@ sub make_macro_file{
 
   my ($currentRun, $energy, $nEvents) = @_;
 
-  open MACROFILE, ">${condor_dir}/mac/res_${currentRunNumber}.mac" or die "Error: Cannot make macro file: $!";
+  open MACROFILE, ">${condor_dir}/mac/res_${currentRun}.mac" or die "Error: Cannot make macro file: $!";
 
   print MACROFILE <<EOF;
 
@@ -69,7 +69,7 @@ sub make_macro_file{
 /RES/Det/ModuleWidth 99.5 cm
 /RES/Det/ModuleLength 99.5 cm
 
-/RES/Gun/Energy $energy
+/RES/Gun/Energy $energy GeV
 
 #/RES/Field/SetInhomFieldFrom tables/perdaix_07_jul_2009.table
 #/RES/Field/SetDummyField 0.3 0.0 0.0 tesla
@@ -100,7 +100,7 @@ EOF
   close MACROFILE;
 
   # return value: macro file name
-  "${condor_dir}/mac/res_${currentRunNumber}.mac";
+  "${condor_dir}/mac/res_${currentRun}.mac";
 
 }
 
@@ -110,14 +110,14 @@ sub make_condor_file{
   # make a condor file, first ( and only ) argument is run number
 
   my $ith = shift;
-  my $currentRunNumber = $ith;
+  my $currentRun = $ith;
 
-  open CONDORFILE, ">${condor_dir}/condor/res_${currentRunNumber}.condor" or die "Error: Cannot make condor file: $!";
+  open CONDORFILE, ">${condor_dir}/condor/res_${currentRun}.condor" or die "Error: Cannot make condor file: $!";
 
   print CONDORFILE <<EOF;
 universe        = vanilla
 executable      = $executable
-arguments	= ${condor_dir}/mac/res_$currentRunNumber.mac
+arguments	= ${condor_dir}/mac/res_$currentRun.mac
 initialdir      = ${condor_dir}
 EOF
 
@@ -128,9 +128,9 @@ rank            = KFlops
 EOF
 
   print CONDORFILE <<EOF;
-error           = ${condor_dir}/ERR/res_${currentRunNumber}.ERR
-output          = ${condor_dir}/STD/res_${currentRunNumber}.STD
-log             = ${condor_dir}/LOG/res_${currentRunNumber}.LOG
+error           = ${condor_dir}/ERR/res_${currentRun}.ERR
+output          = ${condor_dir}/STD/res_${currentRun}.STD
+log             = ${condor_dir}/LOG/res_${currentRun}.LOG
 EOF
 
   print CONDORFILE <<'EOF';
@@ -143,6 +143,6 @@ EOF
   close CONDORFILE;
 
   # return value: condor file name
-  "${condor_dir}/condor/res_${currentRunNumber}.condor";
+  "${condor_dir}/condor/res_${currentRun}.condor";
 
 }

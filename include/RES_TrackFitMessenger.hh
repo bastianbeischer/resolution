@@ -7,6 +7,7 @@ class RES_TrackFitter;
 class G4UIcommand;
 class G4UIdirectory;
 class G4UIcmdWithAnInteger;
+class G4UIcmdWithAString;
 
 class RES_TrackFitMessenger : public G4UImessenger
 {
@@ -23,6 +24,7 @@ private:
 
   G4UIdirectory*        m_directory;
   G4UIcmdWithAnInteger* m_setVerboseCmd;
+  G4UIcmdWithAString*   m_setFitMethodCmd;
 
 };
 

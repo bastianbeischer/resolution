@@ -23,17 +23,19 @@
 /RES/Det/AddModule 0. 0. -40. cm
 /RES/Det/AddModule 0. 0. -45. cm
 /RES/Det/ModuleGap 2.4 cm
-/RES/Det/ModuleWidth 1. m
-/RES/Det/ModuleLength 1. m
+/RES/Det/ModuleWidth 99.9 cm
+/RES/Det/ModuleLength 99.9 cm
 
-/RES/Gun/Energy 2.0 GeV
+/RES/Gun/Energy 1.0 GeV
 
 #/RES/Field/SetInhomFieldFrom tables/perdaix_07_jul_2009.table
 #/RES/Field/SetDummyField 0.3 0.0 0.0 tesla
 /RES/Field/SetUniformField 0.3 0.0 0.0 tesla
 
+/RES/Fit/Method Minuit
+
 /RES/Data/OverWriteFile true
-/RES/Data/SetFileName results/equi.root
+/RES/Data/SetFileName results/equi_minuit.root
 /RES/Run/StoreResults
 
 /run/initialize

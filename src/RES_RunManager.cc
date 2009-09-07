@@ -12,7 +12,7 @@ RES_RunManager::RES_RunManager() :
 {
   m_messenger = new RES_RunMessenger(this);
   m_dataHandler = new RES_DataHandler();
-  m_trackFitter = new RES_TrackFitter();
+  m_trackFitter = RES_TrackFitter::GetInstance();
   m_eventActionGen = new RES_EventActionGeneration();
   m_eventActionRec = new RES_EventActionReconstruction(m_trackFitter);
   

@@ -45,12 +45,12 @@ RES_DetectorMessenger::RES_DetectorMessenger(RES_DetectorConstruction* detector)
   m_setModuleLengthCmd->SetUnitCategory("Length");
   m_setModuleLengthCmd->AvailableForStates(G4State_PreInit);
 
-  m_setModuleLayerThicknessCmd = new G4UIcmdWithADoubleAndUnit("/RES/Det/ModuleLayerThickness", this);
-  m_setModuleLayerThicknessCmd->SetGuidance("Set the module layerThickness");
-  m_setModuleLayerThicknessCmd->SetParameterName("layerThickness", false);
-  m_setModuleLayerThicknessCmd->SetDefaultUnit("cm");
-  m_setModuleLayerThicknessCmd->SetUnitCategory("Length");
-  m_setModuleLayerThicknessCmd->AvailableForStates(G4State_PreInit);
+  m_setModuleFiberThicknessCmd = new G4UIcmdWithADoubleAndUnit("/RES/Det/ModuleFiberThickness", this);
+  m_setModuleFiberThicknessCmd->SetGuidance("Set the module fiberThickness");
+  m_setModuleFiberThicknessCmd->SetParameterName("fiberThickness", false);
+  m_setModuleFiberThicknessCmd->SetDefaultUnit("cm");
+  m_setModuleFiberThicknessCmd->SetUnitCategory("Length");
+  m_setModuleFiberThicknessCmd->AvailableForStates(G4State_PreInit);
 
   m_setModuleGapCmd = new G4UIcmdWithADoubleAndUnit("/RES/Det/ModuleGap", this);
   m_setModuleGapCmd->SetGuidance("Set the module gap");
@@ -69,7 +69,7 @@ RES_DetectorMessenger::~RES_DetectorMessenger()
   delete m_setModuleRotationCmd;
   delete m_setModuleWidthCmd;
   delete m_setModuleLengthCmd;
-  delete m_setModuleLayerThicknessCmd;
+  delete m_setModuleFiberThicknessCmd;
   delete m_setModuleGapCmd;
 }
 
@@ -89,8 +89,8 @@ void RES_DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
   if (command == m_setModuleLengthCmd) {
     m_detector->SetModuleLength(m_setModuleLengthCmd->GetNewDoubleValue(newValue));
   }
-  if (command == m_setModuleLayerThicknessCmd) {
-    m_detector->SetModuleLayerThickness(m_setModuleLayerThicknessCmd->GetNewDoubleValue(newValue));
+  if (command == m_setModuleFiberThicknessCmd) {
+    m_detector->SetModuleFiberThickness(m_setModuleFiberThicknessCmd->GetNewDoubleValue(newValue));
   }
   if (command == m_setModuleGapCmd) {
     m_detector->SetModuleGap(m_setModuleGapCmd->GetNewDoubleValue(newValue));

@@ -30,7 +30,7 @@ private:
   G4UIcmdWithAString*        m_setModuleRotationCmd;
   G4UIcmdWithADoubleAndUnit* m_setModuleWidthCmd;
   G4UIcmdWithADoubleAndUnit* m_setModuleLengthCmd;
-  G4UIcmdWithADoubleAndUnit* m_setModuleLayerThicknessCmd;
+  G4UIcmdWithADoubleAndUnit* m_setModuleFiberThicknessCmd;
   G4UIcmdWithADoubleAndUnit* m_setModuleGapCmd;
 
 };

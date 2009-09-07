@@ -17,10 +17,11 @@ class RES_TrackFitter
 {
 
 public:
-  RES_TrackFitter();
   ~RES_TrackFitter();
 
 public:
+  static RES_TrackFitter* GetInstance();
+
   inline void SetCurrentGenEvent(RES_Event event) {m_currentGenEvent = event;}
   inline void SetCurrentRecEvent(RES_Event event) {m_currentRecEvent = event;}
   inline void SetVerbose(G4int verbose) {m_verbose = verbose;}
@@ -29,16 +30,18 @@ public:
   RES_Event Fit();
 
 private:
+  RES_TrackFitter();
+
   void     SetSpatialResolutions();
   void     SmearHits();
   void     CalculateStartParameters();
-  G4int    DoBlobelFit();
-  G4int    DoBlobelFitInPlane();
-  G4int    DoMinuitFit();
+  G4int    DoBlobelFit(G4int npar);
+  G4int    DoMinuitFit(G4int npar);
   G4double Chi2();
-  G4double Chi2InPlane();
 
 private:
+  static RES_TrackFitter* m_instance;
+
   RES_TrackFitMessenger* m_messenger;
 
   RES_Event              m_currentGenEvent;
@@ -47,11 +50,16 @@ private:
 
   G4ThreeVector*         m_smearedHits;
   G4double*              m_parameter;
+  G4double*              m_step;
+  G4double*              m_lowerBound;
+  G4double*              m_upperBound;
   FitMethod              m_fitMethod;
 
   G4double               m_sigmaX;
   G4double               m_sigmaY;
   G4double               m_sigmaZ;
+
+  friend void MinuitChi2Wrapper(int& npar, double* /*gin*/, double& f, double* par, int /*iflag*/);
 
 };
 
