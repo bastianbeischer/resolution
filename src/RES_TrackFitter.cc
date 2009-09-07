@@ -128,10 +128,13 @@ void RES_TrackFitter::SmearHits()
 
 void RES_TrackFitter::CalculateStartParameters()
 {
-  G4int nHits = m_currentGenEvent.GetNbOfHits();
-  G4double theta =   (m_smearedHits[nHits-1].y() - m_smearedHits[nHits-2].y()) / (m_smearedHits[nHits-1].z() - m_smearedHits[nHits-2].z())
-                   - (m_smearedHits[1].y()       - m_smearedHits[0].y())       / (m_smearedHits[1].z()       - m_smearedHits[0].z());
-  G4double L = sqrt(pow(m_smearedHits[nHits-1].y() - m_smearedHits[0].y(),2.) + pow(m_smearedHits[nHits-1].z() - m_smearedHits[0].z(), 2.))/m;
+  // G4int nHits = m_currentGenEvent.GetNbOfHits();
+  // G4double theta =   (m_smearedHits[nHits-1].y() - m_smearedHits[nHits-2].y()) / (m_smearedHits[nHits-1].z() - m_smearedHits[nHits-2].z())
+  //                  - (m_smearedHits[1].y()       - m_smearedHits[0].y())       / (m_smearedHits[1].z()       - m_smearedHits[0].z());
+  // G4double L = sqrt(pow(m_smearedHits[nHits-1].y() - m_smearedHits[0].y(),2.) + pow(m_smearedHits[nHits-1].z() - m_smearedHits[0].z(), 2.))/m;
+  G4double theta =   (m_smearedHits[7].y() - m_smearedHits[4].y()) / (m_smearedHits[7].z() - m_smearedHits[4].z())
+                   - (m_smearedHits[3].y() - m_smearedHits[0].y()) / (m_smearedHits[3].z() - m_smearedHits[0].z());
+  G4double L = sqrt(pow(m_smearedHits[4].y() - m_smearedHits[3].y(),2.) + pow(m_smearedHits[4].z() - m_smearedHits[3].z(), 2.))/m;
   G4double B = 0.3;
   G4double pStart = 0.3 * B * L / theta * GeV;
   //  G4double pStart = m_currentGenEvent.GetMomentum();
@@ -265,7 +268,11 @@ G4double RES_TrackFitter::Chi2()
 
   G4int nHits = m_currentGenEvent.GetNbOfHits();
   G4int nRecHits = m_currentRecEvent.GetNbOfHits();
-  assert(nHits == nRecHits);
+  //assert(nHits == nRecHits);
+  if (nHits != nRecHits) {
+    chi2 = DBL_MAX;
+    return chi2;
+  }
 
   for( G4int i = 0 ; i < nHits ; i++ ) {
     G4int iModule = m_currentRecEvent.GetModuleID(i);

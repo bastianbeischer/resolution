@@ -22,7 +22,6 @@ public:
 public:
   inline void SetRandomOrigin(G4bool value) {m_randomOrigin = value;}
   inline void SetRandomDirection(G4bool value) {m_randomDirection = value;}
-  void SetEnergy(G4double energy);
 
 private:
   RES_PrimaryGeneratorMessenger* m_messenger;

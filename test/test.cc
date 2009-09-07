@@ -7,7 +7,11 @@
 
 int main(int argc, char** argv)
 {
-  TFile* file = new TFile("results/equi_minuit.root", "READ");
+  if (!argc == 2)
+    std::cout << "please provide root file for analysis" << std::endl;
+  const char* filename = argv[1];
+
+  TFile* file = new TFile(filename, "READ");
   TTree* genTree = (TTree*) file->Get("resolution_gen_tree");
   TTree* recTree = (TTree*) file->Get("resolution_rec_tree");
   RES_Event* genEvent = new RES_Event();

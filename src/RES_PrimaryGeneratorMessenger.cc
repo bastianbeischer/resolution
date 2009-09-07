@@ -25,16 +25,13 @@ RES_PrimaryGeneratorMessenger::RES_PrimaryGeneratorMessenger(RES_PrimaryGenerato
   m_randomDirectionCmd->SetParameterName("randDirection", true);
   m_randomDirectionCmd->SetDefaultValue(true);
   m_randomDirectionCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
-
-  m_energyCmd = new G4UIcmdWithADoubleAndUnit("/RES/Gun/Energy", this);
-  m_energyCmd->SetGuidance("Set particle energy");
-  m_energyCmd->SetParameterName("energy", false);
-  m_energyCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
 }
 
 RES_PrimaryGeneratorMessenger::~RES_PrimaryGeneratorMessenger()
 {
   delete m_directory;
+  delete m_randomOriginCmd;
+  delete m_randomDirectionCmd;
 }
 
 void RES_PrimaryGeneratorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
@@ -44,8 +41,5 @@ void RES_PrimaryGeneratorMessenger::SetNewValue(G4UIcommand* command, G4String n
   }
   if (command == m_randomDirectionCmd) {
     m_generator->SetRandomDirection(m_randomDirectionCmd->GetNewBoolValue(newValue));
-  }
-  if (command == m_energyCmd) {
-    m_generator->SetEnergy(m_energyCmd->GetNewDoubleValue(newValue));
   }
 }

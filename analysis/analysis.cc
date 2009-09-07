@@ -42,8 +42,9 @@ int main(int argc, char** argv)
 
   genTree->GetEntry(0);
   double genMom = genEvent->GetMomentum()/1000.;
-  double momRes = calculatePrediction(&genMom, 0);
-  TH1D resHist("resHist", "resHist", 100, 1. - 5.*momRes, 1. + 5.*momRes);    
+  // double momRes = calculatePrediction(&genMom, 0);
+  // TH1D resHist("resHist", "resHist", 100, 1. - 5.*momRes, 1. + 5.*momRes);    
+  TH1D resHist("resHist", "resHist", 100, 1. - 5.*0.1, 1. + 5.*0.1);    
   TH1D chi2Hist("chi2Hist", "chi2Hist", 100, 0.0, 10.0);
   for(int i = 0; i < genTree->GetEntries(); i++) {
     genTree->GetEntry(i);

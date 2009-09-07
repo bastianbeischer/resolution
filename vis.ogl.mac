@@ -1,33 +1,34 @@
 /control/verbose 1
 /run/verbose 0
-/tracking/verbose 0
+/tracking/verbose 1
 /RES/Fit/Verbose 1
 
-/RES/Gun/Energy 1.0 GeV
+/gun/energy 1.0 GeV
+/gun/position 0.1 0.1 50 cm
 
 /RES/Det/AddModule 0. -6.912 18.5 cm
 /RES/Det/AddModule 0. 0. 18.5 cm
 /RES/Det/AddModule 0. 6.912 18.5 cm
-# /RES/Det/SetModuleRotation 0 -2.5
-# /RES/Det/SetModuleRotation 1 -2.5
-# /RES/Det/SetModuleRotation 2 -2.5
+/RES/Det/SetModuleRotation 0 -2.5
+/RES/Det/SetModuleRotation 1 -2.5
+/RES/Det/SetModuleRotation 2 -2.5
 
 /RES/Det/AddModule 0. -3.456 4.5 cm
 /RES/Det/AddModule 0. 3.456 4.5 cm
-# /RES/Det/SetModuleRotation 3 2.5
-# /RES/Det/SetModuleRotation 4 2.5
+/RES/Det/SetModuleRotation 3 2.5
+/RES/Det/SetModuleRotation 4 2.5
 
 /RES/Det/AddModule 0. -3.456 -4.5 cm
 /RES/Det/AddModule 0. 3.456 -4.5 cm
-# /RES/Det/SetModuleRotation 5 2.5
-# /RES/Det/SetModuleRotation 6 2.5
+/RES/Det/SetModuleRotation 5 2.5
+/RES/Det/SetModuleRotation 6 2.5
 
 /RES/Det/AddModule 0. -6.912 -18.5 cm
 /RES/Det/AddModule 0. 0. -18.5 cm
 /RES/Det/AddModule 0. 6.912 -18.5 cm
-# /RES/Det/SetModuleRotation 7 -2.5
-# /RES/Det/SetModuleRotation 8 -2.5
-# /RES/Det/SetModuleRotation 9 -2.5
+/RES/Det/SetModuleRotation 7 -2.5
+/RES/Det/SetModuleRotation 8 -2.5
+/RES/Det/SetModuleRotation 9 -2.5
 
 #/RES/Field/SetInhomFieldFrom tables/perdaix_07_jul_2009.table
 /RES/Field/SetDummyField 0.3 0.0 0.0 tesla
@@ -38,6 +39,7 @@
 /RES/Data/OverWriteFile true
 /RES/Data/SetFileName results/perdaix.root
 /RES/Run/StoreResults
+
 /run/initialize
 
 /vis/scene/create

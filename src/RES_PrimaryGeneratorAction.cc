@@ -54,8 +54,3 @@ void RES_PrimaryGeneratorAction::GeneratePrimaries(G4Event* event)
 
   m_particleGun->GeneratePrimaryVertex(event);
 }
-
-void RES_PrimaryGeneratorAction::SetEnergy(G4double energy)
-{
-  m_particleGun->SetParticleEnergy(energy);
-}
