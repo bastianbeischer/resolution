@@ -23,36 +23,32 @@ CPPFLAGS += -I$(BlobelDir)
 EXTRA_LINK_DEPENDENCIES += $(BlobelLib)
 
 .PHONY: all
-all: lib bin TAGS
+all: TAGS lib bin
 
 include $(G4INSTALL)/config/binmake.gmk
 
 TAGS: $(G4TARGET).cc src/*.cc include/*.hh $(RES_EventDir)/*.cc $(RES_EventDir)/*.hh $(BlobelDir)/*.h $(BlobelDir)/*.f
+	@echo
+	@echo "Creating TAGS file ..."
 	@rm -f TAGS;
-	etags $^
+	@etags $^
+	@echo
 
-clean:: clean_res_event clean_blobel clean_analysis clean_test
+clean::
+	@$(MAKE) -C $(RES_EventDir) clean
+	@$(MAKE) -C $(BlobelDir) clean
+	@$(MAKE) -C analysis clean
+	@$(MAKE) -C test clean
+	@rm -f TAGS;
 
 $(RES_EventLib): $(RES_EventDir)/*.hh $(RES_EventDir)/*.cc
-	$(MAKE) -C $(RES_EventDir)
-
-clean_res_event:
-	$(MAKE) -C $(RES_EventDir) clean
+	@echo
+	@echo "Creating shared lib libRES_Event.so ..."
+	@$(MAKE) -C $(RES_EventDir)
+	@echo
 
 $(BlobelLib): $(BlobelDir)/*.h $(BlobelDir)/*.f 
-	$(MAKE) -C $(BlobelDir)
-
-clean_blobel:
-	$(MAKE) -C $(BlobelDir) clean
-
-test:
-	$(MAKE) -C test
-
-clean_test:
-	$(MAKE) -C test clean
-
-analysis:
-	$(MAKE) -C analysis
-
-clean_analysis:
-	$(MAKE) -C analysis clean
+	@echo
+	@echo "Creating shared lib libBlobel.so ..."
+	@$(MAKE) -C $(BlobelDir)
+	@echo

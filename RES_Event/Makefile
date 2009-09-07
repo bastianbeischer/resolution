@@ -3,20 +3,17 @@ DICT = RES_EventDict
 
 LD = g++
 
-CXXFLAGS	+= -fPIC -I. -I$(ROOTSYS)/include
+CXXFLAGS += -fPIC -I. -I$(ROOTSYS)/include
 
 all: $(LIB)
 
 clean:
-		@rm -f *.o $(DICT).* $(LIB)
-
-
+	@echo "Cleaning up RES_Event ..."
+	@rm -f *.o $(DICT).* $(LIB)
 
 $(LIB): $(DICT).o RES_Event.o
-		@echo "Creating shared lib libRES_Event.so"
-		$(LD) -o $(LIB) $(DICT).o RES_Event.o -shared
-		@echo "DONE."
-		@echo
+	$(LD) -o $(LIB) $(DICT).o RES_Event.o -shared
+	@echo "DONE."
 
 $(DICT).cc: RES_Event.hh RES_Event.cc
-		rootcint -f $(DICT).cc -c -p RES_Event.hh LinkDef.h
+	rootcint -f $(DICT).cc -c -p RES_Event.hh LinkDef.h

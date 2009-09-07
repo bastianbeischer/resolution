@@ -12,4 +12,5 @@ analysis: analysis.o
 analysis2: analysis2.o
 
 clean:
-	rm -f *.o analysis analysis2
+	@echo "Cleaning up analysis ..."
+	@rm -f *.o analysis analysis2

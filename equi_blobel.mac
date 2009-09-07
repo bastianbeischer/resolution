@@ -51,5 +51,5 @@
 # /vis/viewer/set/upVector 0 0 1
 # /vis/viewer/zoom 1.5
 
-/RES/Run/Generate 500
+/RES/Run/Generate 1000
 /RES/Run/Reconstruct

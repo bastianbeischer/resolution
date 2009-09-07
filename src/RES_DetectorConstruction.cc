@@ -107,7 +107,7 @@ void RES_DetectorConstruction::SetVisibility()
   m_module_bulk_log->SetVisAttributes(vis_att);
 }
 
-G4bool RES_DetectorConstruction::TrackInAcceptance(G4ThreeVector position, G4ThreeVector direction)
+G4bool RES_DetectorConstruction::TrackInAcceptance(G4ThreeVector /*position*/, G4ThreeVector /*direction*/)
 {
   return true;
 }

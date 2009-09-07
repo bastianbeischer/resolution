@@ -34,8 +34,8 @@ RES_TrackFitter::RES_TrackFitter() :
   m_verbose(0),
   m_smearedHits(0),
   m_fitMethod(blobel),
-  m_sigmaX(0.),
-  m_sigmaY(0.),
+  m_sigmaU(0.),
+  m_sigmaV(0.),
   m_sigmaZ(0.)
 {
   m_messenger = new RES_TrackFitMessenger(this);
@@ -88,9 +88,8 @@ void RES_TrackFitter::SetSpatialResolutions()
 {
   RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
   G4double moduleLength = det->GetModuleLength();
-
-  m_sigmaX = moduleLength/sqrt(12.);
-  m_sigmaY = 50.*um;
+  m_sigmaU = moduleLength/sqrt(12.);
+  m_sigmaV = 50.*um;
   m_sigmaZ = 0.*um;
 }
 
@@ -106,19 +105,24 @@ void RES_TrackFitter::SmearHits()
   for (G4int i = 0; i < nHits; i++) {
     G4int iModule = m_currentGenEvent.GetModuleID(i);
     G4double angle = det->GetModuleAngle(iModule);
-    G4double s = sin(angle);
-    G4double c = cos(angle);
-      
-    G4double currentSigmaX = sqrt(c*c*m_sigmaX*m_sigmaX + s*s*m_sigmaY*m_sigmaY);
-    G4double currentSigmaY = sqrt(s*s*m_sigmaX*m_sigmaX + c*c*m_sigmaY*m_sigmaY);
- 
-    // G4double x = CLHEP::RandGauss::shoot(m_currentGenEvent.GetHitPosition(i).x(), currentSigmaX);
-    G4double x = CLHEP::RandGauss::shoot(m_currentGenEvent.GetHitPosition(i).x(), 0.);
-    G4double y = CLHEP::RandGauss::shoot(m_currentGenEvent.GetHitPosition(i).y(), currentSigmaY);
-    //G4double y = CLHEP::RandGauss::shoot(m_currentGenEvent.GetHitPosition(i).y(), 0.);
-    G4double z = CLHEP::RandGauss::shoot(m_currentGenEvent.GetHitPosition(i).z(), m_sigmaZ);
+    
+    // collect hit information
+    G4double x = m_currentGenEvent.GetHitPosition(i).x();
+    G4double y = m_currentGenEvent.GetHitPosition(i).y();
+    G4double z = m_currentGenEvent.GetHitPosition(i).z();
+    G4ThreeVector hit(x,y,z);
 
-    m_smearedHits[i] = G4ThreeVector(x,y,z);
+    // transform from detector reference frame (x,y,z) to module frame (u,v,z), smear the hits, transform back to detector frame
+    G4RotationMatrix forwardRotation(angle, 0., 0.);
+    G4RotationMatrix backwardRotation(-angle, 0., 0.);
+    hit = forwardRotation*hit;
+    //hit.setX(CLHEP::RandGauss::shoot(hit.x(), m_sigmaU));
+    hit.setX(CLHEP::RandGauss::shoot(hit.x(), 0.));
+    hit.setY(CLHEP::RandGauss::shoot(hit.y(), m_sigmaV));
+    hit.setZ(CLHEP::RandGauss::shoot(hit.z(), m_sigmaZ));
+    hit = backwardRotation*hit;
+
+    m_smearedHits[i] = hit;
   }
 }
 
@@ -145,15 +149,15 @@ void RES_TrackFitter::CalculateStartParameters()
   m_parameter[3] = x0;
   m_parameter[4] = atan((x1-x0)/(z1-z0));
 
-  G4double sigmaPhi = sqrt(2) * m_sigmaY / ((z1-z0)*(1 + pow((y1-y0)/(z1-z0),2.0)));
-  G4double sigmaTheta = sqrt(2) * m_sigmaX / ((z1-z0)*(1 + pow((x1-x0)/(z1-z0),2.0)));
+  G4double sigmaPhi = sqrt(2) * m_sigmaV / ((z1-z0)*(1 + pow((y1-y0)/(z1-z0),2.0)));
+  G4double sigmaTheta = sqrt(2) * m_sigmaU / ((z1-z0)*(1 + pow((x1-x0)/(z1-z0),2.0)));
 
   // for (int i = 0; i < 5; i++)
   //   m_step[i] = 0.1*m_parameter[i];
   m_step[0] = 0.1*m_parameter[0];
-  m_step[1] = m_sigmaY;
+  m_step[1] = m_sigmaV;
   m_step[2] = sigmaPhi;
-  m_step[3] = m_sigmaX;
+  m_step[3] = m_sigmaU;
   m_step[4] = sigmaTheta;
 
   for (int i = 0; i < 5; i++) {
@@ -165,7 +169,7 @@ void RES_TrackFitter::CalculateStartParameters()
     G4cout << "---------------------------------------------" << G4endl;
     G4cout << "Start values: " << G4endl;
     for (int i = 0; i < 5; i++)
-      G4cout << "m_parameter[i] = " << m_parameter[i] << ", m_step[i] = " << m_step[i] << ", m_lowerBound[i] = " << m_lowerBound[i] << ", m_upperBound[i] = " << m_upperBound[i] << G4endl;
+      G4cout << "m_parameter["<<i<<"] = " << m_parameter[i] << ", m_step["<<i<<"] = " << m_step[i] << ", m_lowerBound["<<i<<"] = " << m_lowerBound[i] << ", m_upperBound["<<i<<"] = " << m_upperBound[i] << G4endl;
   }
 
 }
@@ -270,14 +274,14 @@ G4double RES_TrackFitter::Chi2()
     G4double c = cos(angle);
     G4double dx = m_smearedHits[i].x() - m_currentRecEvent.GetHitPosition(i).x();
     G4double dy = m_smearedHits[i].y() - m_currentRecEvent.GetHitPosition(i).y();
-    chi2 += pow(dx*m_sigmaX*s, 2.);
-    chi2 += pow(dy*m_sigmaY*s, 2.);
-    chi2 += pow(dx*m_sigmaY*c, 2.);
-    chi2 += pow(dy*m_sigmaX*c, 2.);
-    chi2 += 2.*dx*dy*s*c*(pow(m_sigmaY,2.) - pow(m_sigmaX, 2.));
+    chi2 += pow(dx*m_sigmaU*s, 2.);
+    chi2 += pow(dy*m_sigmaV*s, 2.);
+    chi2 += pow(dx*m_sigmaV*c, 2.);
+    chi2 += pow(dy*m_sigmaU*c, 2.);
+    chi2 += 2.*dx*dy*s*c*(pow(m_sigmaV,2.) - pow(m_sigmaU, 2.));
   }
   
-  chi2 /= pow(m_sigmaX*m_sigmaY, 2.);
+  chi2 /= pow(m_sigmaU*m_sigmaV, 2.);
     
   return chi2;
 }

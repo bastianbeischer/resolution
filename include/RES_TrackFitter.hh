@@ -55,8 +55,8 @@ private:
   G4double*              m_upperBound;
   FitMethod              m_fitMethod;
 
-  G4double               m_sigmaX;
-  G4double               m_sigmaY;
+  G4double               m_sigmaU;
+  G4double               m_sigmaV;
   G4double               m_sigmaZ;
 
   friend void MinuitChi2Wrapper(int& npar, double* /*gin*/, double& f, double* par, int /*iflag*/);

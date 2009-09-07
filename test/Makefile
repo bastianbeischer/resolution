@@ -3,4 +3,5 @@ test: test.cc
 	g++ -o test $(shell root-config --libs) -L../RES_Event -l RES_Event test.o
 
 clean:
-	rm -f test.o test
+	@echo "Cleaning up test ..."
+	@rm -f test.o test
