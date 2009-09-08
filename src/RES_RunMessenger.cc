@@ -6,6 +6,7 @@
 #include "G4UIcmdWithABool.hh"
 #include "G4UIcmdWithAnInteger.hh"
 #include "G4UIcmdWithoutParameter.hh"
+#include "G4UIcmdWithAString.hh"
 
 RES_RunMessenger::RES_RunMessenger(RES_RunManager* manager)
 {
@@ -29,6 +30,12 @@ RES_RunMessenger::RES_RunMessenger(RES_RunManager* manager)
   m_reconstructCmd = new G4UIcmdWithoutParameter("/RES/Run/Reconstruct", this);
   m_reconstructCmd->SetGuidance("Reconstruct the events which are stored in the DataHandler");
   m_reconstructCmd->AvailableForStates(G4State_Idle);
+
+  m_scanChi2FuncCmd = new G4UIcmdWithAString("/RES/Run/ScanChi2", this);
+  m_scanChi2FuncCmd->SetGuidance("Scan the chi2 function and write the output to the given file")
+;
+  m_scanChi2FuncCmd->SetParameterName("filename", false);
+  m_scanChi2FuncCmd->AvailableForStates(G4State_Idle);
 }
 
 RES_RunMessenger::~RES_RunMessenger()
@@ -37,6 +44,7 @@ RES_RunMessenger::~RES_RunMessenger()
   delete m_setStoreResultsCmd;
   delete m_generateCmd;
   delete m_reconstructCmd;
+  delete m_scanChi2FuncCmd;
 }
 
 void RES_RunMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
@@ -49,5 +57,8 @@ void RES_RunMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
   }
   if (command == m_reconstructCmd) {
     m_manager->StartReconstructionRun();
+  }
+  if (command == m_scanChi2FuncCmd) {
+    m_manager->ScanChi2Function(newValue);
   }
 }

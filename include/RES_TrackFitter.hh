@@ -29,6 +29,8 @@ public:
 
   RES_Event Fit();
 
+  void ScanChi2Function(G4String filename);
+
 private:
   RES_TrackFitter();
 

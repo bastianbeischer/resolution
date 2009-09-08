@@ -6,11 +6,12 @@ CXXFLAGS += -I$(ROOTSYS)/include -I../RES_Event -I$(MY_INCLUDES)
 
 .PHONY: all clean
 
-all: analysis analysis2
+all: analysis analysis2 analysis3
 
 analysis: analysis.o
 analysis2: analysis2.o
+analysis3: analysis3.o
 
 clean:
 	@echo "Cleaning up analysis ..."
-	@rm -f *.o analysis analysis2
+	@rm -f *.o analysis analysis2 analysis3

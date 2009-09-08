@@ -1,4 +1,5 @@
 #include <cmath>
+#include <fstream>
 
 #include "RES_TrackFitter.hh"
 
@@ -71,10 +72,10 @@ RES_Event RES_TrackFitter::Fit()
 
   switch (m_fitMethod) {
   case blobel:
-    conv = DoBlobelFit(3);
+    conv = DoBlobelFit(5);
     break;
   case minuit:
-    conv = DoMinuitFit(3);
+    conv = DoMinuitFit(5);
     break;
   default:
     break;
@@ -136,8 +137,8 @@ void RES_TrackFitter::CalculateStartParameters()
                    - (m_smearedHits[3].y() - m_smearedHits[0].y()) / (m_smearedHits[3].z() - m_smearedHits[0].z());
   G4double L = sqrt(pow(m_smearedHits[4].y() - m_smearedHits[3].y(),2.) + pow(m_smearedHits[4].z() - m_smearedHits[3].z(), 2.))/m;
   G4double B = 0.3;
-  G4double pStart = 0.3 * B * L / theta * GeV;
-  //  G4double pStart = m_currentGenEvent.GetMomentum();
+  // G4double pStart = 0.3 * B * L / theta * GeV;
+  G4double pStart = m_currentGenEvent.GetMomentum();
   
   G4double x0 = m_smearedHits[0].x();
   G4double x1 = m_smearedHits[1].x();
@@ -152,15 +153,16 @@ void RES_TrackFitter::CalculateStartParameters()
   m_parameter[3] = x0;
   m_parameter[4] = atan((x1-x0)/(z1-z0));
 
+  G4double sigmaEllipsis = 1.0*mm;
   G4double sigmaPhi = sqrt(2) * m_sigmaV / ((z1-z0)*(1 + pow((y1-y0)/(z1-z0),2.0)));
-  G4double sigmaTheta = sqrt(2) * m_sigmaU / ((z1-z0)*(1 + pow((x1-x0)/(z1-z0),2.0)));
+  //  G4double sigmaTheta = sqrt(2) * m_sigmaU / ((z1-z0)*(1 + pow((x1-x0)/(z1-z0),2.0)));
+  G4double sigmaTheta = sqrt(2) * sigmaEllipsis / ((z1-z0)*(1 + pow((x1-x0)/(z1-z0),2.0)));
 
-  // for (int i = 0; i < 5; i++)
-  //   m_step[i] = 0.1*m_parameter[i];
   m_step[0] = 0.1*m_parameter[0];
   m_step[1] = m_sigmaV;
   m_step[2] = sigmaPhi;
-  m_step[3] = m_sigmaU;
+  //  m_step[3] = m_sigmaU;
+  m_step[3] = sigmaEllipsis;
   m_step[4] = sigmaTheta;
 
   for (int i = 0; i < 5; i++) {
@@ -222,7 +224,7 @@ G4int RES_TrackFitter::DoMinuitFit(G4int npar)
   arglist[0] = 500;
   arglist[1] = 1.;
   gMinuit->mnexcm("SIMPLEX", arglist, 2, ierflg);
-  // gMinuit->mnexcm("MINOS", arglist, 2, ierflg);
+  // gMinuit->mnexcm("MIGRAD", arglist, 2, ierflg);
 
   // // Print results
   // Double_t amin,edm,errdef;
@@ -261,8 +263,6 @@ G4double RES_TrackFitter::Chi2()
       
   gun->SetParticlePosition(position);
   gun->SetParticleMomentumDirection(direction);
-  // gun->SetParticlePosition(G4ThreeVector(0,0,500));
-  // gun->SetParticleMomentumDirection(G4ThreeVector(0,0,-1));
   gun->SetParticleEnergy(pt/cos(theta));
   runManager->BeamOn(1);
 
@@ -291,4 +291,36 @@ G4double RES_TrackFitter::Chi2()
   chi2 /= pow(m_sigmaU*m_sigmaV, 2.);
     
   return chi2;
+}
+
+void RES_TrackFitter::ScanChi2Function(G4String filename)
+{
+  SetSpatialResolutions();
+  SmearHits();
+  CalculateStartParameters();
+
+  DoBlobelFit(3);
+
+  std::ofstream file(filename);
+  if (!file.is_open()) {
+    G4cerr << "Error opening file" << G4endl;
+    return;
+  }
+
+  G4double nSteps = 180.;
+  G4double x0 = 0.*cm;
+  G4double x1 = 4.*cm;
+  G4double theta0 = -10.*M_PI/180.;
+  G4double theta1 =  10.*M_PI/180.;
+
+  file << nSteps << "\t" << x0 << "\t" << x1 << "\t" << theta0 << "\t" << theta1 <<std::endl;
+
+  for (m_parameter[3] = x0; m_parameter[3] <= x1; m_parameter[3] += (x1-x0)/nSteps) {
+    for (m_parameter[4] = theta0; m_parameter[4] <= theta1; m_parameter[4] += (theta1 - theta0)/nSteps) {
+      G4double chi2 = Chi2();
+      file << m_parameter[3] << "\t" << m_parameter[4] << "\t" << chi2 << std::endl;;
+    }
+  }
+
+  file.close();
 }

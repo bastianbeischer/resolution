@@ -31,14 +31,15 @@ int main(int argc, char** argv)
   RES_FieldManager* fieldManager = new RES_FieldManager();
   G4TransportationManager::GetTransportationManager()->SetFieldManager(fieldManager);
 
+  // User interface
+  if(argc==1){ //Interactive mode	
+
 #ifdef G4VIS_USE
   // visualization manager
   G4VisManager* visManager = new G4VisExecutive;
   visManager->Initialize();
 #endif
 
-  // User interface
-  if(argc==1){ //Interactive mode	
     G4UIsession* session = new G4UIterminal(new G4UItcsh);
     session->SessionStart(); 
     delete session;

@@ -61,6 +61,24 @@ void RES_RunManager::StartReconstructionRun()
   }
 }
 
+void RES_RunManager::ScanChi2Function(G4String filename)
+{
+  m_dataHandler->Initialize();
+  SetActionsForReconstruction();
+
+  int Nevents = m_dataHandler->GetNumberOfGeneratedEvents();
+  for (int i = 0; i < Nevents; i++) {
+
+    if( (i > 0) && (i % 100 == 0) )
+      G4cout << ">>> Event " << i << G4endl;
+
+    m_dataHandler->LoadGeneratedEntry(i);
+    RES_Event genEvent = m_dataHandler->GetCurrentEvent();
+    m_trackFitter->SetCurrentGenEvent(genEvent);
+    m_trackFitter->ScanChi2Function(filename);
+  }
+}
+
 void RES_RunManager::SetActionsForGeneration()
 {
   SetUserAction(m_eventActionGen);
