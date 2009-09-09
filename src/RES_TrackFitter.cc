@@ -26,7 +26,7 @@ void MinuitChi2Wrapper(int& npar, double* /*gin*/, double& f, double* par, int /
   for (int i = 0; i < npar; i++)
     fitter->m_parameter[i] = par[i];
 
-  double chi2 = fitter->Chi2();
+  double chi2 = fitter->Chi2InModuleFrame();
 
   f = chi2;
 }
@@ -117,8 +117,8 @@ void RES_TrackFitter::SmearHits()
     G4RotationMatrix forwardRotation(angle, 0., 0.);
     G4RotationMatrix backwardRotation(-angle, 0., 0.);
     hit = forwardRotation*hit;
-    //hit.setX(CLHEP::RandGauss::shoot(hit.x(), m_sigmaU));
-    hit.setX(CLHEP::RandGauss::shoot(hit.x(), 0.));
+    //    hit.setX(CLHEP::RandFlat::shoot(-moduleLength/2.,moduleLength/2.));
+    hit.setX(0.);
     hit.setY(CLHEP::RandGauss::shoot(hit.y(), m_sigmaV));
     hit.setZ(CLHEP::RandGauss::shoot(hit.z(), m_sigmaZ));
     hit = backwardRotation*hit;
@@ -133,13 +133,12 @@ void RES_TrackFitter::CalculateStartParameters()
   // G4double theta =   (m_smearedHits[nHits-1].y() - m_smearedHits[nHits-2].y()) / (m_smearedHits[nHits-1].z() - m_smearedHits[nHits-2].z())
   //                  - (m_smearedHits[1].y()       - m_smearedHits[0].y())       / (m_smearedHits[1].z()       - m_smearedHits[0].z());
   // G4double L = sqrt(pow(m_smearedHits[nHits-1].y() - m_smearedHits[0].y(),2.) + pow(m_smearedHits[nHits-1].z() - m_smearedHits[0].z(), 2.))/m;
-  G4double theta =   (m_smearedHits[7].y() - m_smearedHits[4].y()) / (m_smearedHits[7].z() - m_smearedHits[4].z())
-                   - (m_smearedHits[3].y() - m_smearedHits[0].y()) / (m_smearedHits[3].z() - m_smearedHits[0].z());
+  G4double theta = fabs((m_smearedHits[7].y() - m_smearedHits[4].y()) / (m_smearedHits[7].z() - m_smearedHits[4].z())
+                        - (m_smearedHits[3].y() - m_smearedHits[0].y()) / (m_smearedHits[3].z() - m_smearedHits[0].z()));
   G4double L = sqrt(pow(m_smearedHits[4].y() - m_smearedHits[3].y(),2.) + pow(m_smearedHits[4].z() - m_smearedHits[3].z(), 2.))/m;
   G4double B = 0.3;
-  // G4double pStart = 0.3 * B * L / theta * GeV;
-  G4double pStart = m_currentGenEvent.GetMomentum();
-  
+  G4double pStart = 0.3 * B * L / theta * GeV;
+ 
   G4double x0 = m_smearedHits[0].x();
   G4double x1 = m_smearedHits[1].x();
   G4double y0 = m_smearedHits[0].y();
@@ -194,7 +193,7 @@ G4int RES_TrackFitter::DoBlobelFit(G4int npar)
 
   while( conv <= 0 ){
     ++iter;
-    chi2 = Chi2();
+    chi2 = Chi2InModuleFrame();
     DVALLEY(chi2,m_parameter,conv);
   }
 
@@ -233,7 +232,7 @@ G4int RES_TrackFitter::DoMinuitFit(G4int npar)
   // gMinuit->mnprin(3,amin);
 
   // in this step a new rec event will be created with (hopefully) identical properties than the result of the minimization. this should be done properly in the future...
-  G4double chi2 = Chi2();
+  G4double chi2 = Chi2InModuleFrame();
   G4int nHits = m_currentGenEvent.GetNbOfHits();
   G4double dof = nHits - npar;
   m_currentRecEvent.SetChi2OverDof(chi2/dof);
@@ -241,7 +240,7 @@ G4int RES_TrackFitter::DoMinuitFit(G4int npar)
   return 1;
 }
 
-G4double RES_TrackFitter::Chi2()
+G4double RES_TrackFitter::Chi2InDetFrame()
 {
   RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
 
@@ -268,7 +267,6 @@ G4double RES_TrackFitter::Chi2()
 
   G4int nHits = m_currentGenEvent.GetNbOfHits();
   G4int nRecHits = m_currentRecEvent.GetNbOfHits();
-  //assert(nHits == nRecHits);
   if (nHits != nRecHits) {
     chi2 = DBL_MAX;
     return chi2;
@@ -293,13 +291,97 @@ G4double RES_TrackFitter::Chi2()
   return chi2;
 }
 
-void RES_TrackFitter::ScanChi2Function(G4String filename)
+G4double RES_TrackFitter::Chi2InModuleFrame()
+{
+  RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
+
+  G4RunManager* runManager = G4RunManager::GetRunManager();
+  const RES_PrimaryGeneratorAction* genAction = (RES_PrimaryGeneratorAction*) runManager->GetUserPrimaryGeneratorAction();
+  G4ParticleGun* gun = genAction->GetParticleGun();
+
+  G4double chi2 = 0.;
+    
+  double pt    = m_parameter[0];
+  double y0    = m_parameter[1];
+  double phi   = m_parameter[2];
+  double x0    = m_parameter[3];
+  double theta = m_parameter[4];
+  
+  G4ThreeVector direction(sin(M_PI - theta), cos(M_PI - theta)*sin(phi), cos(M_PI - theta)*cos(phi));
+  G4ThreeVector position(x0, y0, m_smearedHits[0].z());
+  position -= 1.*cm * direction;
+      
+  gun->SetParticlePosition(position);
+  gun->SetParticleMomentumDirection(direction);
+  gun->SetParticleEnergy(pt/cos(theta));
+  runManager->BeamOn(1);
+
+  G4int nHits = m_currentGenEvent.GetNbOfHits();
+  G4int nRecHits = m_currentRecEvent.GetNbOfHits();
+  if (nHits != nRecHits) {
+    chi2 = DBL_MAX;
+    return chi2;
+  }
+
+  for( G4int i = 0 ; i < nHits ; i++ ) {
+    G4int iModule = m_currentRecEvent.GetModuleID(i);
+    G4double angle = det->GetModuleAngle(iModule);
+    G4RotationMatrix forwardRotation(angle, 0, 0);
+    G4RotationMatrix backwardRotation(-angle, 0, 0);
+    G4ThreeVector hit(m_currentRecEvent.GetHitPosition(i).x(),m_currentRecEvent.GetHitPosition(i).y(),m_currentRecEvent.GetHitPosition(i).z());
+
+    hit = forwardRotation*hit;
+    m_smearedHits[i] = forwardRotation*m_smearedHits[i];
+    
+    G4double dv = m_smearedHits[i].y() - hit.y();
+    chi2 += pow(dv/m_sigmaV,2.);
+
+    m_smearedHits[i] = backwardRotation*m_smearedHits[i];
+  }
+    
+  return chi2;
+}
+
+void RES_TrackFitter::ScanChi2Function(G4int i, G4int j, G4String filename)
 {
   SetSpatialResolutions();
   SmearHits();
-  CalculateStartParameters();
+  
+  G4double p  = m_currentGenEvent.GetMomentum();
+  G4double x0 = m_currentGenEvent.GetHitPosition(0).x();
+  G4double x1 = m_currentGenEvent.GetHitPosition(1).x();
+  G4double y0 = m_currentGenEvent.GetHitPosition(0).y();
+  G4double y1 = m_currentGenEvent.GetHitPosition(1).y();
+  G4double z0 = m_currentGenEvent.GetHitPosition(0).z();
+  G4double z1 = m_currentGenEvent.GetHitPosition(1).z();
 
-  DoBlobelFit(3);
+  m_parameter[0] = p;
+  m_parameter[1] = y0;
+  m_parameter[2] = atan((y1-y0)/(z1-z0));
+  m_parameter[3] = x0;
+  m_parameter[4] = atan((x1-x0)/(z1-z0));
+
+  m_lowerBound[0] = 0.2*GeV;        m_upperBound[0] = 1.8*GeV;
+  m_lowerBound[1] = 1.5*cm;         m_upperBound[1] = 2.5*cm;
+  m_lowerBound[2] = -1.*M_PI/180.;  m_upperBound[2] = 1.*M_PI/180.;
+  m_lowerBound[3] = 0.0*cm;         m_upperBound[3] = 4.0*cm;
+  m_lowerBound[4] = -10.*M_PI/180.; m_upperBound[4] = 10.*M_PI/180.;
+
+  G4double nSteps = 200.;
+  for (int k = 0; k < 5; k++)
+    m_step[k] = (m_upperBound[k] - m_lowerBound[k]) / nSteps;
+
+  if (m_verbose > 0) {
+    G4cout << "---------------------------------------------" << G4endl;
+    G4cout << " Scanning chi2 around the following fixed values:" << G4endl;
+    for (int k = 0; k < 5; k++) {
+      if (k != i && k != j)
+        G4cout << "  m_parameter["<<k<<"] = " << m_parameter[k] << G4endl;
+    }
+    G4cout << " Varying parameters " << i << " and " << j << ":" << G4endl;    
+    G4cout << "  " << i <<" --> from " << m_lowerBound[i] << " to " << m_upperBound[i] << " with step size: " << m_step[i] << G4endl;
+    G4cout << "  " << j <<" --> from " << m_lowerBound[j] << " to " << m_upperBound[j] << " with step size: " << m_step[j] << G4endl;
+  }
 
   std::ofstream file(filename);
   if (!file.is_open()) {
@@ -307,19 +389,17 @@ void RES_TrackFitter::ScanChi2Function(G4String filename)
     return;
   }
 
-  G4double nSteps = 180.;
-  G4double x0 = 0.*cm;
-  G4double x1 = 4.*cm;
-  G4double theta0 = -10.*M_PI/180.;
-  G4double theta1 =  10.*M_PI/180.;
+  file << i << "\t" << j << "\t" << nSteps << "\t" << m_lowerBound[i] << "\t" << m_upperBound[i] << "\t" << m_lowerBound[j] << "\t" << m_upperBound[j] << std::endl;
 
-  file << nSteps << "\t" << x0 << "\t" << x1 << "\t" << theta0 << "\t" << theta1 <<std::endl;
-
-  for (m_parameter[3] = x0; m_parameter[3] <= x1; m_parameter[3] += (x1-x0)/nSteps) {
-    for (m_parameter[4] = theta0; m_parameter[4] <= theta1; m_parameter[4] += (theta1 - theta0)/nSteps) {
-      G4double chi2 = Chi2();
-      file << m_parameter[3] << "\t" << m_parameter[4] << "\t" << chi2 << std::endl;;
+  m_parameter[i] = m_lowerBound[i];
+  for (int ctr1 = 0; ctr1 <= nSteps; ctr1++) {
+    m_parameter[j] = m_lowerBound[j];
+    for (int ctr2 = 0; ctr2 <= nSteps; ctr2++) {
+      G4double chi2 = Chi2InModuleFrame();
+      file << m_parameter[i] << "\t" << m_parameter[j] << "\t" << chi2 << std::endl;;
+      m_parameter[j] += m_step[j];
     }
+    m_parameter[i] += m_step[i];
   }
 
   file.close();

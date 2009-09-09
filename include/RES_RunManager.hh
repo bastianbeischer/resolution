@@ -24,7 +24,7 @@ public:
 
   void StartGenerationRun(G4int nEvents);
   void StartReconstructionRun();
-  void ScanChi2Function(G4String filename);
+  void ScanChi2Function(G4int iPar, G4int jPar, G4String filename);
 
 private:
   void SetActionsForGeneration();

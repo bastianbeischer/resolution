@@ -61,7 +61,7 @@ void RES_RunManager::StartReconstructionRun()
   }
 }
 
-void RES_RunManager::ScanChi2Function(G4String filename)
+void RES_RunManager::ScanChi2Function(G4int iPar, G4int jPar, G4String filename)
 {
   m_dataHandler->Initialize();
   SetActionsForReconstruction();
@@ -75,7 +75,7 @@ void RES_RunManager::ScanChi2Function(G4String filename)
     m_dataHandler->LoadGeneratedEntry(i);
     RES_Event genEvent = m_dataHandler->GetCurrentEvent();
     m_trackFitter->SetCurrentGenEvent(genEvent);
-    m_trackFitter->ScanChi2Function(filename);
+    m_trackFitter->ScanChi2Function(iPar,jPar,filename);
   }
 }
 

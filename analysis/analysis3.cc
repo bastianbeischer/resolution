@@ -27,9 +27,13 @@ int main(int argc, char** argv) {
   myStyle.cd();
 
 
+  int i,j;
   int n = 0;
   double x0,x1,theta0,theta1;
-  infile >> n >> x0 >> x1 >> theta0 >> theta1;
+
+  infile >> i >> j >> n >> x0 >> x1 >> theta0 >> theta1;
+
+  std::string axisLabels[5] = {"p / GeV", "y_{0} / mm", "#phi / rad", " x_{0} / mm", "#theta / rad"};
 
   TH2D hist("hist","#chi^{2} distribution after fitting in bending plane", n+1, x0 - (x1-x0)/(2.*n), x1 + (x1-x0)/(2.*n), n+1, theta0 - (theta1-theta0)/(2.*n),theta1 + (theta1-theta0)/(2.*n));
   for (int i = 0; i <= n; i++) {
@@ -48,8 +52,8 @@ int main(int argc, char** argv) {
   can.SetRightMargin(0.15);
   hist.Draw("cont4 z");
   hist.SetContour(99);
-  hist.GetXaxis()->SetTitle("x [cm]");
-  hist.GetYaxis()->SetTitle("#theta [rad]");
+  hist.GetXaxis()->SetTitle(axisLabels[i].c_str());
+  hist.GetYaxis()->SetTitle(axisLabels[j].c_str());
   hist.GetZaxis()->SetTitle("#chi^{2}");
 
 

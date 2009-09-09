@@ -29,7 +29,7 @@ public:
 
   RES_Event Fit();
 
-  void ScanChi2Function(G4String filename);
+  void ScanChi2Function(G4int i, G4int j, G4String filename);
 
 private:
   RES_TrackFitter();
@@ -39,7 +39,8 @@ private:
   void     CalculateStartParameters();
   G4int    DoBlobelFit(G4int npar);
   G4int    DoMinuitFit(G4int npar);
-  G4double Chi2();
+  G4double Chi2InDetFrame();
+  G4double Chi2InModuleFrame();
 
 private:
   static RES_TrackFitter* m_instance;

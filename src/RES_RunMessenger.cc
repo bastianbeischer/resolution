@@ -59,6 +59,9 @@ void RES_RunMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
     m_manager->StartReconstructionRun();
   }
   if (command == m_scanChi2FuncCmd) {
-    m_manager->ScanChi2Function(newValue);
+    G4int iPar = m_scanChi2FuncCmd->ConvertToInt(newValue.substr(0,1).c_str());
+    G4int jPar = m_scanChi2FuncCmd->ConvertToInt(newValue.substr(2,3).c_str());
+    G4String filename = newValue.substr(4).c_str();
+    m_manager->ScanChi2Function(iPar, jPar, filename);
   }
 }
