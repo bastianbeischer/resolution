@@ -5,8 +5,8 @@ G4EXLIB := true
 #CPPVERBOSE := 1
 #CPPFLAGS += -Wno-unused-result
 
-CPPFLAGS += -I$(ROOTSYS)/include
-EXTRALIBS += $(shell root-config --libs) -lMinuit -lMinuit2
+CPPFLAGS += -I$(ROOTSYS)/include -I$(MATPACK)/include
+EXTRALIBS += $(shell root-config --libs) -lMinuit -lMinuit2 $(MATPACK)/matpack.a
 
 CPPFLAGS += -g
 

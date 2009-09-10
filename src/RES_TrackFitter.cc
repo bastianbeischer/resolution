@@ -16,6 +16,7 @@
 #include "globals.hh"
 
 #include "TMinuit.h"
+#include "matpack.h"
 
 RES_TrackFitter* RES_TrackFitter::m_instance = 0;
 
@@ -103,6 +104,7 @@ void RES_TrackFitter::SmearHits()
   delete[] m_smearedHits;
   m_smearedHits = new G4ThreeVector[nHits];
 
+  //  CLHEP::HepRandom::setTheSeed(11219);
   for (G4int i = 0; i < nHits; i++) {
     G4int iModule = m_currentGenEvent.GetModuleID(i);
     G4double angle = det->GetModuleAngle(iModule);
@@ -117,6 +119,7 @@ void RES_TrackFitter::SmearHits()
     G4RotationMatrix forwardRotation(angle, 0., 0.);
     G4RotationMatrix backwardRotation(-angle, 0., 0.);
     hit = forwardRotation*hit;
+
     //    hit.setX(CLHEP::RandFlat::shoot(-moduleLength/2.,moduleLength/2.));
     hit.setX(0.);
     hit.setY(CLHEP::RandGauss::shoot(hit.y(), m_sigmaV));
@@ -129,38 +132,78 @@ void RES_TrackFitter::SmearHits()
 
 void RES_TrackFitter::CalculateStartParameters()
 {
-  // G4int nHits = m_currentGenEvent.GetNbOfHits();
-  // G4double theta =   (m_smearedHits[nHits-1].y() - m_smearedHits[nHits-2].y()) / (m_smearedHits[nHits-1].z() - m_smearedHits[nHits-2].z())
-  //                  - (m_smearedHits[1].y()       - m_smearedHits[0].y())       / (m_smearedHits[1].z()       - m_smearedHits[0].z());
-  // G4double L = sqrt(pow(m_smearedHits[nHits-1].y() - m_smearedHits[0].y(),2.) + pow(m_smearedHits[nHits-1].z() - m_smearedHits[0].z(), 2.))/m;
-  G4double theta = fabs((m_smearedHits[7].y() - m_smearedHits[4].y()) / (m_smearedHits[7].z() - m_smearedHits[4].z())
-                        - (m_smearedHits[3].y() - m_smearedHits[0].y()) / (m_smearedHits[3].z() - m_smearedHits[0].z()));
-  G4double L = sqrt(pow(m_smearedHits[4].y() - m_smearedHits[3].y(),2.) + pow(m_smearedHits[4].z() - m_smearedHits[3].z(), 2.))/m;
+  G4double dx_over_dz, dy_over_dz;
+  G4double x[4], y[4], z[4], k[4], l[4];
+  G4double f[4][3], alpha[4][2];
+
+  for (int i = 0; i < 4; i++) {
+    RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
+
+    G4int iHit = i;
+    G4int iModule = m_currentGenEvent.GetModuleID(iHit);
+    G4double angle = det->GetModuleAngle(iModule);
+    alpha[i][0] = cos(angle);
+    alpha[i][1] = sin(angle);
+    f[i][0] = m_smearedHits[iHit].x();
+    f[i][1] = m_smearedHits[iHit].y();
+    f[i][2] = m_smearedHits[iHit].z();
+    k[i] = f[i][2] - f[0][2];
+  }
+
+  MATPACK::Matrix A(0,7,0,7);
+  for (int i = 0; i < 8; i++)
+    for (int j = 0; j < 8; j++)
+      A(i,j) = 0.;
+
+  for (int i = 0; i < 8; i++) {
+    A(i,i%2)   = 1.;
+    A(i,i%2+2) = k[i/2];
+    A(i,4+i/2) = -alpha[i/2][i%2];
+  }
+
+  MATPACK::Vector b(0,7);
+  for (int i = 0; i < 8; i++)
+    b(i) = f[i/2][i%2];
+
+  MATPACK::SolveLinear(A,b);
+
+  dx_over_dz = b(2);
+  dy_over_dz = b(3);
+  for (int i = 0; i < 4; i++) {
+    l[i] = b(i+4);
+    x[i] = f[i][0] + l[i] * alpha[i][0];
+    y[i] = f[i][1] + l[i] * alpha[i][1];
+    z[i] = f[i][2];
+  }
+
+  // G4cout << "straight line fit:" << G4endl;
+  // for (int i = 0; i < 4; i++) {
+  //   G4cout << "i: " << i << " x: " << x[i] << " y: " << y[i] << " z: " << z[i] << G4endl;
+  // }
+
+  G4double deltaTheta = fabs(  (m_smearedHits[7].y()-m_smearedHits[4].y())/(m_smearedHits[7].z()-m_smearedHits[4].z())
+                             - (m_smearedHits[3].y()-m_smearedHits[0].y())/(m_smearedHits[3].z()-m_smearedHits[0].z()));
   G4double B = 0.3;
-  G4double pStart = 0.3 * B * L / theta * GeV;
- 
-  G4double x0 = m_smearedHits[0].x();
-  G4double x1 = m_smearedHits[1].x();
-  G4double y0 = m_smearedHits[0].y();
-  G4double y1 = m_smearedHits[1].y();
-  G4double z0 = m_smearedHits[0].z();
-  G4double z1 = m_smearedHits[1].z();
+  G4double L = sqrt(pow(m_smearedHits[4].y()-m_smearedHits[3].y(),2.) + pow(m_smearedHits[4].z()-m_smearedHits[3].z(),2.))/m;
+  G4double p = 0.3*B*L/deltaTheta*GeV;
+  //  G4double p = m_currentGenEvent.GetMomentum();
 
-  m_parameter[0] = pStart;
-  m_parameter[1] = y0;
-  m_parameter[2] = atan((y1-y0)/(z1-z0));
-  m_parameter[3] = x0;
-  m_parameter[4] = atan((x1-x0)/(z1-z0));
+  G4double phi = atan(dy_over_dz);
+  G4double theta = atan(-dx_over_dz*cos(phi));
 
-  G4double sigmaEllipsis = 1.0*mm;
-  G4double sigmaPhi = sqrt(2) * m_sigmaV / ((z1-z0)*(1 + pow((y1-y0)/(z1-z0),2.0)));
-  //  G4double sigmaTheta = sqrt(2) * m_sigmaU / ((z1-z0)*(1 + pow((x1-x0)/(z1-z0),2.0)));
-  G4double sigmaTheta = sqrt(2) * sigmaEllipsis / ((z1-z0)*(1 + pow((x1-x0)/(z1-z0),2.0)));
+  m_parameter[0] = p;
+  m_parameter[1] = y[0];
+  m_parameter[2] = phi;
+  m_parameter[3] = x[0];
+  m_parameter[4] = theta;
 
-  m_step[0] = 0.1*m_parameter[0];
+  G4double sigmaEllipsis = 5.*mm;
+  G4double sigmaPhi   = sqrt(2) * m_sigmaV      / ((z[1]-z[0])*(1 + pow((y[1]-y[0])/(z[1]-z[0]),2.0)));
+  G4double sigmaTheta = sqrt(2) * sigmaEllipsis / ((z[1]-z[0])*(1 + pow((x[1]-x[0])/(z[1]-z[0]),2.0)));
+
+  m_step[0] = 0.2*p;
   m_step[1] = m_sigmaV;
   m_step[2] = sigmaPhi;
-  //  m_step[3] = m_sigmaU;
   m_step[3] = sigmaEllipsis;
   m_step[4] = sigmaTheta;
 
@@ -256,7 +299,7 @@ G4double RES_TrackFitter::Chi2InDetFrame()
   double x0    = m_parameter[3];
   double theta = m_parameter[4];
   
-  G4ThreeVector direction(sin(M_PI - theta), cos(M_PI - theta)*sin(phi), cos(M_PI - theta)*cos(phi));
+  G4ThreeVector direction(sin(theta), -cos(theta)*sin(phi), -cos(theta)*cos(phi));
   G4ThreeVector position(x0, y0, m_smearedHits[0].z());
   position -= 1.*cm * direction;
       
@@ -346,20 +389,21 @@ void RES_TrackFitter::ScanChi2Function(G4int i, G4int j, G4String filename)
 {
   SetSpatialResolutions();
   SmearHits();
+  CalculateStartParameters();
   
-  G4double p  = m_currentGenEvent.GetMomentum();
-  G4double x0 = m_currentGenEvent.GetHitPosition(0).x();
-  G4double x1 = m_currentGenEvent.GetHitPosition(1).x();
-  G4double y0 = m_currentGenEvent.GetHitPosition(0).y();
-  G4double y1 = m_currentGenEvent.GetHitPosition(1).y();
-  G4double z0 = m_currentGenEvent.GetHitPosition(0).z();
-  G4double z1 = m_currentGenEvent.GetHitPosition(1).z();
+  // G4double p  = m_currentGenEvent.GetMomentum();
+  // G4double x0 = m_currentGenEvent.GetHitPosition(0).x();
+  // G4double x1 = m_currentGenEvent.GetHitPosition(1).x();
+  // G4double y0 = m_currentGenEvent.GetHitPosition(0).y();
+  // G4double y1 = m_currentGenEvent.GetHitPosition(1).y();
+  // G4double z0 = m_currentGenEvent.GetHitPosition(0).z();
+  // G4double z1 = m_currentGenEvent.GetHitPosition(1).z();
 
-  m_parameter[0] = p;
-  m_parameter[1] = y0;
-  m_parameter[2] = atan((y1-y0)/(z1-z0));
-  m_parameter[3] = x0;
-  m_parameter[4] = atan((x1-x0)/(z1-z0));
+  // m_parameter[0] = p;
+  // m_parameter[1] = y0;
+  // m_parameter[2] = atan((y1-y0)/(z1-z0));
+  // m_parameter[3] = x0;
+  // m_parameter[4] = atan((x1-x0)/(z1-z0));
 
   m_lowerBound[0] = 0.2*GeV;        m_upperBound[0] = 1.8*GeV;
   m_lowerBound[1] = 1.5*cm;         m_upperBound[1] = 2.5*cm;
