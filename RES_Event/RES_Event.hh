@@ -24,14 +24,16 @@ public:
   inline void SetID(int ID) {m_ID = ID;}
   inline void SetEventType(EventType type) {m_eventType = type;}
   inline void SetMomentum(double momentum) {m_momentum = momentum;}
-  inline void SetChi2OverDof(double chi2_over_dof) {m_chi2_over_dof = chi2_over_dof;}
+  inline void SetChi2(double chi2) {m_chi2 = chi2;}
+  inline void SetDof(int dof) {m_dof = dof;}
 
   inline int          GetID()                        {return m_ID;}
   inline int          GetModuleID(unsigned int i)    {assert(i <m_moduleID.size()); return m_moduleID.at(i);}
   inline int          GetFiberID(unsigned int i)     {assert(i <m_fiberID.size()); return m_fiberID.at(i);}
   inline EventType    GetEventType()                 {return m_eventType;}
   inline double       GetMomentum()                  {return m_momentum;}
-  inline double       GetChi2OverDof()               {return m_chi2_over_dof;}
+  inline double       GetChi2()                      {return m_chi2;}
+  inline int          GetDof()                       {return m_dof;}
   inline unsigned int GetNbOfHits()                  {return m_hits.size();}
   inline TVector3     GetHitPosition(unsigned int i) {assert(i < m_hits.size()); return m_hits.at(i);}
 
@@ -44,7 +46,8 @@ private:
   std::vector<TVector3> m_hits;
   double                m_momentum;
   EventType             m_eventType;
-  double                m_chi2_over_dof;
+  double                m_chi2;
+  int                   m_dof;
   
   ClassDef( RES_Event, 1 );
 

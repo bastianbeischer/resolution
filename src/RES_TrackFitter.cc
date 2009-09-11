@@ -68,6 +68,7 @@ RES_Event RES_TrackFitter::Fit()
   SetSpatialResolutions();
   SmearHits();
   CalculateStartParameters();
+  //SetStartParametesToGeneratedParticle();
 
   G4int conv = -1;
 
@@ -104,7 +105,7 @@ void RES_TrackFitter::SmearHits()
   delete[] m_smearedHits;
   m_smearedHits = new G4ThreeVector[nHits];
 
-  //  CLHEP::HepRandom::setTheSeed(11219);
+  CLHEP::HepRandom::setTheSeed(1234);
   for (G4int i = 0; i < nHits; i++) {
     G4int iModule = m_currentGenEvent.GetModuleID(i);
     G4double angle = det->GetModuleAngle(iModule);
@@ -120,6 +121,8 @@ void RES_TrackFitter::SmearHits()
     G4RotationMatrix backwardRotation(-angle, 0., 0.);
     hit = forwardRotation*hit;
 
+    G4cout << "original hit: " << i << " --> " << hit << G4endl;
+
     //    hit.setX(CLHEP::RandFlat::shoot(-moduleLength/2.,moduleLength/2.));
     hit.setX(0.);
     hit.setY(CLHEP::RandGauss::shoot(hit.y(), m_sigmaV));
@@ -130,56 +133,119 @@ void RES_TrackFitter::SmearHits()
   }
 }
 
+void RES_TrackFitter::SetStartParametesToGeneratedParticle()
+{
+  G4double p  = m_currentGenEvent.GetMomentum();
+  G4double x0 = m_currentGenEvent.GetHitPosition(0).x();
+  G4double x1 = m_currentGenEvent.GetHitPosition(1).x();
+  G4double y0 = m_currentGenEvent.GetHitPosition(0).y();
+  G4double y1 = m_currentGenEvent.GetHitPosition(1).y();
+  G4double z0 = m_currentGenEvent.GetHitPosition(0).z();
+  G4double z1 = m_currentGenEvent.GetHitPosition(1).z();
+
+  m_parameter[0] = p;
+  m_parameter[1] = y0;
+  m_parameter[2] = atan((y1-y0)/(z1-z0));
+  m_parameter[3] = x0;
+  m_parameter[4] = atan((x1-x0)/(z1-z0));
+
+  for (int i = 0; i < 5; i++)
+    m_step[i] = 0.1*m_parameter[i];
+
+}
+
 void RES_TrackFitter::CalculateStartParameters()
 {
+  G4int nHits = m_currentGenEvent.GetNbOfHits();
+
   G4double dx_over_dz, dy_over_dz;
-  G4double x[4], y[4], z[4], k[4], l[4];
-  G4double f[4][3], alpha[4][2];
+  G4double* x = new G4double[nHits];
+  G4double* y = new G4double[nHits];
+  G4double* z = new G4double[nHits];
+  G4double* k = new G4double[nHits];
+  G4double* l = new G4double[nHits];
+  G4double** f = new G4double*[nHits];
+  for (int i = 0; i < nHits; i++)
+    f[i] = new G4double[3];
+  G4double** alpha = new G4double*[nHits];
+  for (int i = 0; i < nHits; i++)
+    alpha[i] = new G4double[2];
 
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < nHits; i++) {
     RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
-
-    G4int iHit = i;
-    G4int iModule = m_currentGenEvent.GetModuleID(iHit);
+    G4int iModule = m_currentGenEvent.GetModuleID(i);
     G4double angle = det->GetModuleAngle(iModule);
     alpha[i][0] = cos(angle);
     alpha[i][1] = sin(angle);
-    f[i][0] = m_smearedHits[iHit].x();
-    f[i][1] = m_smearedHits[iHit].y();
-    f[i][2] = m_smearedHits[iHit].z();
+    f[i][0] = m_smearedHits[i].x();
+    f[i][1] = m_smearedHits[i].y();
+    f[i][2] = m_smearedHits[i].z();
     k[i] = f[i][2] - f[0][2];
   }
 
-  MATPACK::Matrix A(0,7,0,7);
-  for (int i = 0; i < 8; i++)
-    for (int j = 0; j < 8; j++)
+  int nRow = 2*nHits;
+  int nCol = 4+nHits;
+
+  MATPACK::Matrix A(0,nRow-1,0,nCol-1);
+  for (int i = 0; i < nRow; i++)
+    for (int j = 0; j < nCol; j++)
       A(i,j) = 0.;
 
-  for (int i = 0; i < 8; i++) {
+  for (int i = 0; i < nRow; i++) {
     A(i,i%2)   = 1.;
     A(i,i%2+2) = k[i/2];
     A(i,4+i/2) = -alpha[i/2][i%2];
   }
 
-  MATPACK::Vector b(0,7);
-  for (int i = 0; i < 8; i++)
+  MATPACK::Vector b(0,nRow-1);
+  for (int i = 0; i < nRow; i++)
     b(i) = f[i/2][i%2];
 
-  MATPACK::SolveLinear(A,b);
+  MATPACK::Matrix M = A.Transpose() * A;
+  MATPACK::Vector c = A.Transpose() * b;
 
-  dx_over_dz = b(2);
-  dy_over_dz = b(3);
-  for (int i = 0; i < 4; i++) {
-    l[i] = b(i+4);
+  MATPACK::SolveLinear(M,c);
+
+  dx_over_dz = c(2);
+  dy_over_dz = c(3);
+  for (int i = 0; i < nHits; i++) {
+    l[i] = c(i+4);
     x[i] = f[i][0] + l[i] * alpha[i][0];
     y[i] = f[i][1] + l[i] * alpha[i][1];
     z[i] = f[i][2];
   }
 
-  // G4cout << "straight line fit:" << G4endl;
-  // for (int i = 0; i < 4; i++) {
-  //   G4cout << "i: " << i << " x: " << x[i] << " y: " << y[i] << " z: " << z[i] << G4endl;
-  // }
+  G4cout << "straight line fit:" << G4endl;
+  for (int i = 0; i < nHits; i++) {
+    G4cout << "i: " << i << " x: " << x[i] << " y: " << y[i] << " z: " << z[i] << G4endl;
+  }
+
+  G4double phi = atan(dy_over_dz);
+  G4double theta = atan(-dx_over_dz*cos(phi));
+
+  for (G4int i = 0; i < nHits; i++) {
+    RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
+    G4int iModule = m_currentGenEvent.GetModuleID(i);
+    G4double angle = det->GetModuleAngle(iModule);
+
+    G4RotationMatrix forwardRotation(angle, 0., 0.);
+    G4RotationMatrix backwardRotation(-angle, 0., 0.);
+
+    G4double dz = m_smearedHits[i].z() - m_smearedHits[0].z();
+    G4ThreeVector start(x[0],y[0],z[0]);
+    G4ThreeVector direction(sin(theta), -cos(theta)*sin(phi), -cos(theta)*cos(phi));
+    G4double l = dz/direction.z();
+    G4ThreeVector straightLine = start + l*direction;
+
+    m_smearedHits[i] = forwardRotation*m_smearedHits[i];
+    straightLine = forwardRotation*straightLine;
+
+    m_smearedHits[i].setX(straightLine.x());
+
+    G4cout << "restored hit: " << i << " --> " << m_smearedHits[i] << G4endl;
+
+    m_smearedHits[i] = backwardRotation*m_smearedHits[i];
+  }
 
   G4double deltaTheta = fabs(  (m_smearedHits[7].y()-m_smearedHits[4].y())/(m_smearedHits[7].z()-m_smearedHits[4].z())
                              - (m_smearedHits[3].y()-m_smearedHits[0].y())/(m_smearedHits[3].z()-m_smearedHits[0].z()));
@@ -187,9 +253,6 @@ void RES_TrackFitter::CalculateStartParameters()
   G4double L = sqrt(pow(m_smearedHits[4].y()-m_smearedHits[3].y(),2.) + pow(m_smearedHits[4].z()-m_smearedHits[3].z(),2.))/m;
   G4double p = 0.3*B*L/deltaTheta*GeV;
   //  G4double p = m_currentGenEvent.GetMomentum();
-
-  G4double phi = atan(dy_over_dz);
-  G4double theta = atan(-dx_over_dz*cos(phi));
 
   m_parameter[0] = p;
   m_parameter[1] = y[0];
@@ -219,6 +282,17 @@ void RES_TrackFitter::CalculateStartParameters()
       G4cout << "m_parameter["<<i<<"] = " << m_parameter[i] << ", m_step["<<i<<"] = " << m_step[i] << ", m_lowerBound["<<i<<"] = " << m_lowerBound[i] << ", m_upperBound["<<i<<"] = " << m_upperBound[i] << G4endl;
   }
 
+  delete[] x;
+  delete[] y;
+  delete[] z;
+  delete[] k;
+  delete[] l;
+  for(int i = 0; i < nHits; i++)
+    delete[] f[i];
+  delete[] f;
+  for(int i = 0; i < nHits; i++)
+    delete[] alpha[i];
+  delete[] alpha;
 }
 
 G4int RES_TrackFitter::DoBlobelFit(G4int npar)
@@ -242,7 +316,8 @@ G4int RES_TrackFitter::DoBlobelFit(G4int npar)
 
   G4int nHits = m_currentGenEvent.GetNbOfHits();
   G4double dof = nHits - npar;
-  m_currentRecEvent.SetChi2OverDof(chi2/dof);
+  m_currentRecEvent.SetChi2(chi2);
+  m_currentRecEvent.SetDof(dof);
 
   return conv;
 }
@@ -276,9 +351,10 @@ G4int RES_TrackFitter::DoMinuitFit(G4int npar)
 
   // in this step a new rec event will be created with (hopefully) identical properties than the result of the minimization. this should be done properly in the future...
   G4double chi2 = Chi2InModuleFrame();
-  G4int nHits = m_currentGenEvent.GetNbOfHits();
+  G4int nHits = m_currentRecEvent.GetNbOfHits();
   G4double dof = nHits - npar;
-  m_currentRecEvent.SetChi2OverDof(chi2/dof);
+  m_currentRecEvent.SetChi2(chi2);
+  m_currentRecEvent.SetDof(dof);
 
   return 1;
 }
@@ -389,22 +465,10 @@ void RES_TrackFitter::ScanChi2Function(G4int i, G4int j, G4String filename)
 {
   SetSpatialResolutions();
   SmearHits();
-  CalculateStartParameters();
+  //CalculateStartParameters();
+  SetStartParametesToGeneratedParticle();
   
-  // G4double p  = m_currentGenEvent.GetMomentum();
-  // G4double x0 = m_currentGenEvent.GetHitPosition(0).x();
-  // G4double x1 = m_currentGenEvent.GetHitPosition(1).x();
-  // G4double y0 = m_currentGenEvent.GetHitPosition(0).y();
-  // G4double y1 = m_currentGenEvent.GetHitPosition(1).y();
-  // G4double z0 = m_currentGenEvent.GetHitPosition(0).z();
-  // G4double z1 = m_currentGenEvent.GetHitPosition(1).z();
-
-  // m_parameter[0] = p;
-  // m_parameter[1] = y0;
-  // m_parameter[2] = atan((y1-y0)/(z1-z0));
-  // m_parameter[3] = x0;
-  // m_parameter[4] = atan((x1-x0)/(z1-z0));
-
+  // hardcoded at the moment
   m_lowerBound[0] = 0.2*GeV;        m_upperBound[0] = 1.8*GeV;
   m_lowerBound[1] = 1.5*cm;         m_upperBound[1] = 2.5*cm;
   m_lowerBound[2] = -1.*M_PI/180.;  m_upperBound[2] = 1.*M_PI/180.;

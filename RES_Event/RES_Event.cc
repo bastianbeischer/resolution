@@ -9,7 +9,8 @@ RES_Event::RES_Event() :
   m_hits(0),
   m_momentum(0.),
   m_eventType(generated),
-  m_chi2_over_dof(0.)
+  m_chi2(0.),
+  m_dof(0)
 {
 }
 
@@ -24,7 +25,8 @@ RES_Event::RES_Event(const RES_Event& other)
   }
   m_momentum = other.m_momentum;
   m_eventType = other.m_eventType;
-  m_chi2_over_dof = other.m_chi2_over_dof;
+  m_chi2 = other.m_chi2;
+  m_dof = other.m_dof;
 }
 
 RES_Event::~RES_Event()
@@ -42,7 +44,8 @@ const RES_Event& RES_Event::operator=(const RES_Event& right)
   }
   m_momentum = right.m_momentum;
   m_eventType = right.m_eventType;
-  m_chi2_over_dof = right.m_chi2_over_dof;
+  m_chi2 = right.m_chi2;
+  m_dof = right.m_dof;
   return *this;
 }
 

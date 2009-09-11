@@ -36,6 +36,7 @@ private:
 
   void     SetSpatialResolutions();
   void     SmearHits();
+  void     SetStartParametesToGeneratedParticle();
   void     CalculateStartParameters();
   G4int    DoBlobelFit(G4int npar);
   G4int    DoMinuitFit(G4int npar);

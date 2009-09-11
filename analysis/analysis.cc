@@ -44,7 +44,7 @@ int main(int argc, char** argv)
   double genMom = genEvent->GetMomentum()/1000.;
   // double momRes = calculatePrediction(&genMom, 0);
   // TH1D resHist("resHist", "resHist", 100, 1. - 5.*momRes, 1. + 5.*momRes);    
-  TH1D resHist("resHist", "resHist", 100, 0.5, 3.5);    
+  TH1D resHist("resHist", "resHist", 100, 0.5, 1.5);    
   TH1D chi2Hist("chi2Hist", "chi2Hist", 100, 0.0, 10.0);
   for(int i = 0; i < genTree->GetEntries(); i++) {
     genTree->GetEntry(i);
@@ -52,8 +52,12 @@ int main(int argc, char** argv)
     std::cout << "rec mom: " << recEvent->GetMomentum() << "  --> frac: " << genEvent->GetMomentum()/recEvent->GetMomentum() << std::endl;
 
     resHist.Fill(genEvent->GetMomentum()/recEvent->GetMomentum());
-    chi2Hist.Fill(recEvent->GetChi2OverDof());
+    chi2Hist.Fill(recEvent->GetChi2());
   }
+
+  char title[128];
+  sprintf(title, "#chi^{2} Distribution (dof = %d)",recEvent->GetDof());
+  chi2Hist.SetTitle(title);
 
   TCanvas canvas("canvas", "canvas", 1024, 768);
   canvas.Draw();
