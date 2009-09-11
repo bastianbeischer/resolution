@@ -105,7 +105,7 @@ void RES_TrackFitter::SmearHits()
   delete[] m_smearedHits;
   m_smearedHits = new G4ThreeVector[nHits];
 
-  CLHEP::HepRandom::setTheSeed(1234);
+  // CLHEP::HepRandom::setTheSeed(1234);
   for (G4int i = 0; i < nHits; i++) {
     G4int iModule = m_currentGenEvent.GetModuleID(i);
     G4double angle = det->GetModuleAngle(iModule);
@@ -119,11 +119,10 @@ void RES_TrackFitter::SmearHits()
     // transform from detector reference frame (x,y,z) to module frame (u,v,z), smear the hits, transform back to detector frame
     G4RotationMatrix forwardRotation(angle, 0., 0.);
     G4RotationMatrix backwardRotation(-angle, 0., 0.);
+
+    //    G4cout << "original hit: " << i << " --> " << hit << G4endl;
+
     hit = forwardRotation*hit;
-
-    G4cout << "original hit: " << i << " --> " << hit << G4endl;
-
-    //    hit.setX(CLHEP::RandFlat::shoot(-moduleLength/2.,moduleLength/2.));
     hit.setX(0.);
     hit.setY(CLHEP::RandGauss::shoot(hit.y(), m_sigmaV));
     hit.setZ(CLHEP::RandGauss::shoot(hit.z(), m_sigmaZ));
@@ -131,6 +130,9 @@ void RES_TrackFitter::SmearHits()
 
     m_smearedHits[i] = hit;
   }
+  // for (int i = 0; i < nHits; i++)
+  //   G4cout << "smeared hit: " << i << " --> " << m_smearedHits[i] << G4endl;
+
 }
 
 void RES_TrackFitter::SetStartParametesToGeneratedParticle()
@@ -215,10 +217,10 @@ void RES_TrackFitter::CalculateStartParameters()
     z[i] = f[i][2];
   }
 
-  G4cout << "straight line fit:" << G4endl;
-  for (int i = 0; i < nHits; i++) {
-    G4cout << "i: " << i << " x: " << x[i] << " y: " << y[i] << " z: " << z[i] << G4endl;
-  }
+  // G4cout << "straight line fit:" << G4endl;
+  // for (int i = 0; i < nHits; i++) {
+  //   G4cout << "i: " << i << " x: " << x[i] << " y: " << y[i] << " z: " << z[i] << G4endl;
+  // }
 
   G4double phi = atan(dy_over_dz);
   G4double theta = atan(-dx_over_dz*cos(phi));
@@ -242,9 +244,9 @@ void RES_TrackFitter::CalculateStartParameters()
 
     m_smearedHits[i].setX(straightLine.x());
 
-    G4cout << "restored hit: " << i << " --> " << m_smearedHits[i] << G4endl;
-
     m_smearedHits[i] = backwardRotation*m_smearedHits[i];
+
+    //    G4cout << "restored hit: " << i << " --> " << m_smearedHits[i] << G4endl;
   }
 
   G4double deltaTheta = fabs(  (m_smearedHits[7].y()-m_smearedHits[4].y())/(m_smearedHits[7].z()-m_smearedHits[4].z())
