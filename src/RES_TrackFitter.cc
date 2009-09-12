@@ -120,9 +120,11 @@ void RES_TrackFitter::SmearHits()
     G4RotationMatrix forwardRotation(angle, 0., 0.);
     G4RotationMatrix backwardRotation(-angle, 0., 0.);
 
-    //    G4cout << "original hit: " << i << " --> " << hit << G4endl;
+    if (m_verbose > 0)
+      G4cout << "original hit: " << i << " --> " << hit << G4endl;
 
     hit = forwardRotation*hit;
+    //    hit.setX(CLHEP::RandGauss::shoot(0., m_sigmaU));
     hit.setX(0.);
     hit.setY(CLHEP::RandGauss::shoot(hit.y(), m_sigmaV));
     hit.setZ(CLHEP::RandGauss::shoot(hit.z(), m_sigmaZ));
@@ -130,8 +132,9 @@ void RES_TrackFitter::SmearHits()
 
     m_smearedHits[i] = hit;
   }
-  // for (int i = 0; i < nHits; i++)
-  //   G4cout << "smeared hit: " << i << " --> " << m_smearedHits[i] << G4endl;
+  if (m_verbose >0)
+    for (int i = 0; i < nHits; i++)
+      G4cout << "smeared hit: " << i << " --> " << m_smearedHits[i] << G4endl;
 
 }
 
@@ -158,6 +161,8 @@ void RES_TrackFitter::SetStartParametesToGeneratedParticle()
 
 void RES_TrackFitter::CalculateStartParameters()
 {
+  RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
+
   G4int nHits = m_currentGenEvent.GetNbOfHits();
 
   G4double dx_over_dz, dy_over_dz;
@@ -174,7 +179,6 @@ void RES_TrackFitter::CalculateStartParameters()
     alpha[i] = new G4double[2];
 
   for (int i = 0; i < nHits; i++) {
-    RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
     G4int iModule = m_currentGenEvent.GetModuleID(i);
     G4double angle = det->GetModuleAngle(iModule);
     alpha[i][0] = cos(angle);
@@ -203,8 +207,35 @@ void RES_TrackFitter::CalculateStartParameters()
   for (int i = 0; i < nRow; i++)
     b(i) = f[i/2][i%2];
 
-  MATPACK::Matrix M = A.Transpose() * A;
-  MATPACK::Vector c = A.Transpose() * b;
+  MATPACK::Matrix U(0,nRow-1,0,nRow-1);
+  for (int i = 0; i < nRow; i++)
+    for (int j = 0; j < nRow; j++)
+      U(i,j) = 0.;
+
+  for (int i = 0; i < nHits; i++) {
+
+    G4int iModule = m_currentGenEvent.GetModuleID(i);
+    G4double angle = det->GetModuleAngle(iModule);
+
+    MATPACK::Matrix Rot(0,1,0,1); 
+    Rot(0,0) = cos(angle);
+    Rot(0,1) = -sin(angle);
+    Rot(1,0) = sin(angle);
+    Rot(1,1) = cos(angle);
+    MATPACK::Matrix V_prime(0,1,0,1);
+    V_prime(0,0) = m_sigmaU;
+    V_prime(0,1) = 0.;
+    V_prime(1,0) = 0.;
+    V_prime(1,1) = m_sigmaV;
+    MATPACK::Matrix V = Rot * V_prime * Rot.Transpose();
+    
+    U(2*i,2*i)     = V(0,0);
+    U(2*i,2*i+1)   = V(0,1);
+    U(2*i+1,2*i)   = V(1,0);
+    U(2*i+1,2*i+1) = V(1,1);
+  }
+  MATPACK::Matrix M = A.Transpose() * U.Inverse() * A;
+  MATPACK::Vector c = A.Transpose() * U.Inverse() * b;
 
   MATPACK::SolveLinear(M,c);
 
@@ -217,16 +248,17 @@ void RES_TrackFitter::CalculateStartParameters()
     z[i] = f[i][2];
   }
 
-  // G4cout << "straight line fit:" << G4endl;
-  // for (int i = 0; i < nHits; i++) {
-  //   G4cout << "i: " << i << " x: " << x[i] << " y: " << y[i] << " z: " << z[i] << G4endl;
-  // }
+  if (m_verbose > 0) {
+    G4cout << "straight line fit:" << G4endl;
+    for (int i = 0; i < nHits; i++) {
+      G4cout << "i: " << i << " x: " << x[i] << " y: " << y[i] << " z: " << z[i] << G4endl;
+    }
+  }
 
   G4double phi = atan(dy_over_dz);
   G4double theta = atan(-dx_over_dz*cos(phi));
 
   for (G4int i = 0; i < nHits; i++) {
-    RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
     G4int iModule = m_currentGenEvent.GetModuleID(i);
     G4double angle = det->GetModuleAngle(iModule);
 
@@ -246,7 +278,8 @@ void RES_TrackFitter::CalculateStartParameters()
 
     m_smearedHits[i] = backwardRotation*m_smearedHits[i];
 
-    //    G4cout << "restored hit: " << i << " --> " << m_smearedHits[i] << G4endl;
+    if (m_verbose > 0)
+      G4cout << "restored hit: " << i << " --> " << m_smearedHits[i] << G4endl;
   }
 
   G4double deltaTheta = fabs(  (m_smearedHits[7].y()-m_smearedHits[4].y())/(m_smearedHits[7].z()-m_smearedHits[4].z())
