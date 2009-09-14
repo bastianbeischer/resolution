@@ -266,14 +266,15 @@ void RES_TrackFitter::CalculateStartParameters()
     G4RotationMatrix forwardRotation(angle, 0., 0.);
     G4RotationMatrix backwardRotation(-angle, 0., 0.);
 
-    G4double dz = m_smearedHits[i].z() - m_smearedHits[0].z();
-    G4ThreeVector start(x[0],y[0],z[0]);
-    G4ThreeVector direction(sin(theta), -cos(theta)*sin(phi), -cos(theta)*cos(phi));
-    G4double l = dz/direction.z();
-    G4ThreeVector straightLine = start + l*direction;
+    // G4double dz = m_smearedHits[i].z() - m_smearedHits[0].z();
+    // G4ThreeVector start(x[0],y[0],z[0]);
+    // G4ThreeVector direction(sin(theta), -cos(theta)*sin(phi), -cos(theta)*cos(phi));
+    // G4double l = dz/direction.z();
+    // G4ThreeVector straightLine = start + l*direction;
+    G4ThreeVector straightLine(x[i],y[i],z[i]);
 
     m_smearedHits[i] = forwardRotation*m_smearedHits[i];
-    straightLine = forwardRotation*straightLine;
+    straightLine     = forwardRotation*straightLine;
 
     m_smearedHits[i].setX(straightLine.x());
 
