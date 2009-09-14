@@ -258,6 +258,7 @@ void RES_TrackFitter::CalculateStartParameters()
   G4double phi = atan(dy_over_dz);
   G4double theta = atan(-dx_over_dz*cos(phi));
 
+  // restore u components of hits
   for (G4int i = 0; i < nHits; i++) {
     G4int iModule = m_currentGenEvent.GetModuleID(i);
     G4double angle = det->GetModuleAngle(iModule);
