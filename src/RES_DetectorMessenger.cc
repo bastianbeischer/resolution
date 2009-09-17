@@ -31,11 +31,9 @@ RES_DetectorMessenger::RES_DetectorMessenger(RES_DetectorConstruction* detector)
   m_setModuleRotationCmd->SetParameterName("rotationString", false);
   m_setModuleRotationCmd->AvailableForStates(G4State_PreInit);
 
-  m_setModuleWidthCmd = new G4UIcmdWithADoubleAndUnit("/RES/Det/ModuleWidth", this);
-  m_setModuleWidthCmd->SetGuidance("Set the module Width");
-  m_setModuleWidthCmd->SetParameterName("Width", false);
-  m_setModuleWidthCmd->SetDefaultUnit("cm");
-  m_setModuleWidthCmd->SetUnitCategory("Length");
+  m_setModuleWidthCmd = new G4UIcmdWithAString("/RES/Det/SetModuleWidth", this);
+  m_setModuleWidthCmd->SetGuidance("Set the width for the module");
+  m_setModuleWidthCmd->SetParameterName("widthString", false);
   m_setModuleWidthCmd->AvailableForStates(G4State_PreInit);
 
   m_setModuleLengthCmd = new G4UIcmdWithADoubleAndUnit("/RES/Det/ModuleLength", this);
@@ -84,7 +82,9 @@ void RES_DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
     m_detector->SetModuleAngle(iModule, angle);
   }
   if (command == m_setModuleWidthCmd) {
-    m_detector->SetModuleWidth(m_setModuleWidthCmd->GetNewDoubleValue(newValue));
+    G4int iModule = m_setModuleRotationCmd->ConvertToInt(newValue.substr(0,1).c_str());
+    G4double width = m_setModuleRotationCmd->ConvertToDouble(newValue.substr(2,newValue.length()).c_str()) * cm;
+    m_detector->SetModuleWidth(iModule, width);
   }
   if (command == m_setModuleLengthCmd) {
     m_detector->SetModuleLength(m_setModuleLengthCmd->GetNewDoubleValue(newValue));

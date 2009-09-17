@@ -28,7 +28,7 @@ private:
   
   G4UIcmdWith3VectorAndUnit* m_addModulePlacementCmd;
   G4UIcmdWithAString*        m_setModuleRotationCmd;
-  G4UIcmdWithADoubleAndUnit* m_setModuleWidthCmd;
+  G4UIcmdWithAString*        m_setModuleWidthCmd;
   G4UIcmdWithADoubleAndUnit* m_setModuleLengthCmd;
   G4UIcmdWithADoubleAndUnit* m_setModuleFiberThicknessCmd;
   G4UIcmdWithADoubleAndUnit* m_setModuleGapCmd;

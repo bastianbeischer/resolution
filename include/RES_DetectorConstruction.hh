@@ -34,11 +34,14 @@ public:
   inline void AddModulePlacement(G4ThreeVector where) {
     m_modulePlacements.push_back(where);
     m_moduleAngles.push_back(0);
+    m_moduleWidth.push_back(m_moduleDefaultWidth);
   }
   inline void SetModuleAngle(G4int module, G4double angle) {
     m_moduleAngles[module] = angle;
   }
-  inline void SetModuleWidth(G4double width) {m_moduleWidth = width;}
+  inline void SetModuleWidth(G4int module, G4double width) {
+    m_moduleWidth[module] = width;
+  }
   inline void SetModuleLength(G4double length) {m_moduleLength = length;}
   inline void SetModuleFiberThickness(G4double fiberThickness) {m_moduleFiberThickness = fiberThickness;}
   inline void SetModuleGap(G4double gap) {m_moduleGap = gap;}
@@ -56,31 +59,32 @@ private:
   G4double                        m_world_z;
 
   G4Material*                     m_module_material;
-  G4double                        m_moduleWidth;
+  G4double                        m_moduleDefaultWidth;
   G4double                        m_moduleLength;
   G4double                        m_moduleFiberThickness;
   G4double                        m_moduleGap; 
   G4double                        m_moduleHeight;
 
-  G4int                           m_numberOfModules;
   std::vector<G4ThreeVector>      m_modulePlacements;
   std::vector<G4double>           m_moduleAngles;
+  std::vector<G4double>           m_moduleWidth;
 
   G4Box*                          m_world_solid;
   G4LogicalVolume*                m_world_log;
   G4VPhysicalVolume*              m_world_phys;
   
-  G4Box*                          m_module_solid;
-  G4LogicalVolume*                m_module_log;
+  std::vector<G4Box*>             m_module_solid;
+  std::vector<G4LogicalVolume*>   m_module_log;
   std::vector<G4VPhysicalVolume*> m_module_phys;
   
-  G4Box*                          m_module_fiber_solid;
-  G4LogicalVolume*                m_module_fiber_log;
-  std::vector<G4VPhysicalVolume*> m_module_fiber_phys;
+  std::vector<G4Box*>             m_module_fiber_solid;
+  std::vector<G4LogicalVolume*>   m_module_fiber_log;
+  std::vector<G4VPhysicalVolume*> m_module_fiber_upper_phys;
+  std::vector<G4VPhysicalVolume*> m_module_fiber_lower_phys;
 
-  G4Box*                          m_module_bulk_solid;
-  G4LogicalVolume*                m_module_bulk_log;
-  G4VPhysicalVolume*              m_module_bulk_phys;
+  std::vector<G4Box*>             m_module_bulk_solid;
+  std::vector<G4LogicalVolume*>   m_module_bulk_log;
+  std::vector<G4VPhysicalVolume*> m_module_bulk_phys;
 
 };
 
