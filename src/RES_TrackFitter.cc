@@ -16,7 +16,8 @@
 #include "globals.hh"
 
 #include "TMinuit.h"
-#include "matpack.h"
+#include "TMatrixD.h"
+#include "TVectorD.h"
 
 RES_TrackFitter* RES_TrackFitter::m_instance = 0;
 
@@ -192,7 +193,7 @@ void RES_TrackFitter::CalculateStartParameters()
   int nRow = 2*nHits;
   int nCol = 4+nHits;
 
-  MATPACK::Matrix A(0,nRow-1,0,nCol-1);
+  TMatrixD A(nRow,nCol);
   for (int i = 0; i < nRow; i++)
     for (int j = 0; j < nCol; j++)
       A(i,j) = 0.;
@@ -203,46 +204,51 @@ void RES_TrackFitter::CalculateStartParameters()
     A(i,4+i/2) = -alpha[i/2][i%2];
   }
 
-  MATPACK::Vector b(0,nRow-1);
+  TVectorD b(nRow);
   for (int i = 0; i < nRow; i++)
     b(i) = f[i/2][i%2];
 
-  MATPACK::Matrix U(0,nRow-1,0,nRow-1);
+  TMatrixD U(nRow,nRow);
   for (int i = 0; i < nRow; i++)
     for (int j = 0; j < nRow; j++)
       U(i,j) = 0.;
 
   for (int i = 0; i < nHits; i++) {
-
     G4int iModule = m_currentGenEvent.GetModuleID(i);
     G4double angle = det->GetModuleAngle(iModule);
 
-    MATPACK::Matrix Rot(0,1,0,1); 
+    TMatrixD Rot(2,2); 
     Rot(0,0) = cos(angle);
     Rot(0,1) = -sin(angle);
     Rot(1,0) = sin(angle);
     Rot(1,1) = cos(angle);
-    MATPACK::Matrix V_prime(0,1,0,1);
+    TMatrixD V_prime(2,2);
     V_prime(0,0) = m_sigmaU;
     V_prime(0,1) = 0.;
     V_prime(1,0) = 0.;
     V_prime(1,1) = m_sigmaV;
-    MATPACK::Matrix V = Rot * V_prime * Rot.Transpose();
+    TMatrixD V(2,2);
+    V = Rot * V_prime * Rot.T();
     
     U(2*i,2*i)     = V(0,0);
     U(2*i,2*i+1)   = V(0,1);
     U(2*i+1,2*i)   = V(1,0);
     U(2*i+1,2*i+1) = V(1,1);
   }
-  MATPACK::Matrix M = A.Transpose() * U.Inverse() * A;
-  MATPACK::Vector c = A.Transpose() * U.Inverse() * b;
 
-  MATPACK::SolveLinear(M,c);
+  U.Invert();
+  TMatrixD ATranspose(nCol,nRow);
+  ATranspose.Transpose(A);
+  TMatrixD M = ATranspose * U * A;
+  TVectorD c = ATranspose * U * b;
+  M.Invert();
+  TVectorD solution(nCol);
+  solution = M * c;
 
-  dx_over_dz = c(2);
-  dy_over_dz = c(3);
+  dx_over_dz = solution(2);
+  dy_over_dz = solution(3);
   for (int i = 0; i < nHits; i++) {
-    l[i] = c(i+4);
+    l[i] = solution(i+4);
     x[i] = f[i][0] + l[i] * alpha[i][0];
     y[i] = f[i][1] + l[i] * alpha[i][1];
     z[i] = f[i][2];
