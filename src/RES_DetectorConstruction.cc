@@ -135,9 +135,6 @@ G4bool RES_DetectorConstruction::TrackInAcceptance(G4ThreeVector position, G4Thr
     G4ThreeVector currentPosition = position + l*direction;
     if (fabs(currentPosition.x() - m_modulePlacements[i].x()) > 0.5*m_moduleLength)   {retVal = false;}
     if (fabs(currentPosition.y() - m_modulePlacements[i].y()) > 0.5*m_moduleWidth[i]) {retVal = false;}
-    
-    G4cout << "passing through " << i << "-->" << fabs(currentPosition.x() - m_modulePlacements[i].x()) << G4endl;
-    G4cout << "                " << i << "-->" << fabs(currentPosition.y() - m_modulePlacements[i].y()) << G4endl;
   }
 
   return retVal;

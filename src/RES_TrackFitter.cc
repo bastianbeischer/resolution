@@ -73,19 +73,27 @@ RES_Event RES_TrackFitter::Fit()
 
   G4int conv = -1;
 
-  switch (m_fitMethod) {
-  case blobel:
-    conv = DoBlobelFit(5);
-    break;
-  case minuit:
-    conv = DoMinuitFit(5);
-    break;
-  default:
-    break;
-  }
-    
-  if (conv) return m_currentRecEvent;
-  else      return RES_Event();
+  G4double chi2 = Chi2InModuleFrame();
+  G4int nHits = m_currentGenEvent.GetNbOfHits();
+  G4int dof = nHits - 4;
+  m_currentRecEvent.SetChi2(chi2);
+  m_currentRecEvent.SetDof(dof);
+
+  // switch (m_fitMethod) {
+  // case blobel:
+  //   conv = DoBlobelFit(5);
+  //   break;
+  // case minuit:
+  //   conv = DoMinuitFit(5);
+  //   break;
+  // default:
+  //   break;
+  // }
+
+  return m_currentRecEvent;
+
+  // if (conv) return m_currentRecEvent;
+  // else      return RES_Event();
 }
 
 void RES_TrackFitter::SetSpatialResolutions()
@@ -204,9 +212,13 @@ void RES_TrackFitter::CalculateStartParameters()
     A(i,4+i/2) = -alpha[i/2][i%2];
   }
 
+  //  A.Print();
+
   TVectorD b(nRow);
   for (int i = 0; i < nRow; i++)
     b(i) = f[i/2][i%2];
+
+  // b.Print();
 
   TMatrixD U(nRow,nRow);
   for (int i = 0; i < nRow; i++)
@@ -217,18 +229,21 @@ void RES_TrackFitter::CalculateStartParameters()
     G4int iModule = m_currentGenEvent.GetModuleID(i);
     G4double angle = det->GetModuleAngle(iModule);
 
+    // Rot is the matrix that maps u,v, to x,y (i.e. the backward rotation)
     TMatrixD Rot(2,2); 
     Rot(0,0) = cos(angle);
-    Rot(0,1) = -sin(angle);
-    Rot(1,0) = sin(angle);
+    Rot(0,1) = sin(angle);
+    Rot(1,0) = -sin(angle);
     Rot(1,1) = cos(angle);
     TMatrixD V_prime(2,2);
     V_prime(0,0) = m_sigmaU;
     V_prime(0,1) = 0.;
     V_prime(1,0) = 0.;
     V_prime(1,1) = m_sigmaV;
+    TMatrixD RotTrans(2,2);
+    RotTrans.Transpose(Rot);
     TMatrixD V(2,2);
-    V = Rot * V_prime * Rot.T();
+    V = Rot * V_prime * RotTrans;
     
     U(2*i,2*i)     = V(0,0);
     U(2*i,2*i+1)   = V(0,1);
@@ -237,13 +252,15 @@ void RES_TrackFitter::CalculateStartParameters()
   }
 
   U.Invert();
+  TMatrixD Uinv = U;
   TMatrixD ATranspose(nCol,nRow);
   ATranspose.Transpose(A);
-  TMatrixD M = ATranspose * U * A;
-  TVectorD c = ATranspose * U * b;
+  TMatrixD M = ATranspose * Uinv * A;
+  TVectorD c = ATranspose * Uinv * b;
   M.Invert();
+  TMatrixD Minv = M;
   TVectorD solution(nCol);
-  solution = M * c;
+  solution = Minv * c;
 
   dx_over_dz = solution(2);
   dy_over_dz = solution(3);
@@ -259,6 +276,8 @@ void RES_TrackFitter::CalculateStartParameters()
     for (int i = 0; i < nHits; i++) {
       G4cout << "i: " << i << " x: " << x[i] << " y: " << y[i] << " z: " << z[i] << G4endl;
     }
+    G4cout << "covariance matrix for this fit:" << G4endl;
+    Minv.Print();
   }
 
   G4double phi = atan(dy_over_dz);
@@ -495,7 +514,9 @@ G4double RES_TrackFitter::Chi2InModuleFrame()
     hit = forwardRotation*hit;
     m_smearedHits[i] = forwardRotation*m_smearedHits[i];
     
+    G4double du = m_smearedHits[i].x() - hit.x();
     G4double dv = m_smearedHits[i].y() - hit.y();
+    chi2 += pow(du/m_sigmaU,2.);
     chi2 += pow(dv/m_sigmaV,2.);
 
     m_smearedHits[i] = backwardRotation*m_smearedHits[i];

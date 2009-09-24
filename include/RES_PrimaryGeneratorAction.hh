@@ -20,6 +20,8 @@ public:
   G4ParticleGun* GetParticleGun() const {return m_particleGun;}
   
 public:
+  inline G4bool GetRandomOrigin() {return m_randomOrigin;}
+  inline G4bool GetRandomDirection() {return m_randomDirection;}
   inline void SetRandomOrigin(G4bool value) {m_randomOrigin = value;}
   inline void SetRandomDirection(G4bool value) {m_randomDirection = value;}
 

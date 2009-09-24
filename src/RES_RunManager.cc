@@ -6,6 +6,7 @@
 #include "RES_EventActionReconstruction.hh"
 #include "RES_TrackFitter.hh"
 #include "RES_Event.hh"
+#include "RES_PrimaryGeneratorAction.hh"
 
 RES_RunManager::RES_RunManager() :
   G4RunManager()
@@ -42,6 +43,13 @@ void RES_RunManager::StartReconstructionRun()
   m_dataHandler->Initialize();
   SetActionsForReconstruction();
 
+  RES_PrimaryGeneratorAction* primaryGeneratorAction = (RES_PrimaryGeneratorAction*) GetUserPrimaryGeneratorAction();
+
+  G4bool randOriginValue = primaryGeneratorAction->GetRandomOrigin();
+  G4bool randDirectionValue = primaryGeneratorAction->GetRandomDirection();
+  primaryGeneratorAction->SetRandomOrigin(false);
+  primaryGeneratorAction->SetRandomDirection(false);
+
   int Nevents = m_dataHandler->GetNumberOfGeneratedEvents();
   for (int i = 0; i < Nevents; i++) {
 
@@ -59,6 +67,9 @@ void RES_RunManager::StartReconstructionRun()
   if (m_storeResults) {
     m_dataHandler->WriteFile();
   }
+
+  primaryGeneratorAction->SetRandomOrigin(randOriginValue);  
+  primaryGeneratorAction->SetRandomDirection(randDirectionValue);  
 }
 
 void RES_RunManager::ScanChi2Function(G4int iPar, G4int jPar, G4String filename)

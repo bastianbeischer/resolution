@@ -46,20 +46,22 @@ int main(int argc, char** argv)
   // double momRes = calculatePrediction(&genMom, 0);
   // TH1D resHist("resHist", "resHist", 100, 1. - 5.*momRes, 1. + 5.*momRes);    
   TH1D resHist("resHist", "resHist", 100, 0.5, 1.5);    
-  TH1D posHist("posHist", "posHist", 100, -5, 5);
+  TH1D xHist("xHist", "xHist", 100, -5, 5);
+  TH1D yHist("yHist", "yHist", 100, -1, 1);
   TH1D chi2Hist("chi2Hist", "chi2Hist", 100, 0.0, 10.0);
 
   char title[128];
   sprintf(title, "#chi^{2} Distribution (dof = %d)", recEvent->GetDof());
   chi2Hist.SetTitle(title);
 
-  for(int i = 0; i < genTree->GetEntries(); i++) {
+  for(int i = 0; i < 3500; i++) {
     genTree->GetEntry(i);
     recTree->GetEntry(i);
     //    std::cout << "rec mom: " << recEvent->GetMomentum() << "  --> frac: " << genEvent->GetMomentum()/recEvent->GetMomentum() << std::endl;
-    std::cout << "rec pos: " << recEvent->GetHitPosition(0).x() << "  <--> sim pos: " << genEvent->GetHitPosition(0).x() << std::endl;
+    std::cout << i << " --> rec pos: " << recEvent->GetHitPosition(0).x() << "  <--> sim pos: " << genEvent->GetHitPosition(0).x() << std::endl;
     resHist.Fill(genEvent->GetMomentum()/recEvent->GetMomentum());
-    posHist.Fill(genEvent->GetHitPosition(0).x() - recEvent->GetHitPosition(0).x());
+    xHist.Fill(genEvent->GetHitPosition(0).x() - recEvent->GetHitPosition(0).x());
+    yHist.Fill(genEvent->GetHitPosition(0).y() - recEvent->GetHitPosition(0).y());
     chi2Hist.Fill(recEvent->GetChi2());
   }
 
@@ -71,10 +73,18 @@ int main(int argc, char** argv)
   resHist.GetYaxis()->SetTitle("N");
 
   TCanvas canvas2("canvas2", "canvas2", 1024, 768);
+  canvas2.Divide(1,2);
   canvas2.Draw();
-  posHist.Draw();
-  posHist.GetXaxis()->SetTitle("x_{0,sim} - x_{0,rec}");
-  posHist.GetYaxis()->SetTitle("N");
+
+  canvas2.cd(1);
+  xHist.Draw();
+  xHist.GetXaxis()->SetTitle("x_{0,sim} - x_{0,rec}");
+  xHist.GetYaxis()->SetTitle("N");
+
+  canvas2.cd(2);
+  yHist.Draw();
+  yHist.GetYaxis()->SetTitle("y_{0,sim} - y_{0,rec}");
+  yHist.GetYaxis()->SetTitle("N");
 
   TCanvas canvas3("canvas3", "canvas3", 1024, 768);
   canvas3.Draw();

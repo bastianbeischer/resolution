@@ -63,7 +63,6 @@ void RES_PrimaryGeneratorAction::GeneratePrimaries(G4Event* event)
       position = G4ThreeVector(x_start, y_start, m_z_start);
       direction = G4ThreeVector(direction_x, direction_y, direction_z);
 
-      G4cout << "new test particle" << G4endl;
       trackInAcceptance = detector->TrackInAcceptance(position,direction);
     }
 
