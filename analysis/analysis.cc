@@ -47,7 +47,7 @@ int main(int argc, char** argv)
   // TH1D resHist("resHist", "resHist", 100, 1. - 5.*momRes, 1. + 5.*momRes);    
   TH1D resHist("resHist", "resHist", 100, 0.5, 1.5);    
   TH1D xHist("xHist", "xHist", 100, -5, 5);
-  TH1D yHist("yHist", "yHist", 100, -1, 1);
+  TH1D yHist("yHist", "yHist", 100, -0.2, 0.2);
   TH1D chi2Hist("chi2Hist", "chi2Hist", 100, 0.0, 10.0);
 
   char title[128];

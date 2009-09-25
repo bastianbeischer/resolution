@@ -174,12 +174,12 @@ void RES_TrackFitter::CalculateStartParameters()
 
   G4int nHits = m_currentGenEvent.GetNbOfHits();
 
-  G4double dx_over_dz, dy_over_dz;
+  G4double x0,y0,dx_over_dz, dy_over_dz;
+  G4double z0 = 0.;
   G4double* x = new G4double[nHits];
   G4double* y = new G4double[nHits];
   G4double* z = new G4double[nHits];
   G4double* k = new G4double[nHits];
-  G4double* l = new G4double[nHits];
   G4double** f = new G4double*[nHits];
   for (int i = 0; i < nHits; i++)
     f[i] = new G4double[3];
@@ -195,11 +195,11 @@ void RES_TrackFitter::CalculateStartParameters()
     f[i][0] = m_smearedHits[i].x();
     f[i][1] = m_smearedHits[i].y();
     f[i][2] = m_smearedHits[i].z();
-    k[i] = f[i][2] - f[0][2];
+    k[i] = z0-f[i][2];
   }
 
-  int nRow = 2*nHits;
-  int nCol = 4+nHits;
+  int nRow = nHits;
+  int nCol = 4;
 
   TMatrixD A(nRow,nCol);
   for (int i = 0; i < nRow; i++)
@@ -207,18 +207,19 @@ void RES_TrackFitter::CalculateStartParameters()
       A(i,j) = 0.;
 
   for (int i = 0; i < nRow; i++) {
-    A(i,i%2)   = 1.;
-    A(i,i%2+2) = k[i/2];
-    A(i,4+i/2) = -alpha[i/2][i%2];
+    A(i,0) = 1.;
+    A(i,1) = -alpha[i][0]/alpha[i][1];
+    A(i,2) = k[i];
+    A(i,3) = -k[i]*alpha[i][0]/alpha[i][1];
   }
 
-  //  A.Print();
+  //A.Print();
 
   TVectorD b(nRow);
   for (int i = 0; i < nRow; i++)
-    b(i) = f[i/2][i%2];
+    b(i) = f[i][0] - f[i][1]*alpha[i][0]/alpha[i][1];
 
-  // b.Print();
+  //b.Print();
 
   TMatrixD U(nRow,nRow);
   for (int i = 0; i < nRow; i++)
@@ -236,19 +237,24 @@ void RES_TrackFitter::CalculateStartParameters()
     Rot(1,0) = -sin(angle);
     Rot(1,1) = cos(angle);
     TMatrixD V_prime(2,2);
-    V_prime(0,0) = m_sigmaU;
+    V_prime(0,0) = m_sigmaU*m_sigmaU;
     V_prime(0,1) = 0.;
     V_prime(1,0) = 0.;
-    V_prime(1,1) = m_sigmaV;
+    V_prime(1,1) = m_sigmaV*m_sigmaV;
     TMatrixD RotTrans(2,2);
     RotTrans.Transpose(Rot);
     TMatrixD V(2,2);
     V = Rot * V_prime * RotTrans;
     
-    U(2*i,2*i)     = V(0,0);
-    U(2*i,2*i+1)   = V(0,1);
-    U(2*i+1,2*i)   = V(1,0);
-    U(2*i+1,2*i+1) = V(1,1);
+    TMatrixD Lin(1,2);
+    Lin(0,0) = 1.;
+    Lin(0,1) = -alpha[i][0]/alpha[i][1];
+    TMatrixD LinTrans(2,1);
+    LinTrans.Transpose(Lin);
+    TMatrixD V2 = TMatrixD(1,1);
+    V2 = Lin * V * LinTrans;
+    
+    U(i,i) = V2(0,0);
   }
 
   U.Invert();
@@ -262,13 +268,14 @@ void RES_TrackFitter::CalculateStartParameters()
   TVectorD solution(nCol);
   solution = Minv * c;
 
+  x0 = solution(0);
+  y0 = solution(1);
   dx_over_dz = solution(2);
   dy_over_dz = solution(3);
   for (int i = 0; i < nHits; i++) {
-    l[i] = solution(i+4);
-    x[i] = f[i][0] + l[i] * alpha[i][0];
-    y[i] = f[i][1] + l[i] * alpha[i][1];
-    z[i] = f[i][2];
+    x[i] = x0 + k[i] * dx_over_dz;
+    y[i] = y0 + k[i] * dy_over_dz;
+    z[i] = z0 + k[i];
   }
 
   if (m_verbose > 0) {
@@ -348,7 +355,6 @@ void RES_TrackFitter::CalculateStartParameters()
   delete[] y;
   delete[] z;
   delete[] k;
-  delete[] l;
   for(int i = 0; i < nHits; i++)
     delete[] f[i];
   delete[] f;
