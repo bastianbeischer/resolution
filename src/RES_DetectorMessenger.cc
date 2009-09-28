@@ -31,6 +31,11 @@ RES_DetectorMessenger::RES_DetectorMessenger(RES_DetectorConstruction* detector)
   m_setModuleRotationCmd->SetParameterName("rotationString", false);
   m_setModuleRotationCmd->AvailableForStates(G4State_PreInit);
 
+  m_setModuleInternalRotationCmd = new G4UIcmdWithAString("/RES/Det/SetModuleInternalRotation", this);
+  m_setModuleInternalRotationCmd->SetGuidance("Set the internal rotation for the module.");
+  m_setModuleInternalRotationCmd->SetParameterName("internalRotationString", false);
+  m_setModuleInternalRotationCmd->AvailableForStates(G4State_PreInit);
+
   m_setModuleWidthCmd = new G4UIcmdWithAString("/RES/Det/SetModuleWidth", this);
   m_setModuleWidthCmd->SetGuidance("Set the width for the module");
   m_setModuleWidthCmd->SetParameterName("widthString", false);
@@ -65,6 +70,7 @@ RES_DetectorMessenger::~RES_DetectorMessenger()
   delete m_detDirectory;
   delete m_addModulePlacementCmd;
   delete m_setModuleRotationCmd;
+  delete m_setModuleInternalRotationCmd;
   delete m_setModuleWidthCmd;
   delete m_setModuleLengthCmd;
   delete m_setModuleFiberThicknessCmd;
@@ -80,6 +86,11 @@ void RES_DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
     G4int iModule = m_setModuleRotationCmd->ConvertToInt(newValue.substr(0,1).c_str());
     G4double angle = m_setModuleRotationCmd->ConvertToDouble(newValue.substr(2,newValue.length()).c_str()) * M_PI/180.;
     m_detector->SetModuleAngle(iModule, angle);
+  }
+  if (command == m_setModuleInternalRotationCmd) {
+    G4int iModule = m_setModuleInternalRotationCmd->ConvertToInt(newValue.substr(0,1).c_str());
+    G4double angle = m_setModuleInternalRotationCmd->ConvertToDouble(newValue.substr(2,newValue.length()).c_str()) * M_PI/180.;
+    m_detector->SetModuleInternalAngle(iModule, angle);
   }
   if (command == m_setModuleWidthCmd) {
     G4int iModule = m_setModuleRotationCmd->ConvertToInt(newValue.substr(0,1).c_str());

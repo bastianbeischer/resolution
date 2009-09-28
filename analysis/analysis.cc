@@ -7,6 +7,7 @@
 
 #include <TApplication.h>
 #include <TFile.h>
+#include <TF1.h>
 #include <TTree.h>
 #include <TH1D.h>
 #include <TCanvas.h>
@@ -46,22 +47,45 @@ int main(int argc, char** argv)
   // double momRes = calculatePrediction(&genMom, 0);
   // TH1D resHist("resHist", "resHist", 100, 1. - 5.*momRes, 1. + 5.*momRes);    
   TH1D resHist("resHist", "resHist", 100, 0.5, 1.5);    
-  TH1D xHist("xHist", "xHist", 100, -5, 5);
-  TH1D yHist("yHist", "yHist", 100, -0.2, 0.2);
-  TH1D chi2Hist("chi2Hist", "chi2Hist", 100, 0.0, 10.0);
+  int nHits = genEvent->GetNbOfHits();
+  TH1D** xHist = new TH1D*[nHits];
+  for (int i = 0;i < nHits; i++) {
+    char title[256];
+    sprintf(title, "xHist%d", i);
+    xHist[i] = new TH1D(title,title, 100, -20, 20);
+  }
+  TH1D** yHist = new TH1D*[nHits];
+  for (int i = 0;i < nHits; i++) {
+    char title[256];
+    sprintf(title, "yHist%d", i);
+    yHist[i] = new TH1D(title,title, 100, -1.0, 1.0);
+  }
+
+  TH1D totalXhist("totalXhist", "totalXhist", 100, -20, 20);
+  TH1D totalYhist("totalYhist", "totalYhist", 100, -1.0, 1.0);
+
+  TH1D chi2Hist("chi2Hist", "chi2Hist", 100, 0.0, 25.0);
 
   char title[128];
   sprintf(title, "#chi^{2} Distribution (dof = %d)", recEvent->GetDof());
   chi2Hist.SetTitle(title);
 
-  for(int i = 0; i < 3500; i++) {
+  for(int i = 0; i < genTree->GetEntries(); i++) {
+    //  for(int i = 0; i < 90; i++) {
     genTree->GetEntry(i);
     recTree->GetEntry(i);
+    int nHitsGen = genEvent->GetNbOfHits();
+    int nHitsRec = recEvent->GetNbOfHits();
+    if (nHits == 0 || nHitsGen != nHitsRec) continue;
     //    std::cout << "rec mom: " << recEvent->GetMomentum() << "  --> frac: " << genEvent->GetMomentum()/recEvent->GetMomentum() << std::endl;
-    std::cout << i << " --> rec pos: " << recEvent->GetHitPosition(0).x() << "  <--> sim pos: " << genEvent->GetHitPosition(0).x() << std::endl;
+    //    std::cout << i << " --> rec pos: " << recEvent->GetHitPosition(0).x() << "  <--> sim pos: " << genEvent->GetHitPosition(0).x() << std::endl;
     resHist.Fill(genEvent->GetMomentum()/recEvent->GetMomentum());
-    xHist.Fill(genEvent->GetHitPosition(0).x() - recEvent->GetHitPosition(0).x());
-    yHist.Fill(genEvent->GetHitPosition(0).y() - recEvent->GetHitPosition(0).y());
+    for (int i = 0; i < nHitsRec; i++) {
+      xHist[i]->Fill(genEvent->GetHitPosition(i).x() - recEvent->GetHitPosition(i).x());
+      yHist[i]->Fill(genEvent->GetHitPosition(i).y() - recEvent->GetHitPosition(i).y());
+      totalXhist.Fill(genEvent->GetHitPosition(i).x() - recEvent->GetHitPosition(i).x());
+      totalYhist.Fill(genEvent->GetHitPosition(i).y() - recEvent->GetHitPosition(i).y());
+    }
     chi2Hist.Fill(recEvent->GetChi2());
   }
 
@@ -73,21 +97,50 @@ int main(int argc, char** argv)
   resHist.GetYaxis()->SetTitle("N");
 
   TCanvas canvas2("canvas2", "canvas2", 1024, 768);
-  canvas2.Divide(1,2);
+  canvas2.Divide(nHits/2,2);
   canvas2.Draw();
 
-  canvas2.cd(1);
-  xHist.Draw();
-  xHist.GetXaxis()->SetTitle("x_{0,sim} - x_{0,rec}");
-  xHist.GetYaxis()->SetTitle("N");
-
-  canvas2.cd(2);
-  yHist.Draw();
-  yHist.GetYaxis()->SetTitle("y_{0,sim} - y_{0,rec}");
-  yHist.GetYaxis()->SetTitle("N");
+  for (int i = 0; i < nHits; i++) {
+    char xtitle[256];
+    sprintf(xtitle, "(x_{%d,sim} - x_{%d,rec}) / mm", i, i);
+    canvas2.cd(i+1);
+    xHist[i]->Draw();
+    xHist[i]->GetXaxis()->SetTitle(xtitle);
+    xHist[i]->GetYaxis()->SetTitle("N");
+    xHist[i]->Fit("gaus", "Q");
+    TF1* fitFunc = xHist[i]->GetFunction("gaus");
+    std::cout << "x" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
+  }
 
   TCanvas canvas3("canvas3", "canvas3", 1024, 768);
+  canvas3.Divide(nHits/2,2);
   canvas3.Draw();
+  for (int i = 0; i < nHits; i++) {
+    char ytitle[256];
+    sprintf(ytitle, "(y_{%d,sim} - y_{%d,rec}) / mm", i, i);
+    canvas3.cd(i+1);
+    yHist[i]->Draw();
+    yHist[i]->GetXaxis()->SetTitle(ytitle);
+    yHist[i]->GetYaxis()->SetTitle("N");
+    yHist[i]->Fit("gaus", "Q");
+    TF1* fitFunc = yHist[i]->GetFunction("gaus");
+    std::cout << "y" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
+  }
+
+  TCanvas canvas4("canvas4", "canvas4", 1024, 768);
+  canvas4.Draw();
+  canvas4.Divide(1,2);
+  canvas4.cd(1);
+  totalXhist.Draw();
+  totalXhist.GetXaxis()->SetTitle("(x_{sim,total} - x_{rec,total}) / mm");
+  totalXhist.GetYaxis()->SetTitle("N");
+  canvas4.cd(2);
+  totalYhist.Draw();
+  totalYhist.GetXaxis()->SetTitle("(y_{sim,total} - y_{rec,total}) / mm");
+  totalYhist.GetYaxis()->SetTitle("N");
+
+  TCanvas canvas5("canvas5", "canvas5", 1024, 768);
+  canvas5.Draw();
   chi2Hist.Draw();
   chi2Hist.GetXaxis()->SetTitle("#chi^{2}/dof");
   chi2Hist.GetYaxis()->SetTitle("N");

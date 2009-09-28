@@ -66,6 +66,9 @@ RES_TrackFitter* RES_TrackFitter::GetInstance()
 
 RES_Event RES_TrackFitter::Fit()
 {
+  G4int nHits = m_currentGenEvent.GetNbOfHits();
+  if (nHits < 8) return m_currentRecEvent;
+
   SetSpatialResolutions();
   SmearHits();
   CalculateStartParameters();
@@ -74,21 +77,20 @@ RES_Event RES_TrackFitter::Fit()
   G4int conv = -1;
 
   G4double chi2 = Chi2InModuleFrame();
-  G4int nHits = m_currentGenEvent.GetNbOfHits();
   G4int dof = nHits - 4;
   m_currentRecEvent.SetChi2(chi2);
   m_currentRecEvent.SetDof(dof);
 
-  // switch (m_fitMethod) {
-  // case blobel:
-  //   conv = DoBlobelFit(5);
-  //   break;
-  // case minuit:
-  //   conv = DoMinuitFit(5);
-  //   break;
-  // default:
-  //   break;
-  // }
+  switch (m_fitMethod) {
+  case blobel:
+    conv = DoBlobelFit(5);
+    break;
+  case minuit:
+    conv = DoMinuitFit(5);
+    break;
+  default:
+    break;
+  }
 
   return m_currentRecEvent;
 
@@ -117,7 +119,9 @@ void RES_TrackFitter::SmearHits()
   // CLHEP::HepRandom::setTheSeed(1234);
   for (G4int i = 0; i < nHits; i++) {
     G4int iModule = m_currentGenEvent.GetModuleID(i);
+    G4int iFiber  = m_currentGenEvent.GetFiberID(i);
     G4double angle = det->GetModuleAngle(iModule);
+    if (iFiber > 0) angle += det->GetModuleInternalAngle(iModule);
     
     // collect hit information
     G4double x = m_currentGenEvent.GetHitPosition(i).x();
@@ -168,17 +172,12 @@ void RES_TrackFitter::SetStartParametesToGeneratedParticle()
 
 }
 
-void RES_TrackFitter::CalculateStartParameters()
+void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double &y0, G4double &dxdz, G4double &dydz)
 {
+  G4int nHits = n1 - n0;
   RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
-
-  G4int nHits = m_currentGenEvent.GetNbOfHits();
-
-  G4double x0,y0,dx_over_dz, dy_over_dz;
+  
   G4double z0 = 0.;
-  G4double* x = new G4double[nHits];
-  G4double* y = new G4double[nHits];
-  G4double* z = new G4double[nHits];
   G4double* k = new G4double[nHits];
   G4double** f = new G4double*[nHits];
   for (int i = 0; i < nHits; i++)
@@ -189,13 +188,15 @@ void RES_TrackFitter::CalculateStartParameters()
 
   for (int i = 0; i < nHits; i++) {
     G4int iModule = m_currentGenEvent.GetModuleID(i);
+    G4int iFiber  = m_currentGenEvent.GetFiberID(i);
     G4double angle = det->GetModuleAngle(iModule);
+    if (iFiber > 0) angle += det->GetModuleInternalAngle(iModule);
     alpha[i][0] = cos(angle);
     alpha[i][1] = sin(angle);
-    f[i][0] = m_smearedHits[i].x();
-    f[i][1] = m_smearedHits[i].y();
-    f[i][2] = m_smearedHits[i].z();
-    k[i] = z0-f[i][2];
+    f[i][0] = m_smearedHits[i+n0].x();
+    f[i][1] = m_smearedHits[i+n0].y();
+    f[i][2] = m_smearedHits[i+n0].z();
+    k[i]    = f[i][2] - z0;
   }
 
   int nRow = nHits;
@@ -213,13 +214,9 @@ void RES_TrackFitter::CalculateStartParameters()
     A(i,3) = -k[i]*alpha[i][0]/alpha[i][1];
   }
 
-  //A.Print();
-
   TVectorD b(nRow);
   for (int i = 0; i < nRow; i++)
     b(i) = f[i][0] - f[i][1]*alpha[i][0]/alpha[i][1];
-
-  //b.Print();
 
   TMatrixD U(nRow,nRow);
   for (int i = 0; i < nRow; i++)
@@ -228,7 +225,9 @@ void RES_TrackFitter::CalculateStartParameters()
 
   for (int i = 0; i < nHits; i++) {
     G4int iModule = m_currentGenEvent.GetModuleID(i);
+    G4int iFiber  = m_currentGenEvent.GetFiberID(i);
     G4double angle = det->GetModuleAngle(iModule);
+    if (iFiber > 0) angle += det->GetModuleInternalAngle(iModule);
 
     // Rot is the matrix that maps u,v, to x,y (i.e. the backward rotation)
     TMatrixD Rot(2,2); 
@@ -236,25 +235,25 @@ void RES_TrackFitter::CalculateStartParameters()
     Rot(0,1) = sin(angle);
     Rot(1,0) = -sin(angle);
     Rot(1,1) = cos(angle);
-    TMatrixD V_prime(2,2);
-    V_prime(0,0) = m_sigmaU*m_sigmaU;
-    V_prime(0,1) = 0.;
-    V_prime(1,0) = 0.;
-    V_prime(1,1) = m_sigmaV*m_sigmaV;
+    TMatrixD V1(2,2);
+    V1(0,0) = m_sigmaU*m_sigmaU;
+    V1(0,1) = 0.;
+    V1(1,0) = 0.;
+    V1(1,1) = m_sigmaV*m_sigmaV;
     TMatrixD RotTrans(2,2);
     RotTrans.Transpose(Rot);
-    TMatrixD V(2,2);
-    V = Rot * V_prime * RotTrans;
+    TMatrixD V2(2,2);
+    V2 = Rot * V1 * RotTrans;
     
     TMatrixD Lin(1,2);
     Lin(0,0) = 1.;
     Lin(0,1) = -alpha[i][0]/alpha[i][1];
     TMatrixD LinTrans(2,1);
     LinTrans.Transpose(Lin);
-    TMatrixD V2 = TMatrixD(1,1);
-    V2 = Lin * V * LinTrans;
+    TMatrixD V3 = TMatrixD(1,1);
+    V3 = Lin * V2 * LinTrans;
     
-    U(i,i) = V2(0,0);
+    U(i,i) = V3(0,0);
   }
 
   U.Invert();
@@ -268,60 +267,129 @@ void RES_TrackFitter::CalculateStartParameters()
   TVectorD solution(nCol);
   solution = Minv * c;
 
-  x0 = solution(0);
-  y0 = solution(1);
-  dx_over_dz = solution(2);
-  dy_over_dz = solution(3);
-  for (int i = 0; i < nHits; i++) {
-    x[i] = x0 + k[i] * dx_over_dz;
-    y[i] = y0 + k[i] * dy_over_dz;
-    z[i] = z0 + k[i];
+  x0   = solution(0);
+  y0   = solution(1);
+  dxdz = solution(2);
+  dydz = solution(3);
+
+  if (m_verbose > 0) {
+    G4cout << "covariance matrix for this fit:" << G4endl;
+    TMatrixD Lin(2*nRow,nCol);
+    for (int i = 0; i < 2*nRow; i++)
+      for (int j = 0; j < nCol; j++)
+        Lin(i,j) = 0.;
+    for (int i = 0; i < 2*nRow; i++){
+      Lin(i,i%2)     = 1.;
+      Lin(i,(i%2)+2) = k[i/2];
+    }
+    //    (Lin*solution).Print();
+    TMatrixD LinTrans(nCol, 2*nRow);
+    LinTrans.Transpose(Lin);
+    TMatrixD Cov(2*nRow, 2*nRow);
+    Cov = Lin * Minv * LinTrans;
+
+    Cov.Print();
   }
 
+  delete[] k;
+  for(int i = 0; i < nHits; i++)
+    delete[] f[i];
+  delete[] f;
+  for(int i = 0; i < nHits; i++)
+    delete[] alpha[i];
+  delete[] alpha;
+}
+
+void RES_TrackFitter::CalculateStartParameters()
+{
+  G4int nHits = m_currentGenEvent.GetNbOfHits();
+
+  G4double z0 = 0.;
+
+  G4double* k = new G4double[nHits];
+  G4double* x = new G4double[nHits];
+  G4double* y = new G4double[nHits];
+  G4double* z = new G4double[nHits];
+
+  G4double x0_top,y0_top,dx_over_dz_top,dy_over_dz_top;
+  FitStraightLine(0, nHits/2, x0_top, y0_top, dx_over_dz_top, dy_over_dz_top);
+  G4double x0_bottom,y0_bottom,dx_over_dz_bottom,dy_over_dz_bottom;
+  FitStraightLine(nHits/2, nHits, x0_bottom, y0_bottom, dx_over_dz_bottom, dy_over_dz_bottom);
+
+  for (int i = 0; i < nHits; i++)
+    k[i] = m_smearedHits[i].z() - z0;
+
+  for (int i = 0; i < nHits; i++) {
+    if (i < nHits/2) {
+      x[i] = x0_top + k[i] * dx_over_dz_top;
+      y[i] = y0_top + k[i] * dy_over_dz_top;
+      z[i] = z0 + k[i];
+    }
+    else {
+      x[i] = x0_bottom + k[i] * dx_over_dz_bottom;
+      y[i] = y0_bottom + k[i] * dy_over_dz_bottom;
+      z[i] = z0 + k[i];
+    }
+  }
+
+  // G4double x0,y0,dx_over_dz,dy_over_dz;
+  // FitStraightLine(0, nHits, x0, y0, dx_over_dz, dy_over_dz);
+
+  for (int i = 0; i < nHits; i++)
+    k[i] = m_smearedHits[i].z() - z0;
+
+  G4double xCorrection[8] = {9.52*mm, 9.07*mm, 2.46*mm, 2.01*mm, -2.08*mm, -2.53*mm, -9.13*mm, -9.58*mm};
+  G4double yCorrection[8] = {-0.42*mm, -0.39*mm, 0.08*mm, 0.11*mm, 0.12*mm, 0.08*mm, -0.39*mm, -0.43*mm};
+
+  // for (int i = 0; i < nHits; i++) {
+  //   x[i] = x0 + k[i] * dx_over_dz;
+  //   y[i] = y0 + k[i] * dy_over_dz;
+  //   z[i] = z0 + k[i];
+  //   // x[i] += xCorrection[i];
+  //   // y[i] += yCorrection[i];
+  // }
+
+  G4double phi = atan(dy_over_dz_top);
+  G4double theta = atan(-dx_over_dz_top*cos(phi));
+ 
   if (m_verbose > 0) {
     G4cout << "straight line fit:" << G4endl;
     for (int i = 0; i < nHits; i++) {
       G4cout << "i: " << i << " x: " << x[i] << " y: " << y[i] << " z: " << z[i] << G4endl;
     }
-    G4cout << "covariance matrix for this fit:" << G4endl;
-    Minv.Print();
   }
 
-  G4double phi = atan(dy_over_dz);
-  G4double theta = atan(-dx_over_dz*cos(phi));
+  //restore u components of hits
+  // for (G4int i = 0; i < nHits; i++) {
+  // RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
+    // G4int iModule = m_currentGenEvent.GetModuleID(i);
+    // G4int iFiber  = m_currentGenEvent.GetFiberID(i);
+    // G4double angle = det->GetModuleAngle(iModule);
+    // if (iFiber > 0) angle += det->GetModuleInternalAngle(iModule);
 
-  // restore u components of hits
-  for (G4int i = 0; i < nHits; i++) {
-    G4int iModule = m_currentGenEvent.GetModuleID(i);
-    G4double angle = det->GetModuleAngle(iModule);
+  //   G4RotationMatrix forwardRotation(angle, 0., 0.);
+  //   G4RotationMatrix backwardRotation(-angle, 0., 0.);
+  //   G4ThreeVector straightLine(x[i],y[i],z[i]);
 
-    G4RotationMatrix forwardRotation(angle, 0., 0.);
-    G4RotationMatrix backwardRotation(-angle, 0., 0.);
+  //   m_smearedHits[i] = forwardRotation*m_smearedHits[i];
+  //   straightLine     = forwardRotation*straightLine;
 
-    // G4double dz = m_smearedHits[i].z() - m_smearedHits[0].z();
-    // G4ThreeVector start(x[0],y[0],z[0]);
-    // G4ThreeVector direction(sin(theta), -cos(theta)*sin(phi), -cos(theta)*cos(phi));
-    // G4double l = dz/direction.z();
-    // G4ThreeVector straightLine = start + l*direction;
-    G4ThreeVector straightLine(x[i],y[i],z[i]);
+  //   // m_smearedHits[i].setX(straightLine.x());
 
-    m_smearedHits[i] = forwardRotation*m_smearedHits[i];
-    straightLine     = forwardRotation*straightLine;
+  //   m_smearedHits[i] = backwardRotation*m_smearedHits[i];
 
-    m_smearedHits[i].setX(straightLine.x());
+  //   if (m_verbose > 0)
+  //     G4cout << "restored hit: " << i << " --> " << m_smearedHits[i] << G4endl;
+  // }
 
-    m_smearedHits[i] = backwardRotation*m_smearedHits[i];
+  G4double deltaTheta = dy_over_dz_top - dy_over_dz_bottom;
 
-    if (m_verbose > 0)
-      G4cout << "restored hit: " << i << " --> " << m_smearedHits[i] << G4endl;
-  }
-
-  G4double deltaTheta = fabs(  (m_smearedHits[7].y()-m_smearedHits[4].y())/(m_smearedHits[7].z()-m_smearedHits[4].z())
-                             - (m_smearedHits[3].y()-m_smearedHits[0].y())/(m_smearedHits[3].z()-m_smearedHits[0].z()));
+  // G4double deltaTheta = fabs(  (m_smearedHits[7].y()-m_smearedHits[4].y())/(m_smearedHits[7].z()-m_smearedHits[4].z())
+  //                            - (m_smearedHits[3].y()-m_smearedHits[0].y())/(m_smearedHits[3].z()-m_smearedHits[0].z()));
   G4double B = 0.3;
   G4double L = sqrt(pow(m_smearedHits[4].y()-m_smearedHits[3].y(),2.) + pow(m_smearedHits[4].z()-m_smearedHits[3].z(),2.))/m;
   G4double p = 0.3*B*L/deltaTheta*GeV;
-  //  G4double p = m_currentGenEvent.GetMomentum();
+  //  p = 100000*GeV;
 
   m_parameter[0] = p;
   m_parameter[1] = y[0];
@@ -355,12 +423,6 @@ void RES_TrackFitter::CalculateStartParameters()
   delete[] y;
   delete[] z;
   delete[] k;
-  for(int i = 0; i < nHits; i++)
-    delete[] f[i];
-  delete[] f;
-  for(int i = 0; i < nHits; i++)
-    delete[] alpha[i];
-  delete[] alpha;
 }
 
 G4int RES_TrackFitter::DoBlobelFit(G4int npar)
@@ -460,8 +522,11 @@ G4double RES_TrackFitter::Chi2InDetFrame()
   }
 
   for( G4int i = 0 ; i < nHits ; i++ ) {
-    G4int iModule = m_currentRecEvent.GetModuleID(i);
+    G4int iModule = m_currentGenEvent.GetModuleID(i);
+    G4int iFiber  = m_currentGenEvent.GetFiberID(i);
     G4double angle = det->GetModuleAngle(iModule);
+    if (iFiber > 0) angle += det->GetModuleInternalAngle(iModule);
+
     G4double s = sin(angle);
     G4double c = cos(angle);
     G4double dx = m_smearedHits[i].x() - m_currentRecEvent.GetHitPosition(i).x();
@@ -493,8 +558,17 @@ G4double RES_TrackFitter::Chi2InModuleFrame()
   double phi   = m_parameter[2];
   double x0    = m_parameter[3];
   double theta = m_parameter[4];
+
   
-  G4ThreeVector direction(sin(M_PI - theta), cos(M_PI - theta)*sin(phi), cos(M_PI - theta)*cos(phi));
+  // G4cout << "calculating chi with: " << G4endl
+  //        << "pt = " << pt << G4endl
+  //        << "y0 = " << y0 << G4endl
+  //        << "phi = " << phi << G4endl
+  //        << "x0 = " << x0 << G4endl
+  //        << "theta = " << theta << G4endl;
+
+    
+  G4ThreeVector direction(sin(theta), -cos(theta)*sin(phi), -cos(theta)*cos(phi));
   G4ThreeVector position(x0, y0, m_smearedHits[0].z());
   position -= 1.*cm * direction;
       
@@ -511,8 +585,10 @@ G4double RES_TrackFitter::Chi2InModuleFrame()
   }
 
   for( G4int i = 0 ; i < nHits ; i++ ) {
-    G4int iModule = m_currentRecEvent.GetModuleID(i);
+    G4int iModule = m_currentGenEvent.GetModuleID(i);
+    G4int iFiber  = m_currentGenEvent.GetFiberID(i);
     G4double angle = det->GetModuleAngle(iModule);
+    if (iFiber > 0) angle += det->GetModuleInternalAngle(iModule);
     G4RotationMatrix forwardRotation(angle, 0, 0);
     G4RotationMatrix backwardRotation(-angle, 0, 0);
     G4ThreeVector hit(m_currentRecEvent.GetHitPosition(i).x(),m_currentRecEvent.GetHitPosition(i).y(),m_currentRecEvent.GetHitPosition(i).z());

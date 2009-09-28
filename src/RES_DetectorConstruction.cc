@@ -66,11 +66,11 @@ G4VPhysicalVolume* RES_DetectorConstruction::Construct()
     m_module_phys.push_back(currentModulePlacement);
 
     // interior of modules
-    
     G4Box* currentFiberSolid = new G4Box("module_fiber", 0.5*m_moduleLength, 0.5*m_moduleWidth[i], 0.5*m_moduleFiberThickness);
     G4LogicalVolume* currentFiberLogic = new G4LogicalVolume(currentFiberSolid, m_world_material, "module_fiber", 0, 0, 0);
+    G4RotationMatrix* currentInternalRotation = new G4RotationMatrix(m_moduleInternalAngles[i], 0., 0.);
     G4PVPlacement* currentUpperFiberPlacement = new G4PVPlacement(0, G4ThreeVector(0, 0, 0.5*m_moduleGap + 0.5*m_moduleFiberThickness), currentFiberLogic, "module_fiber", currentModuleLogic, false, 0);
-    G4PVPlacement* currentLowerFiberPlacement = new G4PVPlacement(0, G4ThreeVector(0, 0, -0.5*m_moduleGap - 0.5*m_moduleFiberThickness), currentFiberLogic, "module_fiber", currentModuleLogic, false, 1);
+    G4PVPlacement* currentLowerFiberPlacement = new G4PVPlacement(currentInternalRotation, G4ThreeVector(0, 0, -0.5*m_moduleGap - 0.5*m_moduleFiberThickness), currentFiberLogic, "module_fiber", currentModuleLogic, false, 1);
     m_module_fiber_solid.push_back(currentFiberSolid);
     m_module_fiber_log.push_back(currentFiberLogic);
     m_module_fiber_upper_phys.push_back(currentUpperFiberPlacement);

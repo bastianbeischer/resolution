@@ -30,14 +30,19 @@ public:
 
   inline G4double GetModuleLength()       {return m_moduleLength;}
   inline G4double GetModuleAngle(unsigned int i) {assert(i < m_moduleAngles.size()); return m_moduleAngles.at(i);}
+  inline G4double GetModuleInternalAngle(unsigned int i) {assert(i < m_moduleInternalAngles.size()); return m_moduleInternalAngles.at(i);}
 
   inline void AddModulePlacement(G4ThreeVector where) {
     m_modulePlacements.push_back(where);
     m_moduleAngles.push_back(0);
+    m_moduleInternalAngles.push_back(0);
     m_moduleWidth.push_back(m_moduleDefaultWidth);
   }
   inline void SetModuleAngle(G4int module, G4double angle) {
     m_moduleAngles[module] = angle;
+  }
+  inline void SetModuleInternalAngle(G4int module, G4double angle) {
+    m_moduleInternalAngles[module] = angle;
   }
   inline void SetModuleWidth(G4int module, G4double width) {
     m_moduleWidth[module] = width;
@@ -67,6 +72,7 @@ private:
 
   std::vector<G4ThreeVector>      m_modulePlacements;
   std::vector<G4double>           m_moduleAngles;
+  std::vector<G4double>           m_moduleInternalAngles;
   std::vector<G4double>           m_moduleWidth;
 
   G4Box*                          m_world_solid;
