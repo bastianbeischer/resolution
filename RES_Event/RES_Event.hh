@@ -23,6 +23,7 @@ public:
 public:
   inline void SetID(int ID) {m_ID = ID;}
   inline void SetEventType(EventType type) {m_eventType = type;}
+  inline void SetTransverseMomentum(double pt) {m_transverseMomentum = pt;}
   inline void SetMomentum(double momentum) {m_momentum = momentum;}
   inline void SetChi2(double chi2) {m_chi2 = chi2;}
   inline void SetDof(int dof) {m_dof = dof;}
@@ -31,6 +32,7 @@ public:
   inline int          GetModuleID(unsigned int i)    {assert(i <m_moduleID.size()); return m_moduleID.at(i);}
   inline int          GetFiberID(unsigned int i)     {assert(i <m_fiberID.size()); return m_fiberID.at(i);}
   inline EventType    GetEventType()                 {return m_eventType;}
+  inline double       GetTransverseMomentum()        {return m_transverseMomentum;}
   inline double       GetMomentum()                  {return m_momentum;}
   inline double       GetChi2()                      {return m_chi2;}
   inline int          GetDof()                       {return m_dof;}
@@ -44,6 +46,7 @@ private:
   std::vector<int>      m_moduleID;
   std::vector<int>      m_fiberID;
   std::vector<TVector3> m_hits;
+  double                m_transverseMomentum;
   double                m_momentum;
   EventType             m_eventType;
   double                m_chi2;

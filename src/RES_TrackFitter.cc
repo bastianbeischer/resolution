@@ -76,10 +76,10 @@ RES_Event RES_TrackFitter::Fit()
 
   G4int conv = -1;
 
-  G4double chi2 = Chi2InModuleFrame();
-  G4int dof = nHits - 4;
-  m_currentRecEvent.SetChi2(chi2);
-  m_currentRecEvent.SetDof(dof);
+  // G4double chi2 = Chi2InModuleFrame();
+  // G4int dof = nHits - 4;
+  // m_currentRecEvent.SetChi2(chi2);
+  // m_currentRecEvent.SetDof(dof);
 
   switch (m_fitMethod) {
   case blobel:
@@ -133,7 +133,7 @@ void RES_TrackFitter::SmearHits()
     G4RotationMatrix forwardRotation(angle, 0., 0.);
     G4RotationMatrix backwardRotation(-angle, 0., 0.);
 
-    if (m_verbose > 0)
+    if (m_verbose > 1)
       G4cout << "original hit: " << i << " --> " << hit << G4endl;
 
     hit = forwardRotation*hit;
@@ -145,7 +145,7 @@ void RES_TrackFitter::SmearHits()
 
     m_smearedHits[i] = hit;
   }
-  if (m_verbose >0)
+  if (m_verbose > 1)
     for (int i = 0; i < nHits; i++)
       G4cout << "smeared hit: " << i << " --> " << m_smearedHits[i] << G4endl;
 
@@ -161,7 +161,8 @@ void RES_TrackFitter::SetStartParametesToGeneratedParticle()
   G4double z0 = m_currentGenEvent.GetHitPosition(0).z();
   G4double z1 = m_currentGenEvent.GetHitPosition(1).z();
 
-  m_parameter[0] = p;
+  // there is something wrong here: it should be pt instead of p (left unfixed because this method is not used at the moment)
+  m_parameter[0] = 1./p;
   m_parameter[1] = y0;
   m_parameter[2] = atan((y1-y0)/(z1-z0));
   m_parameter[3] = x0;
@@ -272,7 +273,7 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
   dxdz = solution(2);
   dydz = solution(3);
 
-  if (m_verbose > 0) {
+  if (m_verbose > 1) {
     G4cout << "covariance matrix for this fit:" << G4endl;
     TMatrixD Lin(2*nRow,nCol);
     for (int i = 0; i < 2*nRow; i++)
@@ -282,7 +283,6 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
       Lin(i,i%2)     = 1.;
       Lin(i,(i%2)+2) = k[i/2];
     }
-    //    (Lin*solution).Print();
     TMatrixD LinTrans(nCol, 2*nRow);
     LinTrans.Transpose(Lin);
     TMatrixD Cov(2*nRow, 2*nRow);
@@ -311,13 +311,13 @@ void RES_TrackFitter::CalculateStartParameters()
   G4double* y = new G4double[nHits];
   G4double* z = new G4double[nHits];
 
+  for (int i = 0; i < nHits; i++)
+    k[i] = m_smearedHits[i].z() - z0;
+
   G4double x0_top,y0_top,dx_over_dz_top,dy_over_dz_top;
   FitStraightLine(0, nHits/2, x0_top, y0_top, dx_over_dz_top, dy_over_dz_top);
   G4double x0_bottom,y0_bottom,dx_over_dz_bottom,dy_over_dz_bottom;
   FitStraightLine(nHits/2, nHits, x0_bottom, y0_bottom, dx_over_dz_bottom, dy_over_dz_bottom);
-
-  for (int i = 0; i < nHits; i++)
-    k[i] = m_smearedHits[i].z() - z0;
 
   for (int i = 0; i < nHits; i++) {
     if (i < nHits/2) {
@@ -331,15 +331,13 @@ void RES_TrackFitter::CalculateStartParameters()
       z[i] = z0 + k[i];
     }
   }
+  G4double phi = atan(dy_over_dz_top);
+  G4double theta = atan(-dx_over_dz_top*cos(phi));
+ 
+
 
   // G4double x0,y0,dx_over_dz,dy_over_dz;
   // FitStraightLine(0, nHits, x0, y0, dx_over_dz, dy_over_dz);
-
-  for (int i = 0; i < nHits; i++)
-    k[i] = m_smearedHits[i].z() - z0;
-
-  G4double xCorrection[8] = {9.52*mm, 9.07*mm, 2.46*mm, 2.01*mm, -2.08*mm, -2.53*mm, -9.13*mm, -9.58*mm};
-  G4double yCorrection[8] = {-0.42*mm, -0.39*mm, 0.08*mm, 0.11*mm, 0.12*mm, 0.08*mm, -0.39*mm, -0.43*mm};
 
   // for (int i = 0; i < nHits; i++) {
   //   x[i] = x0 + k[i] * dx_over_dz;
@@ -348,11 +346,11 @@ void RES_TrackFitter::CalculateStartParameters()
   //   // x[i] += xCorrection[i];
   //   // y[i] += yCorrection[i];
   // }
-
-  G4double phi = atan(dy_over_dz_top);
-  G4double theta = atan(-dx_over_dz_top*cos(phi));
+  // G4double phi = atan(dy_over_dz);
+  // G4double theta = atan(-dx_over_dz*cos(phi));
  
-  if (m_verbose > 0) {
+
+  if (m_verbose > 1) {
     G4cout << "straight line fit:" << G4endl;
     for (int i = 0; i < nHits; i++) {
       G4cout << "i: " << i << " x: " << x[i] << " y: " << y[i] << " z: " << z[i] << G4endl;
@@ -378,30 +376,27 @@ void RES_TrackFitter::CalculateStartParameters()
 
   //   m_smearedHits[i] = backwardRotation*m_smearedHits[i];
 
-  //   if (m_verbose > 0)
+  //   if (m_verbose > 1)
   //     G4cout << "restored hit: " << i << " --> " << m_smearedHits[i] << G4endl;
   // }
 
-  G4double deltaTheta = dy_over_dz_top - dy_over_dz_bottom;
+  G4double deltaTheta = fabs(dy_over_dz_bottom - dy_over_dz_top);
 
-  // G4double deltaTheta = fabs(  (m_smearedHits[7].y()-m_smearedHits[4].y())/(m_smearedHits[7].z()-m_smearedHits[4].z())
-  //                            - (m_smearedHits[3].y()-m_smearedHits[0].y())/(m_smearedHits[3].z()-m_smearedHits[0].z()));
-  G4double B = 0.3;
-  G4double L = sqrt(pow(m_smearedHits[4].y()-m_smearedHits[3].y(),2.) + pow(m_smearedHits[4].z()-m_smearedHits[3].z(),2.))/m;
+  G4double B = 0.27;
+  G4double L = sqrt(pow(y[4]-y[3],2.) + pow(z[4]-z[3],2.))/m;
   G4double p = 0.3*B*L/deltaTheta*GeV;
-  //  p = 100000*GeV;
 
-  m_parameter[0] = p;
+  m_parameter[0] = 1./p;
   m_parameter[1] = y[0];
   m_parameter[2] = phi;
   m_parameter[3] = x[0];
   m_parameter[4] = theta;
 
-  G4double sigmaEllipsis = 5.*mm;
+  G4double sigmaEllipsis = 1.*mm;
   G4double sigmaPhi   = sqrt(2) * m_sigmaV      / ((z[1]-z[0])*(1 + pow((y[1]-y[0])/(z[1]-z[0]),2.0)));
   G4double sigmaTheta = sqrt(2) * sigmaEllipsis / ((z[1]-z[0])*(1 + pow((x[1]-x[0])/(z[1]-z[0]),2.0)));
 
-  m_step[0] = 0.2*p;
+  m_step[0] = 0.1*m_parameter[0];
   m_step[1] = m_sigmaV;
   m_step[2] = sigmaPhi;
   m_step[3] = sigmaEllipsis;
@@ -445,7 +440,8 @@ G4int RES_TrackFitter::DoBlobelFit(G4int npar)
   }
 
   G4int nHits = m_currentGenEvent.GetNbOfHits();
-  G4double dof = nHits - npar;
+  // npar has been put to -npar before
+  G4double dof = nHits - (-npar);
   m_currentRecEvent.SetChi2(chi2);
   m_currentRecEvent.SetDof(dof);
 
@@ -463,21 +459,23 @@ G4int RES_TrackFitter::DoMinuitFit(G4int npar)
   arglist[0] = 1.;
   gMinuit->mnexcm("SET ERR", arglist, 1, ierflg);
   
-  G4String names[5] = {"pt", "y0", "phi", "x0", "theta"};
+  G4String names[5] = {"1/pt", "y0", "phi", "x0", "theta"};
   for (int i = 0; i < npar; i++)
     gMinuit->mnparm(i, names[i].c_str(), m_parameter[i], m_step[i], m_lowerBound[i], m_upperBound[i], ierflg);
 
   // Now ready for minimization step
   arglist[0] = 500;
   arglist[1] = 1.;
-  gMinuit->mnexcm("SIMPLEX", arglist, 2, ierflg);
-  // gMinuit->mnexcm("MIGRAD", arglist, 2, ierflg);
+  //gMinuit->mnexcm("SIMPLEX", arglist, 2, ierflg);
+  gMinuit->mnexcm("MIGRAD", arglist, 2, ierflg);
 
-  // // Print results
-  // Double_t amin,edm,errdef;
-  // Int_t nvpar,nparx,icstat;
-  // gMinuit->mnstat(amin,edm,errdef,nvpar,nparx,icstat);
-  // gMinuit->mnprin(3,amin);
+  if (m_verbose > 0) {
+    // Print results
+    Double_t amin,edm,errdef;
+    Int_t nvpar,nparx,icstat;
+    gMinuit->mnstat(amin,edm,errdef,nvpar,nparx,icstat);
+    gMinuit->mnprin(3,amin);
+  }
 
   // in this step a new rec event will be created with (hopefully) identical properties than the result of the minimization. this should be done properly in the future...
   G4double chi2 = Chi2InModuleFrame();
@@ -499,11 +497,11 @@ G4double RES_TrackFitter::Chi2InDetFrame()
 
   G4double chi2 = 0.;
     
-  double pt    = m_parameter[0];
-  double y0    = m_parameter[1];
-  double phi   = m_parameter[2];
-  double x0    = m_parameter[3];
-  double theta = m_parameter[4];
+  G4double pt    = 1./m_parameter[0];
+  G4double y0    = m_parameter[1];
+  G4double phi   = m_parameter[2];
+  G4double x0    = m_parameter[3];
+  G4double theta = m_parameter[4];
   
   G4ThreeVector direction(sin(theta), -cos(theta)*sin(phi), -cos(theta)*cos(phi));
   G4ThreeVector position(x0, y0, m_smearedHits[0].z());
@@ -553,21 +551,12 @@ G4double RES_TrackFitter::Chi2InModuleFrame()
 
   G4double chi2 = 0.;
     
-  double pt    = m_parameter[0];
-  double y0    = m_parameter[1];
-  double phi   = m_parameter[2];
-  double x0    = m_parameter[3];
-  double theta = m_parameter[4];
+  G4double pt    = 1./m_parameter[0];
+  G4double y0    = m_parameter[1];
+  G4double phi   = m_parameter[2];
+  G4double x0    = m_parameter[3];
+  G4double theta = m_parameter[4];
 
-  
-  // G4cout << "calculating chi with: " << G4endl
-  //        << "pt = " << pt << G4endl
-  //        << "y0 = " << y0 << G4endl
-  //        << "phi = " << phi << G4endl
-  //        << "x0 = " << x0 << G4endl
-  //        << "theta = " << theta << G4endl;
-
-    
   G4ThreeVector direction(sin(theta), -cos(theta)*sin(phi), -cos(theta)*cos(phi));
   G4ThreeVector position(x0, y0, m_smearedHits[0].z());
   position -= 1.*cm * direction;

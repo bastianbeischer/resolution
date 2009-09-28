@@ -47,6 +47,7 @@ int main(int argc, char** argv)
   // double momRes = calculatePrediction(&genMom, 0);
   // TH1D resHist("resHist", "resHist", 100, 1. - 5.*momRes, 1. + 5.*momRes);    
   TH1D resHist("resHist", "resHist", 100, 0.5, 1.5);    
+  TH1D ptHist("ptHist", "ptHist", 100, 0.5, 1.5);    
   int nHits = genEvent->GetNbOfHits();
   TH1D** xHist = new TH1D*[nHits];
   for (int i = 0;i < nHits; i++) {
@@ -64,7 +65,7 @@ int main(int argc, char** argv)
   TH1D totalXhist("totalXhist", "totalXhist", 100, -20, 20);
   TH1D totalYhist("totalYhist", "totalYhist", 100, -1.0, 1.0);
 
-  TH1D chi2Hist("chi2Hist", "chi2Hist", 100, 0.0, 25.0);
+  TH1D chi2Hist("chi2Hist", "chi2Hist", 500, 0.0, 100.0);
 
   char title[128];
   sprintf(title, "#chi^{2} Distribution (dof = %d)", recEvent->GetDof());
@@ -78,8 +79,9 @@ int main(int argc, char** argv)
     int nHitsRec = recEvent->GetNbOfHits();
     if (nHits == 0 || nHitsGen != nHitsRec) continue;
     //    std::cout << "rec mom: " << recEvent->GetMomentum() << "  --> frac: " << genEvent->GetMomentum()/recEvent->GetMomentum() << std::endl;
-    //    std::cout << i << " --> rec pos: " << recEvent->GetHitPosition(0).x() << "  <--> sim pos: " << genEvent->GetHitPosition(0).x() << std::endl;
+    //    std::cout << i << " --> rec pos: " << recEvent->GetHitPosition(0).x() << "  <--> sim pos: " << genEvent->GetHitPosition(0).x() << " <--> chi2: " << recEvent->GetChi2() << ", dof: " << recEvent->GetDof() << std::endl;
     resHist.Fill(genEvent->GetMomentum()/recEvent->GetMomentum());
+    ptHist.Fill(genEvent->GetTransverseMomentum()/recEvent->GetTransverseMomentum());
     for (int i = 0; i < nHitsRec; i++) {
       xHist[i]->Fill(genEvent->GetHitPosition(i).x() - recEvent->GetHitPosition(i).x());
       yHist[i]->Fill(genEvent->GetHitPosition(i).y() - recEvent->GetHitPosition(i).y());
@@ -87,14 +89,23 @@ int main(int argc, char** argv)
       totalYhist.Fill(genEvent->GetHitPosition(i).y() - recEvent->GetHitPosition(i).y());
     }
     chi2Hist.Fill(recEvent->GetChi2());
+    char title[128];
+    sprintf(title, "#chi^{2} Distribution (dof = %d)", recEvent->GetDof());
+    chi2Hist.SetTitle(title);
   }
 
 
   TCanvas canvas("canvas", "canvas", 1024, 768);
   canvas.Draw();
+  canvas.Divide(1,2);
+  canvas.cd(1);
   resHist.Draw();
   resHist.GetXaxis()->SetTitle("p_{sim}/p_{rec}");
   resHist.GetYaxis()->SetTitle("N");
+  canvas.cd(2);
+  ptHist.Draw();
+  ptHist.GetXaxis()->SetTitle("pt_{sim}/pt_{rec}");
+  ptHist.GetYaxis()->SetTitle("N");
 
   TCanvas canvas2("canvas2", "canvas2", 1024, 768);
   canvas2.Divide(nHits/2,2);

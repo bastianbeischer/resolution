@@ -40,8 +40,9 @@ void RES_EventActionReconstruction::EndOfEventAction(const G4Event* event)
   recEvent.SetEventType(reconstructed);
 
   G4PrimaryParticle* primary = event->GetPrimaryVertex()->GetPrimary();
-  G4double momentum = primary->GetMomentum().mag();
-  recEvent.SetMomentum(momentum);
+  G4ThreeVector momentum = primary->GetMomentum();
+  recEvent.SetMomentum(momentum.mag());
+  recEvent.SetTransverseMomentum(sqrt(momentum.y()*momentum.y() + momentum.z()*momentum.z()));
 
   m_trackFitter->SetCurrentRecEvent(recEvent);
 }

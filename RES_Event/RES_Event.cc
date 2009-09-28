@@ -7,6 +7,7 @@ RES_Event::RES_Event() :
   m_moduleID(0),
   m_fiberID(0),
   m_hits(0),
+  m_transverseMomentum(0.),
   m_momentum(0.),
   m_eventType(generated),
   m_chi2(0.),
@@ -23,6 +24,7 @@ RES_Event::RES_Event(const RES_Event& other)
   for (unsigned int i = 0; i < other.m_hits.size(); i++) {
     m_hits.push_back(other.m_hits.at(i));
   }
+  m_transverseMomentum = other.m_transverseMomentum;
   m_momentum = other.m_momentum;
   m_eventType = other.m_eventType;
   m_chi2 = other.m_chi2;
@@ -42,6 +44,7 @@ const RES_Event& RES_Event::operator=(const RES_Event& right)
   for (unsigned int i = 0; i < right.m_hits.size(); i++) {
     m_hits.push_back(right.m_hits.at(i));
   }
+  m_transverseMomentum = right.m_transverseMomentum;
   m_momentum = right.m_momentum;
   m_eventType = right.m_eventType;
   m_chi2 = right.m_chi2;

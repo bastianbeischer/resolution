@@ -46,8 +46,9 @@ void RES_EventActionGeneration::EndOfEventAction(const G4Event* event)
     newEvent.SetEventType(generated);
 
     G4PrimaryParticle* primary = event->GetPrimaryVertex()->GetPrimary();
-    G4double momentum = primary->GetMomentum().mag();
-    newEvent.SetMomentum(momentum);
+    G4ThreeVector momentum = primary->GetMomentum();
+    newEvent.SetMomentum(momentum.mag());
+    newEvent.SetTransverseMomentum(sqrt(momentum.y()*momentum.y() + momentum.z()*momentum.z()));
 
     dataHandler->AddEvent(newEvent);
   }
