@@ -10,7 +10,18 @@
 #include <TF1.h>
 #include <TTree.h>
 #include <TH1D.h>
+#include <TMath.h>
 #include <TCanvas.h>
+
+
+double chi2dist(double*x, double*p)
+{
+  double amplitude = p[0];
+  double ndf = p[1];
+  double nom = pow(x[0],ndf/2. - 1.) * exp(-x[0]/2.);
+  double denom = pow(2., ndf/2.) * TMath::Gamma(ndf/2.);
+  return amplitude*nom/denom;
+}
 
 double calculatePrediction(double* x, double* p)
 {
@@ -150,11 +161,19 @@ int main(int argc, char** argv)
   totalYhist.GetXaxis()->SetTitle("(y_{sim,total} - y_{rec,total}) / mm");
   totalYhist.GetYaxis()->SetTitle("N");
 
+  TF1 chi2Dist("chi2Dist", chi2dist, 0.0, 100.0, 2);
+  //  chi2Dist.SetParameter(0,recEvent->GetDof());
+
+  chi2Dist.SetParameters(1000, 3);
+
   TCanvas canvas5("canvas5", "canvas5", 1024, 768);
   canvas5.Draw();
   chi2Hist.Draw();
-  chi2Hist.GetXaxis()->SetTitle("#chi^{2}/dof");
+  chi2Hist.GetXaxis()->SetTitle("#chi^{2}");
   chi2Hist.GetYaxis()->SetTitle("N");
+  chi2Hist.Fit(&chi2Dist, "E");
+  chi2Dist.Draw("SAME");
+  chi2Dist.SetLineColor(kRed);
 
   app.Run();
 
