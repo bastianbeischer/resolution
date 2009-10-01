@@ -288,7 +288,15 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
     TMatrixD Cov(2*nRow, 2*nRow);
     Cov = Lin * Minv * LinTrans;
 
-    Cov.Print();
+    for (int i = 0; i < nHits; i++) {
+      G4cout << "resolution in x" << i << " --> " << sqrt(Cov(2*i,2*i)) << " mm" << G4endl;
+      G4cout << "resolution in y" << i << " --> " << sqrt(Cov(2*i+1,2*i+1)) << " mm" << G4endl;
+    }
+
+    if (m_verbose > 2)
+      Cov.Print();
+    
+
   }
 
   delete[] k;
@@ -335,7 +343,6 @@ void RES_TrackFitter::CalculateStartParameters()
   G4double theta = atan(-dx_over_dz_top*cos(phi));
  
 
-
   // G4double x0,y0,dx_over_dz,dy_over_dz;
   // FitStraightLine(0, nHits, x0, y0, dx_over_dz, dy_over_dz);
 
@@ -348,6 +355,9 @@ void RES_TrackFitter::CalculateStartParameters()
   // }
   // G4double phi = atan(dy_over_dz);
   // G4double theta = atan(-dx_over_dz*cos(phi));
+
+  // G4double dy_over_dz_top = dy_over_dz;
+  // G4double dy_over_dz_bottom = dy_over_dz;
  
 
   if (m_verbose > 1) {
