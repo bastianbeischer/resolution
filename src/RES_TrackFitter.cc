@@ -237,7 +237,7 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
     Rot(1,0) = -sin(angle);
     Rot(1,1) = cos(angle);
     TMatrixD V1(2,2);
-    V1(0,0) = m_sigmaU*m_sigmaU;
+    V1(0,0) = 0.;
     V1(0,1) = 0.;
     V1(1,0) = 0.;
     V1(1,1) = m_sigmaV*m_sigmaV;
@@ -587,7 +587,7 @@ G4double RES_TrackFitter::Chi2InModuleFrame()
     
     G4double du = m_smearedHits[i].x() - hit.x();
     G4double dv = m_smearedHits[i].y() - hit.y();
-    chi2 += pow(du/m_sigmaU,2.);
+    //chi2 += pow(du/m_sigmaU,2.);
     chi2 += pow(dv/m_sigmaV,2.);
 
     m_smearedHits[i] = backwardRotation*m_smearedHits[i];
