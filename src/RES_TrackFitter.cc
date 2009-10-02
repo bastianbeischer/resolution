@@ -137,6 +137,7 @@ void RES_TrackFitter::SmearHits()
       G4cout << "original hit: " << i << " --> " << hit << G4endl;
 
     hit = forwardRotation*hit;
+    //    hit.setX(CLHEP::RandFlat::shoot());
     //    hit.setX(CLHEP::RandGauss::shoot(0., m_sigmaU));
     hit.setX(0.);
     hit.setY(CLHEP::RandGauss::shoot(hit.y(), m_sigmaV));
