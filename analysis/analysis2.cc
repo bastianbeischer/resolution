@@ -82,7 +82,7 @@ int main(int argc, char** argv)
   double Linner = 0.08;  // in m
   double Lup   = 0.14;   // in m
   double Ldown = 0.14;   // in m
-  double magField = 0.25; // in T
+  double magField = 0.27; // in T
   //double m = 0.511e-3; // electron mass in GeV
   double m = 0.0; // geantino mass in GeV
   double sigmaModule = 50e-6/sqrt(2);
@@ -92,7 +92,7 @@ int main(int argc, char** argv)
 
   for (int i = 0; i < N; i++) {
     char filename[100];
-    sprintf(filename, "../results/perdaix_%d.root", i+1);
+    sprintf(filename, "../results/perdaix_%d_GeV_5_deg.root", i+1);
     file[i] = new TFile(filename, "OPEN");
     genTree = (TTree*) file[i]->Get("resolution_gen_tree");
     recTree = (TTree*) file[i]->Get("resolution_rec_tree");
@@ -100,12 +100,12 @@ int main(int argc, char** argv)
     recTree->SetBranchAddress("event", &recEvent);
     genTree->GetEntry(0);
     double genMom = genEvent->GetMomentum()/1000.;
-    //    double momRes = calculatePrediction(&genMom, 0);
+    double momRes = analyticalFormula2.Eval(genMom); //calculatePrediction(&genMom, 0);
     momentum[i] = genMom;
     momentumErr[i] = 0.;
 
-    //    resHist = TH1D("resHist", "resHist", 30, 1. - 5.*momRes, 1. + 5.*momRes);    
-    resHist = TH1D("resHist", "resHist", 100, -0.5, 2.5);
+    resHist = TH1D("resHist", "resHist", 100, 1. - 5.*momRes, 1. + 5.*momRes);    
+    //    resHist = TH1D("resHist", "resHist", 100, -0.5, 2.5);
     for(int j = 0; j < genTree->GetEntries(); j++) {
       genTree->GetEntry(j);
       recTree->GetEntry(j);
@@ -128,14 +128,16 @@ int main(int argc, char** argv)
   TLegend legend(0.2, 0.6, 0.4, 0.8);
   legend.AddEntry(&graph, "results of simulation", "P");
   //  legend.AddEntry(&prediction, "theoretical prediction", "L");
-  legend.AddEntry(&analyticalFormula, "previous result", "L");
-  legend.AddEntry(&analyticalFormula2, "previous result w/o multiple scattering", "L");
+  legend.AddEntry(&analyticalFormula, "expectation", "L");
+  legend.AddEntry(&analyticalFormula2, "expectation w/o multiple scattering", "L");
 
   analyticalFormula2.SetLineStyle(2);
 
   TCanvas canvas("canvas", "canvas", 1024, 768);
   canvas.Draw();
   canvas.cd();
+  canvas.SetGridx();
+  canvas.SetGridy();
   graph.Draw("AP");
   analyticalFormula.Draw("SAME");
   analyticalFormula2.Draw("SAME");

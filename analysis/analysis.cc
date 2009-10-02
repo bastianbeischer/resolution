@@ -13,6 +13,38 @@
 #include <TMath.h>
 #include <TCanvas.h>
 
+double MS(double p, double m, double L, double X0) {
+  double beta = p / sqrt(p*p + m*m);
+  return 13.6e-3/(beta*p) * sqrt(X0) * L;
+}
+
+
+double analytical(double*x, double* p)
+{
+  double mom = x[0];
+  double mass = p[0];
+  double Lup = p[1];
+  double Ldown = p[2];
+  double Linner = p[3];
+  double B = p[4];
+  double X0 = p[5];
+  double sigma = p[6];
+
+  double soUp = sigma;
+  double siUp = sigma;
+  double siDown = sqrt( pow(sigma, 2.0) + pow(MS(mom,mass,Linner,X0), 2.0) );
+  double soDown = sqrt( pow(sigma, 2.0) + pow(MS(mom,mass,Ldown, X0), 2.0) );
+
+  double part1 = mom*mom / (0.3*Linner*B);
+  double part2 = 1.0/(Lup*Ldown) * sqrt(pow(soUp*Ldown, 2.0) +
+                                        pow(siUp*Ldown, 2.0) +
+                                        pow(siDown*Lup, 2.0) +
+                                        pow(soDown*Lup, 2.0));
+
+  double sigmaP = part1*part2;
+
+  return sigmaP/mom;
+}
 
 double chi2dist(double*x, double*p)
 {
@@ -39,7 +71,7 @@ int main(int argc, char** argv)
   const char* filename = argv[1];
 
   TApplication app("app", &argc, argv);
-  
+
   MyROOTStyle myStyle("myStyle");
   myStyle.cd();
 
@@ -55,10 +87,20 @@ int main(int argc, char** argv)
   genTree->GetEntry(0);
   recTree->GetEntry(0);
   double genMom = genEvent->GetMomentum()/1000.;
-  // double momRes = calculatePrediction(&genMom, 0);
-  // TH1D resHist("resHist", "resHist", 100, 1. - 5.*momRes, 1. + 5.*momRes);    
-  TH1D resHist("resHist", "resHist", 100, 0.5, 1.5);    
-  TH1D ptHist("ptHist", "ptHist", 100, 0.5, 1.5);    
+  TF1 analyticalFormula("analyticalFormula", analytical, 0., 100., 7);
+  double X0 = 0.0046875; // number of radiation lengths in fibers
+  double Linner = 0.08;  // in m
+  double Lup   = 0.14;   // in m
+  double Ldown = 0.14;   // in m
+  double magField = 0.25; // in T
+  //double m = 0.511e-3; // electron mass in GeV
+  double m = 0.0; // geantino mass in GeV
+  double sigmaModule = 50e-6/sqrt(2);
+  analyticalFormula.SetParameters(m, Lup, Ldown, Linner, magField, 0., sigmaModule);
+  double momRes = analyticalFormula.Eval(genMom);
+  TH1D resHist("resHist", "resHist", 100, 1. - 5.*momRes, 1. + 5.*momRes);
+  //  TH1D resHist("resHist", "resHist", 100, 0.5, 1.5);
+  TH1D ptHist("ptHist", "ptHist", 100, 1. - 5.*momRes, 1. + 5.*momRes);
   int nHits = genEvent->GetNbOfHits();
   TH1D** xHist = new TH1D*[nHits];
   for (int i = 0;i < nHits; i++) {
@@ -129,7 +171,7 @@ int main(int argc, char** argv)
     xHist[i]->Draw();
     xHist[i]->GetXaxis()->SetTitle(xtitle);
     xHist[i]->GetYaxis()->SetTitle("N");
-    xHist[i]->Fit("gaus", "Q");
+    xHist[i]->Fit("gaus", "EQR", "", 0.1, 1. + 5*momRes);
     TF1* fitFunc = xHist[i]->GetFunction("gaus");
     std::cout << "x" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
   }
