@@ -76,10 +76,10 @@ RES_Event RES_TrackFitter::Fit()
 
   G4int conv = -1;
 
-  // G4double chi2 = Chi2InModuleFrame();
-  // G4int dof = nHits - 4;
-  // m_currentRecEvent.SetChi2(chi2);
-  // m_currentRecEvent.SetDof(dof);
+  G4double chi2 = Chi2InModuleFrame();
+  G4int dof = nHits - 4;
+  m_currentRecEvent.SetChi2(chi2);
+  m_currentRecEvent.SetDof(dof);
 
   switch (m_fitMethod) {
   case blobel:
@@ -274,7 +274,7 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
   dydz = solution(3);
 
   if (m_verbose > 1) {
-    G4cout << "covariance matrix for this fit:" << G4endl;
+
     TMatrixD Lin(2*nRow,nCol);
     for (int i = 0; i < 2*nRow; i++)
       for (int j = 0; j < nCol; j++)
@@ -288,13 +288,15 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
     TMatrixD Cov(2*nRow, 2*nRow);
     Cov = Lin * Minv * LinTrans;
 
-    for (int i = 0; i < nHits; i++) {
+    for (int i = 0; i < nHits; i++)
       G4cout << "resolution in x" << i << " --> " << sqrt(Cov(2*i,2*i)) << " mm" << G4endl;
+    for (int i = 0; i < nHits; i++)
       G4cout << "resolution in y" << i << " --> " << sqrt(Cov(2*i+1,2*i+1)) << " mm" << G4endl;
-    }
 
-    if (m_verbose > 2)
+    if (m_verbose > 2) {
+      G4cout << "covariance matrix for this fit:" << G4endl;
       Cov.Print();
+    }
     
 
   }
@@ -322,43 +324,43 @@ void RES_TrackFitter::CalculateStartParameters()
   for (int i = 0; i < nHits; i++)
     k[i] = m_smearedHits[i].z() - z0;
 
-  G4double x0_top,y0_top,dx_over_dz_top,dy_over_dz_top;
-  FitStraightLine(0, nHits/2, x0_top, y0_top, dx_over_dz_top, dy_over_dz_top);
-  G4double x0_bottom,y0_bottom,dx_over_dz_bottom,dy_over_dz_bottom;
-  FitStraightLine(nHits/2, nHits, x0_bottom, y0_bottom, dx_over_dz_bottom, dy_over_dz_bottom);
+  G4double dx_over_dz_top = 0., dx_over_dz_bottom = 0., dy_over_dz_top = 0., dy_over_dz_bottom = 0.;
+  if (m_fitMethod == oneline) {
+    G4double x0,y0,dx_over_dz,dy_over_dz;
+    FitStraightLine(0, nHits, x0, y0, dx_over_dz, dy_over_dz);
 
-  for (int i = 0; i < nHits; i++) {
-    if (i < nHits/2) {
-      x[i] = x0_top + k[i] * dx_over_dz_top;
-      y[i] = y0_top + k[i] * dy_over_dz_top;
+    for (int i = 0; i < nHits; i++) {
+      x[i] = x0 + k[i] * dx_over_dz;
+      y[i] = y0 + k[i] * dy_over_dz;
       z[i] = z0 + k[i];
     }
-    else {
-      x[i] = x0_bottom + k[i] * dx_over_dz_bottom;
-      y[i] = y0_bottom + k[i] * dy_over_dz_bottom;
-      z[i] = z0 + k[i];
+    dx_over_dz_top = dx_over_dz;
+    dx_over_dz_bottom = dx_over_dz;
+    dy_over_dz_top = dy_over_dz;
+    dy_over_dz_bottom = dy_over_dz;
+  }
+  else {
+    G4double x0_top,y0_top;
+    FitStraightLine(0, nHits/2, x0_top, y0_top, dx_over_dz_top, dy_over_dz_top);
+    G4double x0_bottom,y0_bottom;
+    FitStraightLine(nHits/2, nHits, x0_bottom, y0_bottom, dx_over_dz_bottom, dy_over_dz_bottom);
+
+    for (int i = 0; i < nHits; i++) {
+      if (i < nHits/2) {
+        x[i] = x0_top + k[i] * dx_over_dz_top;
+        y[i] = y0_top + k[i] * dy_over_dz_top;
+        z[i] = z0 + k[i];
+      }
+      else {
+        x[i] = x0_bottom + k[i] * dx_over_dz_bottom;
+        y[i] = y0_bottom + k[i] * dy_over_dz_bottom;
+        z[i] = z0 + k[i];
+      }
     }
   }
+
   G4double phi = atan(dy_over_dz_top);
   G4double theta = atan(-dx_over_dz_top*cos(phi));
- 
-
-  // G4double x0,y0,dx_over_dz,dy_over_dz;
-  // FitStraightLine(0, nHits, x0, y0, dx_over_dz, dy_over_dz);
-
-  // for (int i = 0; i < nHits; i++) {
-  //   x[i] = x0 + k[i] * dx_over_dz;
-  //   y[i] = y0 + k[i] * dy_over_dz;
-  //   z[i] = z0 + k[i];
-  //   // x[i] += xCorrection[i];
-  //   // y[i] += yCorrection[i];
-  // }
-  // G4double phi = atan(dy_over_dz);
-  // G4double theta = atan(-dx_over_dz*cos(phi));
-
-  // G4double dy_over_dz_top = dy_over_dz;
-  // G4double dy_over_dz_bottom = dy_over_dz;
- 
 
   if (m_verbose > 1) {
     G4cout << "straight line fit:" << G4endl;
@@ -395,6 +397,8 @@ void RES_TrackFitter::CalculateStartParameters()
   G4double B = 0.27;
   G4double L = sqrt(pow(y[4]-y[3],2.) + pow(z[4]-z[3],2.))/m;
   G4double p = 0.3*B*L/deltaTheta*GeV;
+  if (m_fitMethod == oneline)
+    p = 100000000*GeV;
 
   m_parameter[0] = 1./p;
   m_parameter[1] = y[0];
@@ -595,9 +599,10 @@ G4double RES_TrackFitter::Chi2InModuleFrame()
     hit = forwardRotation*hit;
     m_smearedHits[i] = forwardRotation*m_smearedHits[i];
     
-    G4double du = m_smearedHits[i].x() - hit.x();
-    G4double dv = m_smearedHits[i].y() - hit.y();
+    //G4double du = m_smearedHits[i].x() - hit.x();
     //chi2 += pow(du/m_sigmaU,2.);
+
+    G4double dv = m_smearedHits[i].y() - hit.y();
     chi2 += pow(dv/m_sigmaV,2.);
 
     m_smearedHits[i] = backwardRotation*m_smearedHits[i];

@@ -39,10 +39,16 @@ void RES_TrackFitMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
   }
   if (command == m_setFitMethodCmd) {
     FitMethod method;
-    if ((newValue == "Blobel") || (newValue == "blobel") )
+    newValue.toLower();
+    if (newValue == "blobel")
       method = blobel;
-    if ((newValue == "Minuit") || (newValue == "minuit") )
+    if (newValue == "minuit")
       method = minuit;
+    if (newValue == "oneline")
+      method = oneline;
+    if (newValue == "twolines")
+      method = twolines;
+
     m_fitter->SetFitMethod(method);
   }
 }
