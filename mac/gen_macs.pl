@@ -42,17 +42,14 @@ sub make_macro_file{
   open MACROFILE, ">perdaix_${energy}_GeV_${angle}_deg.mac" or die "Error: Cannot make macro file: $!";
 
   print MACROFILE <<EOF;
-
 /control/verbose 1
 /run/verbose 0
 /tracking/verbose 0
 /RES/Fit/Verbose 0
 
-#/RES/Gun/RandomOrigin
+/RES/Gun/RandomOrigin
 /RES/Gun/RandomDirection
 /gun/energy ${energy} GeV
-#/gun/position 0 0 50 cm
-#/gun/direction 0 -2 -400
 
 /control/alias moduleRot -${rotation}
 /control/alias moduleInternalRot ${angle}
@@ -91,7 +88,6 @@ sub make_macro_file{
 
 /RES/Run/Generate ${nEvents}
 /RES/Run/Reconstruct
-
 EOF
 
   close MACROFILE;

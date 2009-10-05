@@ -64,6 +64,8 @@ private:
   G4double                        m_world_z;
 
   G4Material*                     m_module_material;
+  G4Material*                     m_module_fiber_material;
+  G4Material*                     m_module_bulk_material;
   G4double                        m_moduleDefaultWidth;
   G4double                        m_moduleLength;
   G4double                        m_moduleFiberThickness;

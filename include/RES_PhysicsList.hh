@@ -11,6 +11,8 @@ public:
   ~RES_PhysicsList();
 
 private:
+  void ConstructEM();
+
   void ConstructParticle();
   void ConstructProcess();
   void SetCuts();

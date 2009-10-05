@@ -22,14 +22,19 @@ RES_DetectorConstruction::RES_DetectorConstruction() :
   // create the messenger
   m_messenger = new RES_DetectorMessenger(this);
   
-  // define world material and dimensions
+  // define materials
   m_world_material = G4NistManager::Instance()->FindOrBuildMaterial( "G4_AIR" );
+  m_module_material = G4NistManager::Instance()->FindOrBuildMaterial( "G4_AIR" );
+  m_module_bulk_material = G4NistManager::Instance()->FindOrBuildMaterial( "G4_POLYCARBONATE" ); //this has to be refined: 2x 0.1mm polycarbonate, rest: rohacell foam (see bms software)
+  m_module_fiber_material = G4NistManager::Instance()->FindOrBuildMaterial( "G4_POLYSTYRENE" );
+
+  // define world dimensions
   m_world_x = 1.0*m;
   m_world_y = 1.0*m;
   m_world_z = 1.0*m;
 
+
   // define default module parameters
-  m_module_material = m_world_material;
   m_moduleDefaultWidth = 6.912 * cm;
   m_moduleGap = 0.8 * cm;
   m_moduleLength = 30. * cm;
@@ -67,7 +72,7 @@ G4VPhysicalVolume* RES_DetectorConstruction::Construct()
 
     // interior of modules
     G4Box* currentFiberSolid = new G4Box("module_fiber", 0.5*m_moduleLength, 0.5*m_moduleWidth[i], 0.5*m_moduleFiberThickness);
-    G4LogicalVolume* currentFiberLogic = new G4LogicalVolume(currentFiberSolid, m_world_material, "module_fiber", 0, 0, 0);
+    G4LogicalVolume* currentFiberLogic = new G4LogicalVolume(currentFiberSolid, m_module_fiber_material, "module_fiber", 0, 0, 0);
     G4RotationMatrix* currentInternalRotation = new G4RotationMatrix(m_moduleInternalAngles[i], 0., 0.);
     G4PVPlacement* currentUpperFiberPlacement = new G4PVPlacement(0, G4ThreeVector(0, 0, 0.5*m_moduleGap + 0.5*m_moduleFiberThickness), currentFiberLogic, "module_fiber", currentModuleLogic, false, 0);
     G4PVPlacement* currentLowerFiberPlacement = new G4PVPlacement(currentInternalRotation, G4ThreeVector(0, 0, -0.5*m_moduleGap - 0.5*m_moduleFiberThickness), currentFiberLogic, "module_fiber", currentModuleLogic, false, 1);
@@ -77,7 +82,7 @@ G4VPhysicalVolume* RES_DetectorConstruction::Construct()
     m_module_fiber_lower_phys.push_back(currentLowerFiberPlacement);
   
     G4Box* currentBulkSolid = new G4Box("module_bulk", 0.5*m_moduleLength, 0.5*m_moduleWidth[i], 0.5*m_moduleGap);
-    G4LogicalVolume* currentBulkLogic = new G4LogicalVolume(currentBulkSolid, m_world_material, "module_bulk", 0, 0, 0);
+    G4LogicalVolume* currentBulkLogic = new G4LogicalVolume(currentBulkSolid, m_module_bulk_material, "module_bulk", 0, 0, 0);
     G4PVPlacement* currentBulkPlacement = new G4PVPlacement(0, G4ThreeVector(), currentBulkLogic, "module_bulk", currentModuleLogic, false, 0);
     m_module_bulk_solid.push_back(currentBulkSolid);
     m_module_bulk_log.push_back(currentBulkLogic); 

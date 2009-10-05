@@ -153,10 +153,12 @@ int main(int argc, char** argv)
   canvas.Divide(1,2);
   canvas.cd(1);
   resHist.Draw();
+  resHist.Fit("gaus", "EQR", "", 0.1, 1.+5*momRes);
   resHist.GetXaxis()->SetTitle("p_{sim}/p_{rec}");
   resHist.GetYaxis()->SetTitle("N");
   canvas.cd(2);
   ptHist.Draw();
+  ptHist.Fit("gaus", "EQR", "", 0.1, 1.+5*momRes);
   ptHist.GetXaxis()->SetTitle("pt_{sim}/pt_{rec}");
   ptHist.GetYaxis()->SetTitle("N");
 
@@ -171,7 +173,7 @@ int main(int argc, char** argv)
     xHist[i]->Draw();
     xHist[i]->GetXaxis()->SetTitle(xtitle);
     xHist[i]->GetYaxis()->SetTitle("N");
-    xHist[i]->Fit("gaus", "EQR", "", 0.1, 1. + 5*momRes);
+    xHist[i]->Fit("gaus", "Q");
     TF1* fitFunc = xHist[i]->GetFunction("gaus");
     std::cout << "x" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
   }
