@@ -130,7 +130,7 @@ G4bool RES_DetectorConstruction::TrackInAcceptance(G4ThreeVector position, G4Thr
   G4bool retVal = true;
 
   for (unsigned int i = 0; i < m_modulePlacements.size(); i++) {
-    G4double dz = position.z() - m_modulePlacements[i].z();
+    G4double dz = m_modulePlacements[i].z() - position.z();
     G4double l = dz / direction.z();
     G4ThreeVector currentPosition = position + l*direction;
     if (fabs(currentPosition.x() - m_modulePlacements[i].x()) > 0.5*m_moduleLength)   {retVal = false;}
