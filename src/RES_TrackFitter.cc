@@ -298,7 +298,6 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
       G4cout << "covariance matrix for this fit:" << G4endl;
       Cov.Print();
     }
-    
 
   }
 

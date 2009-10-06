@@ -62,13 +62,15 @@ int main(int argc, char** argv)
   MyROOTStyle* myStyle = new MyROOTStyle("myStyle");
   myStyle->cd();
 
-  int N = 10;
+  int N = 89;
 
   TFile** file = new TFile*[N];
-  double* momentum = new double[N];
-  double* momentumErr = new double[N];
-  double* results = new double[N];
-  double* resultsErr = new double[N];
+  double* angle = new double[N];
+  double* angleErr = new double[N];
+  double* sigma = new double[N];
+  double* sigmaErr = new double[N];
+  double* mu = new double[N];
+  double* muErr = new double[N];
 
   TTree* genTree;
   TTree* recTree;
@@ -77,7 +79,6 @@ int main(int argc, char** argv)
   TH1D resHist;
   //  TF1 prediction("prediction", calculatePrediction, 0., 100., 0);
   TF1 analyticalFormula("analyticalFormula", analytical, 0., 100., 7);
-  TF1 analyticalFormula2("analyticalFormula2", analytical, 0., 100., 7);
   double X0 = 0.0046875; // number of radiation lengths in fibers
   double Linner = 0.08;  // in m
   double Lup   = 0.14;   // in m
@@ -87,12 +88,12 @@ int main(int argc, char** argv)
   double m = 0.0; // geantino mass in GeV
   double sigmaModule = 50e-6/sqrt(2);
   analyticalFormula.SetParameters(m, Lup, Ldown, Linner, magField, X0, sigmaModule);
-  analyticalFormula2.SetParameters(m, Lup, Ldown, Linner, magField, 0., sigmaModule);
+  analyticalFormula.SetParameters(m, Lup, Ldown, Linner, magField, 0., sigmaModule);
 
 
   for (int i = 0; i < N; i++) {
     char filename[100];
-    sprintf(filename, "../results/perdaix_%d_GeV_5_deg.root", i+1);
+    sprintf(filename, "../results/perdaix_1_GeV_%d_deg.root", i+1);
     file[i] = new TFile(filename, "OPEN");
     genTree = (TTree*) file[i]->Get("resolution_gen_tree");
     recTree = (TTree*) file[i]->Get("resolution_rec_tree");
@@ -100,58 +101,63 @@ int main(int argc, char** argv)
     recTree->SetBranchAddress("event", &recEvent);
     genTree->GetEntry(0);
     double genMom = genEvent->GetMomentum()/1000.;
-    double momRes = analyticalFormula2.Eval(genMom); //calculatePrediction(&genMom, 0);
-    momentum[i] = genMom;
-    momentumErr[i] = 0.;
+    double momRes = analyticalFormula.Eval(genMom);
+    angle[i] = i+1;
+    angleErr[i] = 0.;
 
     resHist = TH1D("resHist", "resHist", 100, 1. - 5.*momRes, 1. + 5.*momRes);    
-    //    resHist = TH1D("resHist", "resHist", 100, -0.5, 2.5);
     for(int j = 0; j < genTree->GetEntries(); j++) {
       genTree->GetEntry(j);
       recTree->GetEntry(j);
-      resHist.Fill(genEvent->GetMomentum()/recEvent->GetMomentum());
+      resHist.Fill(genEvent->GetMomentum()/recEvent->GetTransverseMomentum());
     }
     resHist.Fit("gaus", "Q0", "", 0.5, 2.5);
-    results[i] = resHist.GetFunction("gaus")->GetParameter(2);
-    resultsErr[i] = resHist.GetFunction("gaus")->GetParError(2);
+    sigma[i] = resHist.GetFunction("gaus")->GetParameter(2);
+    mu[i] = resHist.GetFunction("gaus")->GetParameter(1);
+    sigmaErr[i] = resHist.GetFunction("gaus")->GetParError(2);
+    muErr[i] = resHist.GetFunction("gaus")->GetParError(1);
     file[i]->Close();
   }
 
-  TGraphErrors graph(N, momentum, results, momentumErr, resultsErr);
-  graph.SetMarkerStyle(23);
-  graph.SetMarkerColor(kRed);
-  graph.GetXaxis()->SetTitle("p / GeV");
-  graph.GetYaxis()->SetTitle("#sigma_{p} / p");
-  graph.SetTitle("momentum resolution for perdaix - tracks through center of bending plane, homogeneous field");
-  //  prediction.SetLineWidth(2);
+  TGraphErrors sigmaVsAngleGraph(N, angle, sigma, angleErr, sigmaErr);
+  sigmaVsAngleGraph.SetMarkerStyle(23);
+  sigmaVsAngleGraph.SetMarkerColor(kRed);
+  sigmaVsAngleGraph.GetXaxis()->SetTitle("stereo angle [deg]");
+  sigmaVsAngleGraph.GetYaxis()->SetTitle("#sigma_{p} / p");
+  sigmaVsAngleGraph.SetTitle("momentum resolution for perdaix - homogeneous field");
 
-  TLegend legend(0.2, 0.6, 0.4, 0.8);
-  legend.AddEntry(&graph, "results of simulation", "P");
-  //  legend.AddEntry(&prediction, "theoretical prediction", "L");
-  legend.AddEntry(&analyticalFormula, "expectation", "L");
-  legend.AddEntry(&analyticalFormula2, "expectation w/o multiple scattering", "L");
-
-  analyticalFormula2.SetLineStyle(2);
+  TGraphErrors muVsAngleGraph(N, angle, mu, angleErr, muErr);
+  muVsAngleGraph.SetMarkerStyle(23);
+  muVsAngleGraph.SetMarkerColor(kRed);
+  muVsAngleGraph.GetXaxis()->SetTitle("stereo angle [deg]");
+  muVsAngleGraph.GetYaxis()->SetTitle("#mu_{p_{sim}/p_{rec}}");
+  muVsAngleGraph.SetTitle("distribution of means");
 
   TCanvas canvas("canvas", "canvas", 1024, 768);
   canvas.Draw();
   canvas.cd();
   canvas.SetGridx();
   canvas.SetGridy();
-  graph.Draw("AP");
-  analyticalFormula.Draw("SAME");
-  analyticalFormula2.Draw("SAME");
-  legend.Draw("SAME");
+  sigmaVsAngleGraph.Draw("AP");
+
+  TCanvas canvas2("canvas2", "canvas2", 1024, 768);
+  canvas2.Draw();
+  canvas2.cd();
+  canvas2.SetGridx();
+  canvas2.SetGridy();
+  muVsAngleGraph.Draw("AP");
 
   app->Run();
 
   for (int i = 0; i < N; i++)
     delete file[i];
   delete[] file;
-  delete[] momentum;
-  delete[] results;
-  delete[] momentumErr;
-  delete[] resultsErr;
+  delete[] angle;
+  delete[] sigma;
+  delete[] angleErr;
+  delete[] sigmaErr;
+  delete[] mu;
+  delete[] muErr;
 
   return 1;
 }
