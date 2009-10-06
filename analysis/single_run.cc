@@ -131,7 +131,7 @@ int main(int argc, char** argv)
     int nHitsGen = genEvent->GetNbOfHits();
     int nHitsRec = recEvent->GetNbOfHits();
     if (nHits == 0 || nHitsGen != nHitsRec) continue;
-    resHist.Fill(genEvent->GetMomentum()/recEvent->GetTransverseMomentum());
+    resHist.Fill(genEvent->GetMomentum()/recEvent->GetMomentum());
     ptHist.Fill(genEvent->GetTransverseMomentum()/recEvent->GetTransverseMomentum());
     for (int i = 0; i < nHitsRec; i++) {
       xHist[i]->Fill(genEvent->GetHitPosition(i).x() - recEvent->GetHitPosition(i).x());

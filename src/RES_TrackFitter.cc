@@ -74,8 +74,6 @@ RES_Event RES_TrackFitter::Fit()
   CalculateStartParameters();
   //SetStartParametesToGeneratedParticle();
 
-  G4int conv = -1;
-
   G4double chi2 = Chi2InModuleFrame();
   G4int dof = nHits - 4;
   m_currentRecEvent.SetChi2(chi2);
@@ -83,19 +81,19 @@ RES_Event RES_TrackFitter::Fit()
 
   switch (m_fitMethod) {
   case blobel:
-    conv = DoBlobelFit(5);
+    DoBlobelFit(5);
     break;
   case minuit:
-    conv = DoMinuitFit(5);
+    DoMinuitFit(5);
+    break;
+  case transverse:
+    DoBlobelFit(3);
     break;
   default:
     break;
   }
 
   return m_currentRecEvent;
-
-  // if (conv) return m_currentRecEvent;
-  // else      return RES_Event();
 }
 
 void RES_TrackFitter::SetSpatialResolutions()
@@ -133,8 +131,11 @@ void RES_TrackFitter::SmearHits()
     G4RotationMatrix forwardRotation(angle, 0., 0.);
     G4RotationMatrix backwardRotation(-angle, 0., 0.);
 
-    if (m_verbose > 1)
+    if (m_verbose > 2)
       G4cout << "original hit: " << i << " --> " << hit << G4endl;
+
+    if (m_fitMethod == transverse)
+      hit.setX(0.);
 
     hit = forwardRotation*hit;
     //    hit.setX(CLHEP::RandFlat::shoot());
@@ -146,7 +147,7 @@ void RES_TrackFitter::SmearHits()
 
     m_smearedHits[i] = hit;
   }
-  if (m_verbose > 1)
+  if (m_verbose > 2)
     for (int i = 0; i < nHits; i++)
       G4cout << "smeared hit: " << i << " --> " << m_smearedHits[i] << G4endl;
 
@@ -312,110 +313,138 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
 
 void RES_TrackFitter::CalculateStartParameters()
 {
-  G4int nHits = m_currentGenEvent.GetNbOfHits();
-
-  G4double z0 = 0.;
-
-  G4double* k = new G4double[nHits];
-  G4double* x = new G4double[nHits];
-  G4double* y = new G4double[nHits];
-  G4double* z = new G4double[nHits];
-
-  for (int i = 0; i < nHits; i++)
-    k[i] = m_smearedHits[i].z() - z0;
-
   G4double dx_over_dz_top = 0., dx_over_dz_bottom = 0., dy_over_dz_top = 0., dy_over_dz_bottom = 0.;
-  if (m_fitMethod == oneline) {
-    G4double x0,y0,dx_over_dz,dy_over_dz;
-    FitStraightLine(0, nHits, x0, y0, dx_over_dz, dy_over_dz);
+  
+  if (m_fitMethod == transverse) {
+    dy_over_dz_top = (m_smearedHits[3].y() - m_smearedHits[0].y()) / (m_smearedHits[3].z() - m_smearedHits[0].z());
+    dy_over_dz_bottom = (m_smearedHits[7].y() - m_smearedHits[4].y()) / (m_smearedHits[7].z() - m_smearedHits[4].z());
 
-    for (int i = 0; i < nHits; i++) {
-      x[i] = x0 + k[i] * dx_over_dz;
-      y[i] = y0 + k[i] * dy_over_dz;
-      z[i] = z0 + k[i];
-    }
-    dx_over_dz_top = dx_over_dz;
-    dx_over_dz_bottom = dx_over_dz;
-    dy_over_dz_top = dy_over_dz;
-    dy_over_dz_bottom = dy_over_dz;
+    G4double deltaTheta = fabs(dy_over_dz_bottom - dy_over_dz_top);
+
+    G4double B = 0.27;
+    G4double L = sqrt(pow(m_smearedHits[4].y()-m_smearedHits[3].y(),2.) + pow(m_smearedHits[4].z()-m_smearedHits[3].z(),2.))/m;
+    G4double p = 0.3*B*L/deltaTheta*GeV;
+
+    m_parameter[0] = 1./p;
+    m_parameter[1] = m_smearedHits[0].y();
+    m_parameter[2] = atan(dy_over_dz_top);
+    m_parameter[3] = 0.;
+    m_parameter[4] = 0.;
+
+    for (int i = 0; i < 5; i++)
+      m_step[i] = 0.1*m_parameter[i];
   }
   else {
-    G4double x0_top,y0_top;
-    FitStraightLine(0, nHits/2, x0_top, y0_top, dx_over_dz_top, dy_over_dz_top);
-    G4double x0_bottom,y0_bottom;
-    FitStraightLine(nHits/2, nHits, x0_bottom, y0_bottom, dx_over_dz_bottom, dy_over_dz_bottom);
+    G4int nHits = m_currentGenEvent.GetNbOfHits();
 
-    for (int i = 0; i < nHits; i++) {
-      if (i < nHits/2) {
-        x[i] = x0_top + k[i] * dx_over_dz_top;
-        y[i] = y0_top + k[i] * dy_over_dz_top;
+    G4double z0 = 0.;
+
+    G4double* k = new G4double[nHits];
+    G4double* x = new G4double[nHits];
+    G4double* y = new G4double[nHits];
+    G4double* z = new G4double[nHits];
+
+    for (int i = 0; i < nHits; i++)
+      k[i] = m_smearedHits[i].z() - z0;
+
+
+    if (m_fitMethod == oneline) {
+      G4double x0,y0,dx_over_dz,dy_over_dz;
+      FitStraightLine(0, nHits, x0, y0, dx_over_dz, dy_over_dz);
+
+      for (int i = 0; i < nHits; i++) {
+        x[i] = x0 + k[i] * dx_over_dz;
+        y[i] = y0 + k[i] * dy_over_dz;
         z[i] = z0 + k[i];
       }
-      else {
-        x[i] = x0_bottom + k[i] * dx_over_dz_bottom;
-        y[i] = y0_bottom + k[i] * dy_over_dz_bottom;
-        z[i] = z0 + k[i];
+      dx_over_dz_top = dx_over_dz;
+      dx_over_dz_bottom = dx_over_dz;
+      dy_over_dz_top = dy_over_dz;
+      dy_over_dz_bottom = dy_over_dz;
+    }
+    else {
+      G4double x0_top,y0_top;
+      FitStraightLine(0, nHits/2, x0_top, y0_top, dx_over_dz_top, dy_over_dz_top);
+      G4double x0_bottom,y0_bottom;
+      FitStraightLine(nHits/2, nHits, x0_bottom, y0_bottom, dx_over_dz_bottom, dy_over_dz_bottom);
+
+      for (int i = 0; i < nHits; i++) {
+        if (i < nHits/2) {
+          x[i] = x0_top + k[i] * dx_over_dz_top;
+          y[i] = y0_top + k[i] * dy_over_dz_top;
+          z[i] = z0 + k[i];
+        }
+        else {
+          x[i] = x0_bottom + k[i] * dx_over_dz_bottom;
+          y[i] = y0_bottom + k[i] * dy_over_dz_bottom;
+          z[i] = z0 + k[i];
+        }
       }
     }
-  }
 
-  G4double phi = atan(dy_over_dz_top);
-  G4double theta = atan(-dx_over_dz_top*cos(phi));
+    G4double phi = atan(dy_over_dz_top);
+    G4double theta = atan(-dx_over_dz_top*cos(phi));
 
-  if (m_verbose > 1) {
-    G4cout << "straight line fit:" << G4endl;
-    for (int i = 0; i < nHits; i++) {
-      G4cout << "i: " << i << " x: " << x[i] << " y: " << y[i] << " z: " << z[i] << G4endl;
+    if (m_verbose > 2) {
+      G4cout << "straight line fit:" << G4endl;
+      for (int i = 0; i < nHits; i++) {
+        G4cout << "i: " << i << " x: " << x[i] << " y: " << y[i] << " z: " << z[i] << G4endl;
+      }
     }
-  }
 
-  //restore u components of hits
-  // for (G4int i = 0; i < nHits; i++) {
-  // RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
+    //restore u components of hits
+    // for (G4int i = 0; i < nHits; i++) {
+    // RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
     // G4int iModule = m_currentGenEvent.GetModuleID(i);
     // G4int iFiber  = m_currentGenEvent.GetFiberID(i);
     // G4double angle = det->GetModuleAngle(iModule);
     // if (iFiber > 0) angle += det->GetModuleInternalAngle(iModule);
 
-  //   G4RotationMatrix forwardRotation(angle, 0., 0.);
-  //   G4RotationMatrix backwardRotation(-angle, 0., 0.);
-  //   G4ThreeVector straightLine(x[i],y[i],z[i]);
+    //   G4RotationMatrix forwardRotation(angle, 0., 0.);
+    //   G4RotationMatrix backwardRotation(-angle, 0., 0.);
+    //   G4ThreeVector straightLine(x[i],y[i],z[i]);
 
-  //   m_smearedHits[i] = forwardRotation*m_smearedHits[i];
-  //   straightLine     = forwardRotation*straightLine;
+    //   m_smearedHits[i] = forwardRotation*m_smearedHits[i];
+    //   straightLine     = forwardRotation*straightLine;
 
-  //   // m_smearedHits[i].setX(straightLine.x());
+    //   // m_smearedHits[i].setX(straightLine.x());
 
-  //   m_smearedHits[i] = backwardRotation*m_smearedHits[i];
+    //   m_smearedHits[i] = backwardRotation*m_smearedHits[i];
 
-  //   if (m_verbose > 1)
-  //     G4cout << "restored hit: " << i << " --> " << m_smearedHits[i] << G4endl;
-  // }
+    //   if (m_verbose > 1)
+    //     G4cout << "restored hit: " << i << " --> " << m_smearedHits[i] << G4endl;
+    // }
 
-  G4double deltaTheta = fabs(dy_over_dz_bottom - dy_over_dz_top);
+    G4double deltaTheta = fabs(dy_over_dz_bottom - dy_over_dz_top);
 
-  G4double B = 0.27;
-  G4double L = sqrt(pow(y[4]-y[3],2.) + pow(z[4]-z[3],2.))/m;
-  G4double p = 0.3*B*L/deltaTheta*GeV;
-  if (m_fitMethod == oneline)
-    p = 100000000*GeV;
+    G4double B = 0.27;
+    G4double L = sqrt(pow(y[4]-y[3],2.) + pow(z[4]-z[3],2.))/m;
+    G4double p = 0.3*B*L/deltaTheta*GeV;
+    if (m_fitMethod == oneline)
+      p = 100000000*GeV;
 
-  m_parameter[0] = 1./p;
-  m_parameter[1] = y[0];
-  m_parameter[2] = phi;
-  m_parameter[3] = x[0];
-  m_parameter[4] = theta;
+    m_parameter[0] = 1./p;
+    m_parameter[1] = y[0];
+    m_parameter[2] = phi;
+    m_parameter[3] = x[0];
+    m_parameter[4] = theta;
 
-  G4double sigmaEllipsis = 1.*mm;
-  G4double sigmaPhi   = sqrt(2) * m_sigmaV      / ((z[1]-z[0])*(1 + pow((y[1]-y[0])/(z[1]-z[0]),2.0)));
-  G4double sigmaTheta = sqrt(2) * sigmaEllipsis / ((z[1]-z[0])*(1 + pow((x[1]-x[0])/(z[1]-z[0]),2.0)));
+    G4double sigmaEllipsis = 1.*mm;
+    G4double sigmaPhi   = sqrt(2) * m_sigmaV      / ((z[1]-z[0])*(1 + pow((y[1]-y[0])/(z[1]-z[0]),2.0)));
+    G4double sigmaTheta = sqrt(2) * sigmaEllipsis / ((z[1]-z[0])*(1 + pow((x[1]-x[0])/(z[1]-z[0]),2.0)));
 
-  m_step[0] = 0.1*m_parameter[0];
-  m_step[1] = m_sigmaV;
-  m_step[2] = sigmaPhi;
-  m_step[3] = sigmaEllipsis;
-  m_step[4] = sigmaTheta;
+    delete[] x;
+    delete[] y;
+    delete[] z;
+    delete[] k;
 
+    m_step[0] = 0.1*m_parameter[0];
+    m_step[1] = m_sigmaV;
+    m_step[2] = sigmaPhi;
+    m_step[3] = sigmaEllipsis;
+    m_step[4] = sigmaTheta;
+  }
+  
   for (int i = 0; i < 5; i++) {
     m_lowerBound[i] = m_parameter[i] - 5.*fabs(m_step[i]);
     m_upperBound[i] = m_parameter[i] + 5.*fabs(m_step[i]);
@@ -428,11 +457,7 @@ void RES_TrackFitter::CalculateStartParameters()
       G4cout << "m_parameter["<<i<<"] = " << m_parameter[i] << ", m_step["<<i<<"] = " << m_step[i] << ", m_lowerBound["<<i<<"] = " << m_lowerBound[i] << ", m_upperBound["<<i<<"] = " << m_upperBound[i] << G4endl;
   }
 
-  delete[] x;
-  delete[] y;
-  delete[] z;
-  delete[] k;
-}
+}  
 
 G4int RES_TrackFitter::DoBlobelFit(G4int npar)
 {

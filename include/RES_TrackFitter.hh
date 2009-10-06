@@ -8,7 +8,7 @@
 
 enum FitMethod
 {
-  blobel, minuit, oneline, twolines
+  blobel, minuit, oneline, twolines, transverse
 };
 
 class RES_TrackFitMessenger;

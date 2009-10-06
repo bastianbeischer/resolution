@@ -12,9 +12,11 @@ use strict;
 my $numberOfEventsPerRun = 10000;
 
 my $minEnergy = 1;
-my $maxEnergy = 10; # GeV
-my $minAngle = 5.0;
-my $maxAngle = 5.0;
+my $maxEnergy = 1; # GeV
+my $energyStep = 1;
+my $minAngle = 0.1;
+my $maxAngle = 1.0;
+my $angleStep = 0.1;
 
 my $executable = "resolution";
 
@@ -22,8 +24,8 @@ my $executable = "resolution";
 
 
 
-for (my $angle = $minAngle; $angle <= $maxAngle; ++$angle) {
-    for (my $energy = $minEnergy; $energy <= $maxEnergy; ++$energy) {
+for (my $angle = $minAngle; $angle <= $maxAngle; $angle += $angleStep) {
+    for (my $energy = $minEnergy; $energy <= $maxEnergy; $energy += $energyStep) {
         my $macrofile = &make_macro_file($energy, $angle, $numberOfEventsPerRun);
         print "$macrofile\n";
 

@@ -19,24 +19,23 @@ int main(int argc, char** argv)
   genTree->SetBranchAddress("event", &genEvent);
   recTree->SetBranchAddress("event", &recEvent);
 
-  // std::cout << "Generated events:" << std::endl;
-  // for (unsigned int i = 0; i < genTree->GetEntries(); i++) {
-  //   genTree->GetEntry(i);
-  //   std::cout << "--------------------------------------------------" << std::endl;
-  //   std::cout << "ID: " << genEvent->GetID() << " --> "
-  //             << " p: " << genEvent->GetMomentum()
-  //             << " -----> chi2: " <<  genEvent->GetChi2() << std::endl;
-  //   for (unsigned int j = 0; j < genEvent->GetNbOfHits(); j++) {
-  //     std::cout << " (i,j): (" << genEvent->GetModuleID(j) << ", " << genEvent->GetFiberID(j) << ")"
-  //               << " x: " << genEvent->GetHitPosition(j).x() 
-  //               << " y: " << genEvent->GetHitPosition(j).y()
-  //               << " z: " << genEvent->GetHitPosition(j).z() << std::endl;
-  //   }
-  // }
+  std::cout << "Generated events:" << std::endl;
+  for (unsigned int i = 0; i < genTree->GetEntries(); i++) {
+    genTree->GetEntry(i);
+    std::cout << "--------------------------------------------------" << std::endl;
+    std::cout << "ID: " << genEvent->GetID() << " --> "
+              << " p: " << genEvent->GetMomentum()
+              << " -----> chi2: " <<  genEvent->GetChi2() << std::endl;
+    for (unsigned int j = 0; j < genEvent->GetNbOfHits(); j++) {
+      std::cout << " (i,j): (" << genEvent->GetModuleID(j) << ", " << genEvent->GetFiberID(j) << ")"
+                << " x: " << genEvent->GetHitPosition(j).x() 
+                << " y: " << genEvent->GetHitPosition(j).y()
+                << " z: " << genEvent->GetHitPosition(j).z() << std::endl;
+    }
+  }
 
   std::cout << "Reconstructed events:" << std::endl;
-  //  for (unsigned int i = 0; i < recTree->GetEntries(); i++) {
-    recTree->GetEntry(89);
+  for (unsigned int i = 0; i < recTree->GetEntries(); i++) {
     std::cout << "--------------------------------------------------" << std::endl;
     std::cout << "ID: " << recEvent->GetID() << " --> "
               << " p: " << recEvent->GetMomentum()
@@ -48,7 +47,7 @@ int main(int argc, char** argv)
                 << " y: " << recEvent->GetHitPosition(j).y()
                 << " z: " << recEvent->GetHitPosition(j).z() << std::endl;
     }
-    //  }
+  }
 
   return 0;
 }

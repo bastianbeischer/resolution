@@ -48,6 +48,8 @@ void RES_TrackFitMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
       method = oneline;
     if (newValue == "twolines")
       method = twolines;
+    if (newValue == "transverse")
+      method = transverse;
 
     m_fitter->SetFitMethod(method);
   }
