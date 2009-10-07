@@ -62,21 +62,10 @@ int main(int argc, char** argv)
   MyROOTStyle* myStyle = new MyROOTStyle("myStyle");
   myStyle->cd();
 
-  int N = 89;
-
-  TFile** file = new TFile*[N];
-  double* angle = new double[N];
-  double* angleErr = new double[N];
-  double* sigma = new double[N];
-  double* sigmaErr = new double[N];
-  double* mu = new double[N];
-  double* muErr = new double[N];
-
   TTree* genTree;
   TTree* recTree;
   RES_Event* genEvent = new RES_Event;
   RES_Event* recEvent = new RES_Event;
-  TH1D resHist;
   //  TF1 prediction("prediction", calculatePrediction, 0., 100., 0);
   TF1 analyticalFormula("analyticalFormula", analytical, 0., 100., 7);
   double X0 = 0.0046875; // number of radiation lengths in fibers
@@ -89,49 +78,63 @@ int main(int argc, char** argv)
   double sigmaModule = 50e-6/sqrt(2);
   analyticalFormula.SetParameters(m, Lup, Ldown, Linner, magField, X0, sigmaModule);
   analyticalFormula.SetParameters(m, Lup, Ldown, Linner, magField, 0., sigmaModule);
-
-
-  for (int i = 0; i < N; i++) {
-    char filename[100];
-    sprintf(filename, "../results/perdaix_1_GeV_%d_deg.root", i+1);
-    file[i] = new TFile(filename, "OPEN");
-    genTree = (TTree*) file[i]->Get("resolution_gen_tree");
-    recTree = (TTree*) file[i]->Get("resolution_rec_tree");
-    genTree->SetBranchAddress("event", &genEvent);
-    recTree->SetBranchAddress("event", &recEvent);
-    genTree->GetEntry(0);
-    double genMom = genEvent->GetMomentum()/1000.;
-    double momRes = analyticalFormula.Eval(genMom);
-    angle[i] = i+1;
-    angleErr[i] = 0.;
-
-    resHist = TH1D("resHist", "resHist", 100, 1. - 5.*momRes, 1. + 5.*momRes);    
-    for(int j = 0; j < genTree->GetEntries(); j++) {
-      genTree->GetEntry(j);
-      recTree->GetEntry(j);
-      resHist.Fill(genEvent->GetMomentum()/recEvent->GetTransverseMomentum());
-    }
-    resHist.Fit("gaus", "Q0", "", 0.5, 2.5);
-    sigma[i] = resHist.GetFunction("gaus")->GetParameter(2);
-    mu[i] = resHist.GetFunction("gaus")->GetParameter(1);
-    sigmaErr[i] = resHist.GetFunction("gaus")->GetParError(2);
-    muErr[i] = resHist.GetFunction("gaus")->GetParError(1);
-    file[i]->Close();
-  }
-
-  TGraphErrors sigmaVsAngleGraph(N, angle, sigma, angleErr, sigmaErr);
+  
+  TGraphErrors sigmaVsAngleGraph;
   sigmaVsAngleGraph.SetMarkerStyle(23);
   sigmaVsAngleGraph.SetMarkerColor(kRed);
   sigmaVsAngleGraph.GetXaxis()->SetTitle("stereo angle [deg]");
   sigmaVsAngleGraph.GetYaxis()->SetTitle("#sigma_{p} / p");
   sigmaVsAngleGraph.SetTitle("momentum resolution for perdaix - homogeneous field");
 
-  TGraphErrors muVsAngleGraph(N, angle, mu, angleErr, muErr);
+  TGraphErrors muVsAngleGraph;
   muVsAngleGraph.SetMarkerStyle(23);
   muVsAngleGraph.SetMarkerColor(kRed);
   muVsAngleGraph.GetXaxis()->SetTitle("stereo angle [deg]");
   muVsAngleGraph.GetYaxis()->SetTitle("#mu_{p_{sim}/p_{rec}}");
   muVsAngleGraph.SetTitle("distribution of means");
+
+  int i = 0;
+  
+  double angleMin = 0.0;
+  double angleMax = 89.95;
+  double angleStep = 0.05;
+  for (double angle = angleMin; angle < angleMax; angle += angleStep) {
+    char filename[100];
+    sprintf(filename, "../results/perdaix_1_GeV_%.2f_deg.root", angle);
+    TFile file(filename);
+
+    if (file.IsZombie())
+      continue;
+
+    genTree = (TTree*) file.Get("resolution_gen_tree");
+    recTree = (TTree*) file.Get("resolution_rec_tree");
+    genTree->SetBranchAddress("event", &genEvent);
+    recTree->SetBranchAddress("event", &recEvent);
+    genTree->GetEntry(0);
+    double genMom = genEvent->GetMomentum()/1000.;
+    double momRes = analyticalFormula.Eval(genMom);
+
+    TH1D resHist("resHist", "resHist", 100, 1. - 5.*momRes, 1. + 5.*momRes);    
+    for(int j = 0; j < genTree->GetEntries(); j++) {
+      genTree->GetEntry(j);
+      recTree->GetEntry(j);
+      resHist.Fill(genEvent->GetMomentum()/recEvent->GetMomentum());
+    }
+    resHist.Fit("gaus", "Q0", "", 0.5, 2.5);
+
+    double mu = resHist.GetFunction("gaus")->GetParameter(1);
+    double muErr = resHist.GetFunction("gaus")->GetParError(1);
+    double sigma = resHist.GetFunction("gaus")->GetParameter(2);
+    double sigmaErr = resHist.GetFunction("gaus")->GetParError(2);
+
+    sigmaVsAngleGraph.SetPoint(i, angle, sigma);
+    sigmaVsAngleGraph.SetPointError(i, 0.0, sigmaErr);
+    muVsAngleGraph.SetPoint(i, angle, mu);
+    muVsAngleGraph.SetPointError(i, 0.0, muErr);
+    i++;
+
+    file.Close();
+  }
 
   TCanvas canvas("canvas", "canvas", 1024, 768);
   canvas.Draw();
@@ -148,16 +151,6 @@ int main(int argc, char** argv)
   muVsAngleGraph.Draw("AP");
 
   app->Run();
-
-  for (int i = 0; i < N; i++)
-    delete file[i];
-  delete[] file;
-  delete[] angle;
-  delete[] sigma;
-  delete[] angleErr;
-  delete[] sigmaErr;
-  delete[] mu;
-  delete[] muErr;
 
   return 1;
 }

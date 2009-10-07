@@ -10,8 +10,15 @@ use strict;
 #
 
 my $firstRunNumber = 1000;
-my $numberOfEventsPerRun = 1000;
-my $maximumEnergy = 100; # GeV
+
+my $numberOfEventsPerRun = 10000;
+
+my $minEnergy = 1;
+my $maxEnergy = 1; # GeV
+my $energyStep = 1;
+my $minAngle = 0.1;
+my $maxAngle = 1.0;
+my $angleStep = 0.1;
 
 my $condor_dir = "/home/home4/institut_1b/beischer/src/geant4/resolution/condor";
 my $executable = "/home/home4/institut_1b/beischer/geant4/8.1.p02/slc4_ia32_gcc34/bin/Linux-g++/resolution";
@@ -20,14 +27,16 @@ my $executable = "/home/home4/institut_1b/beischer/geant4/8.1.p02/slc4_ia32_gcc3
 
 my $currentRun = $firstRunNumber;
 
-for (my $energy = 1; $energy <= $maximumEnergy; ++$energy) {
+for (my $angle = $minAngle; $angle <= $maxAngle; $angle += $angleStep) {
+    for (my $energy = $minEnergy; $energy <= $maxEnergy; $energy += $energyStep) {
+
     print "Run $currentRun:\n";
     my $condorfile = &make_condor_file($currentRun);
     print "$condorfile\n";
     my $macrofile = &make_macro_file($currentRun, $energy, $numberOfEventsPerRun);
     print "$macrofile\n";
 
-    unlink("/home/home4/institut_1b/beischer/src/geant4/resolution/results/res_${currentRun}.root");
+    unlink("/home/home4/institut_1b/beischer/src/geant4/resolution/results/perdaix_${energy}_GeV_${angle}_deg.root");
     system "condor_submit", "$condorfile";
     ++$currentRun;
 }
@@ -35,76 +44,67 @@ for (my $energy = 1; $energy <= $maximumEnergy; ++$energy) {
 sub make_macro_file{
   # make a macro file, first argument is run number, second is current value (to be placed in macro template below)
 
-  my ($currentRun, $energy, $nEvents) = @_;
+  my ($energy, $angle, $nEvents) = @_;
 
-  open MACROFILE, ">${condor_dir}/mac/res_${currentRun}.mac" or die "Error: Cannot make macro file: $!";
+  my $rotation = $angle/2.;
+
+  open MACROFILE, ">perdaix_${energy}_GeV_${angle}_deg.mac" or die "Error: Cannot make macro file: $!";
 
   print MACROFILE <<EOF;
-
 /control/verbose 1
 /run/verbose 0
 /tracking/verbose 0
 /RES/Fit/Verbose 0
 
-/RES/Det/AddModule 0. 0. 45. cm
-/RES/Det/AddModule 0. 0. 40. cm
-/RES/Det/AddModule 0. 0. 35. cm
-/RES/Det/AddModule 0. 0. 30. cm
-/RES/Det/AddModule 0. 0. 25. cm
-/RES/Det/AddModule 0. 0. 20. cm
-/RES/Det/AddModule 0. 0. 15. cm
-/RES/Det/AddModule 0. 0. 10. cm
-/RES/Det/AddModule 0. 0. 5. cm
-/RES/Det/AddModule 0. 0. 0. cm
-/RES/Det/AddModule 0. 0. -5. cm
-/RES/Det/AddModule 0. 0. -10. cm
-/RES/Det/AddModule 0. 0. -15. cm
-/RES/Det/AddModule 0. 0. -20. cm
-/RES/Det/AddModule 0. 0. -25. cm
-/RES/Det/AddModule 0. 0. -30. cm
-/RES/Det/AddModule 0. 0. -35. cm
-/RES/Det/AddModule 0. 0. -40. cm
-/RES/Det/AddModule 0. 0. -45. cm
-/RES/Det/ModuleGap 2.4 cm
-/RES/Det/ModuleWidth 99.5 cm
-/RES/Det/ModuleLength 99.5 cm
+/RES/Gun/RandomOrigin
+/RES/Gun/RandomDirection
+/gun/energy ${energy} GeV
 
-/RES/Gun/Energy $energy GeV
+/control/alias moduleRot -${rotation}
+/control/alias moduleInternalRot ${angle}
+
+/RES/Det/AddModule 0. 0. 18.5 cm
+/RES/Det/SetModuleRotation 0 {moduleRot}
+/RES/Det/SetModuleInternalRotation 0 {moduleInternalRot}
+/RES/Det/SetModuleWidth 0 20.736
+
+/RES/Det/AddModule 0. 0. 4.5 cm
+/RES/Det/SetModuleRotation 1 {moduleRot}
+/RES/Det/SetModuleInternalRotation 1 {moduleInternalRot}
+/RES/Det/SetModuleWidth 1 13.824
+
+/RES/Det/AddModule 0. 0. -4.5 cm
+/RES/Det/SetModuleRotation 2 {moduleRot}
+/RES/Det/SetModuleInternalRotation 2 {moduleInternalRot}
+/RES/Det/SetModuleWidth 2 13.824
+
+/RES/Det/AddModule 0. 0. -18.5 cm
+/RES/Det/SetModuleRotation 3 {moduleRot}
+/RES/Det/SetModuleInternalRotation 3 {moduleInternalRot}
+/RES/Det/SetModuleWidth 3 20.736
 
 #/RES/Field/SetInhomFieldFrom tables/perdaix_07_jul_2009.table
-#/RES/Field/SetDummyField 0.3 0.0 0.0 tesla
-/RES/Field/SetUniformField 0.3 0.0 0.0 tesla
+/RES/Field/SetDummyField 0.27 0.0 0.0 tesla
+#/RES/Field/SetUniformField 0.3 0.0 0.0 tesla
+
+/RES/Fit/Method blobel
 
 /RES/Data/OverWriteFile true
-/RES/Data/SetFileName /home/home4/institut_1b/beischer/src/geant4/resolution/results/res_$currentRun.root
+/RES/Data/SetFileName /home/home4/institut_1b/beischer/src/geant4/resolution/results/perdaix_${energy}_GeV_${angle}_deg.root
 /RES/Run/StoreResults
 
 /run/initialize
 
-# /vis/scene/create
-# /vis/scene/add/volume world
-# /vis/scene/add/trajectories
-
-# /vis/open OGLIX
-
-# /vis/scene/endOfEventAction accumulate
-# /vis/viewer/set/viewpointThetaPhi 90 0
-# /vis/viewer/set/upVector 0 0 1
-# /vis/viewer/zoom 1.5
-
-/RES/Run/Generate $nEvents
+/RES/Run/Generate ${nEvents}
 /RES/Run/Reconstruct
-
 EOF
 
   close MACROFILE;
 
   # return value: macro file name
-  "${condor_dir}/mac/res_${currentRun}.mac";
+  "perdaix_${energy}_GeV_${angle}_deg.mac";
 
 }
-
-
 
 sub make_condor_file{
   # make a condor file, first ( and only ) argument is run number
