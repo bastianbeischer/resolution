@@ -16,12 +16,13 @@ my $numberOfEventsPerRun = 10000;
 my $minEnergy = 1;
 my $maxEnergy = 1; # GeV
 my $energyStep = 1;
-my $minAngle = 0.1;
-my $maxAngle = 1.0;
-my $angleStep = 0.1;
+my $minAngle = 0.05;
+my $maxAngle = 3.00;
+my $angleStep = 0.05;
 
 my $condor_dir = "/home/home4/institut_1b/beischer/src/geant4/resolution/condor";
-my $executable = "/home/home4/institut_1b/beischer/geant4/8.1.p02/slc4_ia32_gcc34/bin/Linux-g++/resolution";
+my $result_dir = "/home/home4/institut_1b/beischer/src/geant4/resolution/results";
+my $executable = "/home/home4/institut_1b/beischer/geant4/9.2.p02/i686-slc5-gcc43/bin/Linux-g++/resolution";
 
 ################################################################################################################
 
@@ -33,22 +34,23 @@ for (my $angle = $minAngle; $angle <= $maxAngle; $angle += $angleStep) {
     print "Run $currentRun:\n";
     my $condorfile = &make_condor_file($currentRun);
     print "$condorfile\n";
-    my $macrofile = &make_macro_file($currentRun, $energy, $numberOfEventsPerRun);
+    my $macrofile = &make_macro_file($currentRun, $energy, $angle, $numberOfEventsPerRun);
     print "$macrofile\n";
 
-    unlink("/home/home4/institut_1b/beischer/src/geant4/resolution/results/perdaix_${energy}_GeV_${angle}_deg.root");
+    unlink("${result_dir}/perdaix_${energy}_GeV_${angle}_deg.root");
     system "condor_submit", "$condorfile";
     ++$currentRun;
+  }
 }
 
 sub make_macro_file{
   # make a macro file, first argument is run number, second is current value (to be placed in macro template below)
 
-  my ($energy, $angle, $nEvents) = @_;
+  my ($currentRun, $energy, $angle, $nEvents) = @_;
 
   my $rotation = $angle/2.;
 
-  open MACROFILE, ">perdaix_${energy}_GeV_${angle}_deg.mac" or die "Error: Cannot make macro file: $!";
+  open MACROFILE, ">${condor_dir}/mac/res_${currentRun}.mac" or die "Error: Cannot make macro file: $!";
 
   print MACROFILE <<EOF;
 /control/verbose 1
@@ -90,7 +92,7 @@ sub make_macro_file{
 /RES/Fit/Method blobel
 
 /RES/Data/OverWriteFile true
-/RES/Data/SetFileName /home/home4/institut_1b/beischer/src/geant4/resolution/results/perdaix_${energy}_GeV_${angle}_deg.root
+/RES/Data/SetFileName ${result_dir}/perdaix_${energy}_GeV_${angle}_deg.root
 /RES/Run/StoreResults
 
 /run/initialize
@@ -102,7 +104,7 @@ EOF
   close MACROFILE;
 
   # return value: macro file name
-  "perdaix_${energy}_GeV_${angle}_deg.mac";
+  "${condor_dir}/mac/res_${currentRun}.mac";
 
 }
 
@@ -146,3 +148,4 @@ EOF
   "${condor_dir}/condor/res_${currentRun}.condor";
 
 }
+
