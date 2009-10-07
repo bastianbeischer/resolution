@@ -66,8 +66,10 @@ double calculatePrediction(double* x, double* p)
 
 int main(int argc, char** argv)
 {
-  if (!argc == 2)
+  if (argc != 2) {
     std::cout << "please provide root file for analysis" << std::endl;
+    return -1;
+  }
   const char* filename = argv[1];
 
   TApplication app("app", &argc, argv);
@@ -222,6 +224,14 @@ int main(int argc, char** argv)
   delete genEvent;
   delete recEvent;
   file.Close();
+
+  for (int i = 0; i < nHits; i++)
+    delete xHist[i];
+  delete xHist;
+
+  for (int i = 0; i < nHits; i++)
+    delete yHist[i];
+  delete yHist;
 
 
   return 1;
