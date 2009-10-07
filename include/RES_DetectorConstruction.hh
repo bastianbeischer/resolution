@@ -24,9 +24,9 @@ public:
 
   G4bool TrackInAcceptance(G4ThreeVector position, G4ThreeVector direction);
 
-  inline G4double GetWorldX() {return m_world_x;}
-  inline G4double GetWorldY() {return m_world_y;}
-  inline G4double GetWorldZ() {return m_world_z;}
+  inline G4double GetWorldX() {return m_worldX;}
+  inline G4double GetWorldY() {return m_worldY;}
+  inline G4double GetWorldZ() {return m_worldZ;}
 
   inline G4double GetModuleLength()       {return m_moduleLength;}
   inline G4double GetModuleAngle(unsigned int i) {assert(i < m_moduleAngles.size()); return m_moduleAngles.at(i);}
@@ -58,17 +58,20 @@ private:
 private:
   RES_DetectorMessenger*          m_messenger;
 
-  G4Material*                     m_world_material;
-  G4double                        m_world_x;
-  G4double                        m_world_y;
-  G4double                        m_world_z;
+  G4Material*                     m_worldMaterial;
+  G4double                        m_worldX;
+  G4double                        m_worldY;
+  G4double                        m_worldZ;
 
-  G4Material*                     m_module_material;
-  G4Material*                     m_module_fiber_material;
-  G4Material*                     m_module_bulk_material;
+  G4Material*                     m_moduleMaterial;
+  G4Material*                     m_moduleFiberMaterial;
+  G4Material*                     m_modulePlasticMaterial;
+  G4Material*                     m_moduleFoamMaterial;
   G4double                        m_moduleDefaultWidth;
   G4double                        m_moduleLength;
   G4double                        m_moduleFiberThickness;
+  G4double                        m_modulePlasticThickness;
+  G4double                        m_moduleFoamThickness;
   G4double                        m_moduleGap; 
   G4double                        m_moduleHeight;
 
@@ -77,22 +80,14 @@ private:
   std::vector<G4double>           m_moduleInternalAngles;
   std::vector<G4double>           m_moduleWidth;
 
-  G4Box*                          m_world_solid;
-  G4LogicalVolume*                m_world_log;
-  G4VPhysicalVolume*              m_world_phys;
-  
-  std::vector<G4Box*>             m_module_solid;
-  std::vector<G4LogicalVolume*>   m_module_log;
-  std::vector<G4VPhysicalVolume*> m_module_phys;
-  
-  std::vector<G4Box*>             m_module_fiber_solid;
-  std::vector<G4LogicalVolume*>   m_module_fiber_log;
-  std::vector<G4VPhysicalVolume*> m_module_fiber_upper_phys;
-  std::vector<G4VPhysicalVolume*> m_module_fiber_lower_phys;
-
-  std::vector<G4Box*>             m_module_bulk_solid;
-  std::vector<G4LogicalVolume*>   m_module_bulk_log;
-  std::vector<G4VPhysicalVolume*> m_module_bulk_phys;
+  G4VPhysicalVolume*              m_world;
+  std::vector<G4VPhysicalVolume*> m_modules;
+  std::vector<G4VPhysicalVolume*> m_moduleUpperFiber;
+  std::vector<G4VPhysicalVolume*> m_moduleLowerFiber;
+  std::vector<G4VPhysicalVolume*> m_moduleUpperFoam;
+  std::vector<G4VPhysicalVolume*> m_moduleLowerFoam;
+  std::vector<G4VPhysicalVolume*> m_moduleUpperPlastic;
+  std::vector<G4VPhysicalVolume*> m_moduleLowerPlastic;
 
 };
 

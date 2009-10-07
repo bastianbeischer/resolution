@@ -6,7 +6,7 @@ G4EXLIB := true
 #CPPFLAGS += -Wno-unused-result
 
 CPPFLAGS += -I$(ROOTSYS)/include
-EXTRALIBS += $(shell root-config --libs) -lMinuit -lMinuit2
+EXTRALIBS += $(shell root-config --libs) -lMinuit
 
 CPPFLAGS += -g
 
