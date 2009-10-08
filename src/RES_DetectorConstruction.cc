@@ -54,7 +54,7 @@ RES_DetectorConstruction::RES_DetectorConstruction() :
   // define default module parameters
   m_moduleDefaultWidth = 6.912 * cm;
   m_moduleFoamThickness = 0.3 * cm;
-  m_modulePlasticThickness = 0.1 * cm;
+  m_modulePlasticThickness = 0.01 * cm;
   m_moduleLength = 30. * cm;
   m_moduleFiberThickness = 0.1 * cm;
 }

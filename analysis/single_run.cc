@@ -95,10 +95,10 @@ int main(int argc, char** argv)
   double Lup   = 0.14;   // in m
   double Ldown = 0.14;   // in m
   double magField = 0.25; // in T
-  //double m = 0.511e-3; // electron mass in GeV
-  double m = 0.0; // geantino mass in GeV
+  double m = 0.511e-3; // electron mass in GeV
+  //double m = 0.0; // geantino mass in GeV
   double sigmaModule = 50e-6/sqrt(2);
-  analyticalFormula.SetParameters(m, Lup, Ldown, Linner, magField, 0., sigmaModule);
+  analyticalFormula.SetParameters(m, Lup, Ldown, Linner, magField, X0, sigmaModule);
   double momRes = analyticalFormula.Eval(genMom);
   TH1D resHist("resHist", "resHist", 100, 1. - 5.*momRes, 1. + 5.*momRes);
   //  TH1D resHist("resHist", "resHist", 100, 0.5, 1.5);

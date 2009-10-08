@@ -9,15 +9,15 @@ use strict;
 # RUN script
 #
 
-my $firstRunNumber = 1000;
+my $firstRunNumber = 1200;
 
 my $numberOfEventsPerRun = 10000;
 
-my $minEnergy = 1;
-my $maxEnergy = 1; # GeV
-my $energyStep = 1;
-my $minAngle = 0.05;
-my $maxAngle = 3.00;
+my $minEnergy = 0.5;
+my $maxEnergy = 10; # GeV
+my $energyStep = 0.5;
+my $minAngle = 5.0;
+my $maxAngle = 5.0;
 my $angleStep = 0.05;
 
 my $condor_dir = "/home/home4/institut_1b/beischer/src/geant4/resolution/condor";
@@ -37,7 +37,9 @@ for (my $angle = $minAngle; $angle <= $maxAngle; $angle += $angleStep) {
     my $macrofile = &make_macro_file($currentRun, $energy, $angle, $numberOfEventsPerRun);
     print "$macrofile\n";
 
-    unlink("${result_dir}/perdaix_${energy}_GeV_${angle}_deg.root");
+    my $angleString = sprintf("%.2f", $angle);
+
+    unlink("${result_dir}/perdaix_${energy}_GeV_${angleString}_deg.root");
     system "condor_submit", "$condorfile";
     ++$currentRun;
   }
@@ -50,6 +52,8 @@ sub make_macro_file{
 
   my $rotation = $angle/2.;
 
+  my $angleString = sprintf("%.2f", $angle);
+
   open MACROFILE, ">${condor_dir}/mac/res_${currentRun}.mac" or die "Error: Cannot make macro file: $!";
 
   print MACROFILE <<EOF;
@@ -60,6 +64,7 @@ sub make_macro_file{
 
 /RES/Gun/RandomOrigin
 /RES/Gun/RandomDirection
+/gun/particle e-
 /gun/energy ${energy} GeV
 
 /control/alias moduleRot -${rotation}
@@ -92,12 +97,14 @@ sub make_macro_file{
 /RES/Fit/Method blobel
 
 /RES/Data/OverWriteFile true
-/RES/Data/SetFileName ${result_dir}/perdaix_${energy}_GeV_${angle}_deg.root
+/RES/Data/SetFileName ${result_dir}/perdaix_${energy}_GeV_${angleString}_deg.root
 /RES/Run/StoreResults
 
 /run/initialize
 
+/process/activate msc
 /RES/Run/Generate ${nEvents}
+/process/inactivate msc
 /RES/Run/Reconstruct
 EOF
 

@@ -52,6 +52,8 @@ int main(int argc, char** argv)
   for (int i = 0; i < genTree1->GetEntries(); i++) {
     genTree1->GetEntry(i);
     genTree2->GetEntry(i);
+    if ( (genEvent1->GetNbOfHits() < nHits) || (genEvent2->GetNbOfHits() < nHits) )
+      continue;
     for (int j = 0; j < nHits; j++) {
       xHist[j]->Fill(genEvent1->GetHitPosition(j).x() - genEvent2->GetHitPosition(j).x());
       yHist[j]->Fill(genEvent1->GetHitPosition(j).y() - genEvent2->GetHitPosition(j).y());
