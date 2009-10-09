@@ -69,6 +69,11 @@ RES_Event RES_TrackFitter::Fit()
   G4int nHits = m_currentGenEvent.GetNbOfHits();
   if (nHits < 8) return m_currentRecEvent;
 
+  G4RunManager* runManager = G4RunManager::GetRunManager();
+  const RES_PrimaryGeneratorAction* genAction = (RES_PrimaryGeneratorAction*) runManager->GetUserPrimaryGeneratorAction();
+  G4ParticleGun* gun = genAction->GetParticleGun();
+  m_initialCharge = gun->GetParticleCharge();
+
   SetSpatialResolutions();
   SmearHits();
   CalculateStartParameters();
@@ -415,7 +420,7 @@ void RES_TrackFitter::CalculateStartParameters()
     //     G4cout << "restored hit: " << i << " --> " << m_smearedHits[i] << G4endl;
     // }
 
-    G4double deltaTheta = fabs(dy_over_dz_bottom - dy_over_dz_top);
+    G4double deltaTheta = dy_over_dz_bottom - dy_over_dz_top;
 
     G4double B = 0.27;
     G4double L = sqrt(pow(y[4]-y[3],2.) + pow(z[4]-z[3],2.))/m;
@@ -546,9 +551,18 @@ G4double RES_TrackFitter::Chi2InDetFrame()
   G4ThreeVector position(x0, y0, m_smearedHits[0].z());
   position -= 1.*cm * direction;
       
+  // if (pt < 0) {
+  //   gun->SetParticleCharge(-m_initialCharge);
+  //   pt = -pt;
+  // }
+
+  G4double mass = gun->GetParticleDefinition()->GetPDGMass();
+  G4double momentum = pt/cos(theta);
+  G4double energy = sqrt( pow(momentum, 2.) + pow(mass, 2.) );
+
   gun->SetParticlePosition(position);
   gun->SetParticleMomentumDirection(direction);
-  gun->SetParticleEnergy(pt/cos(theta));
+  gun->SetParticleEnergy(energy);
   runManager->BeamOn(1);
 
   G4int nHits = m_currentGenEvent.GetNbOfHits();
@@ -596,13 +610,22 @@ G4double RES_TrackFitter::Chi2InModuleFrame()
   G4double x0    = m_parameter[3];
   G4double theta = m_parameter[4];
 
+  // if (pt < 0) {
+  //   gun->SetParticleCharge(-m_initialCharge);
+  //   pt = -pt;
+  // }
+  
+  G4double mass = gun->GetParticleDefinition()->GetPDGMass();
+  G4double momentum = pt/cos(theta);
+  G4double energy = sqrt( pow(momentum, 2.) + pow(mass, 2.) );
+
   G4ThreeVector direction(sin(theta), -cos(theta)*sin(phi), -cos(theta)*cos(phi));
   G4ThreeVector position(x0, y0, m_smearedHits[0].z());
   position -= 1.*cm * direction;
       
   gun->SetParticlePosition(position);
   gun->SetParticleMomentumDirection(direction);
-  gun->SetParticleEnergy(pt/cos(theta));
+  gun->SetParticleEnergy(energy);
   runManager->BeamOn(1);
 
   G4int nHits = m_currentGenEvent.GetNbOfHits();

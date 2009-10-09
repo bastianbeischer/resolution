@@ -76,7 +76,6 @@ int main(int argc, char** argv)
   //double m = 0.511e-3; // electron mass in GeV
   double m = 0.0; // geantino mass in GeV
   double sigmaModule = 50e-6/sqrt(2);
-  analyticalFormula.SetParameters(m, Lup, Ldown, Linner, magField, X0, sigmaModule);
   analyticalFormula.SetParameters(m, Lup, Ldown, Linner, magField, 0., sigmaModule);
   
   TGraphErrors sigmaVsAngleGraph;
@@ -84,7 +83,7 @@ int main(int argc, char** argv)
   sigmaVsAngleGraph.SetMarkerColor(kRed);
   sigmaVsAngleGraph.GetXaxis()->SetTitle("stereo angle [deg]");
   sigmaVsAngleGraph.GetYaxis()->SetTitle("#sigma_{p} / p");
-  sigmaVsAngleGraph.SetTitle("momentum resolution for perdaix - homogeneous field");
+  sigmaVsAngleGraph.SetTitle("momentum resolution for perdaix");
 
   TGraphErrors muVsAngleGraph;
   muVsAngleGraph.SetMarkerStyle(23);
@@ -100,7 +99,7 @@ int main(int argc, char** argv)
   double angleStep = 0.05;
   for (double angle = angleMin; angle < angleMax; angle += angleStep) {
     char filename[100];
-    sprintf(filename, "../results/perdaix_1_GeV_%.2f_deg.root", angle);
+    sprintf(filename, "../results/perdaix_1.0_GeV_%.2f_deg.root", angle);
     TFile file(filename);
 
     if (file.IsZombie())

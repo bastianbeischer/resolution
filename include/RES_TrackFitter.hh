@@ -64,6 +64,8 @@ private:
   G4double               m_sigmaV;
   G4double               m_sigmaZ;
 
+  G4double               m_initialCharge;
+
   friend void MinuitChi2Wrapper(int& npar, double* /*gin*/, double& f, double* par, int /*iflag*/);
 
 };

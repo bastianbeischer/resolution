@@ -39,7 +39,7 @@ for (my $angle = $minAngle; $angle <= $maxAngle; $angle += $angleStep) {
 
     my $angleString = sprintf("%.2f", $angle);
 
-    unlink("${result_dir}/perdaix_${energy}_GeV_${angleString}_deg.root");
+    unlink("${result_dir}/perdaix_${energy}_GeV_${angleString}_deg_msc.root");
     system "condor_submit", "$condorfile";
     ++$currentRun;
   }
@@ -97,7 +97,7 @@ sub make_macro_file{
 /RES/Fit/Method blobel
 
 /RES/Data/OverWriteFile true
-/RES/Data/SetFileName ${result_dir}/perdaix_${energy}_GeV_${angleString}_deg.root
+/RES/Data/SetFileName ${result_dir}/perdaix_${energy}_GeV_${angleString}_deg_msc.root
 /RES/Run/StoreResults
 
 /run/initialize

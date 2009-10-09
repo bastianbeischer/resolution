@@ -21,7 +21,10 @@ RES_PrimaryGeneratorAction::RES_PrimaryGeneratorAction() :
   m_particleGun = new G4ParticleGun(nParticle);
   
   m_particleGun->SetParticleDefinition(G4ChargedGeantino::ChargedGeantino());
-  m_particleGun->SetParticleEnergy(1.0*GeV);
+  G4double mass = m_particleGun->GetParticleDefinition()->GetPDGMass();
+  G4double momentum = 1.0 * GeV;
+  G4double energy = sqrt( pow(momentum, 2.) + pow(mass, 2.) );
+  m_particleGun->SetParticleEnergy(energy);
   m_particleGun->SetParticlePosition(G4ThreeVector(0.0*cm, 0.0*cm, m_z_start));
   m_particleGun->SetParticleMomentumDirection(G4ThreeVector(0.0, 0.0, -1.0));
 }
