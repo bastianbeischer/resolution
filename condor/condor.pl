@@ -9,16 +9,16 @@ use strict;
 # RUN script
 #
 
-my $firstRunNumber = 1200;
+my $firstRunNumber = 1300;
 
 my $numberOfEventsPerRun = 10000;
 
-my $minEnergy = 0.5;
-my $maxEnergy = 10; # GeV
-my $energyStep = 0.5;
-my $minAngle = 5.0;
+my $minMomentum = 1;
+my $maxMomentum = 1;
+my $momentumStep = 1;
+my $minAngle = 0.1;
 my $maxAngle = 5.0;
-my $angleStep = 0.05;
+my $angleStep = 0.1;
 
 my $condor_dir = "/home/home4/institut_1b/beischer/src/geant4/resolution/condor";
 my $result_dir = "/home/home4/institut_1b/beischer/src/geant4/resolution/results";
@@ -29,17 +29,18 @@ my $executable = "/home/home4/institut_1b/beischer/geant4/9.2.p02/i686-slc5-gcc4
 my $currentRun = $firstRunNumber;
 
 for (my $angle = $minAngle; $angle <= $maxAngle; $angle += $angleStep) {
-    for (my $energy = $minEnergy; $energy <= $maxEnergy; $energy += $energyStep) {
+    for (my $momentum = $minMomentum; $momentum <= $maxMomentum; $momentum += $momentumStep) {
 
     print "Run $currentRun:\n";
     my $condorfile = &make_condor_file($currentRun);
     print "$condorfile\n";
-    my $macrofile = &make_macro_file($currentRun, $energy, $angle, $numberOfEventsPerRun);
+    my $macrofile = &make_macro_file($currentRun, $momentum, $angle, $numberOfEventsPerRun);
     print "$macrofile\n";
 
+    my $momentumString = sprintf("%.1f", $momentum);
     my $angleString = sprintf("%.2f", $angle);
 
-    unlink("${result_dir}/perdaix_${energy}_GeV_${angleString}_deg_msc.root");
+    unlink("${result_dir}/perdaix_${momentumString}_GeV_${angleString}_deg_msc.root");
     system "condor_submit", "$condorfile";
     ++$currentRun;
   }
@@ -48,10 +49,11 @@ for (my $angle = $minAngle; $angle <= $maxAngle; $angle += $angleStep) {
 sub make_macro_file{
   # make a macro file, first argument is run number, second is current value (to be placed in macro template below)
 
-  my ($currentRun, $energy, $angle, $nEvents) = @_;
+  my ($currentRun, $momentum, $angle, $nEvents) = @_;
 
   my $rotation = $angle/2.;
 
+  my $momentumString = sprintf("%.1f", $momentum);
   my $angleString = sprintf("%.2f", $angle);
 
   open MACROFILE, ">${condor_dir}/mac/res_${currentRun}.mac" or die "Error: Cannot make macro file: $!";
@@ -65,7 +67,7 @@ sub make_macro_file{
 /RES/Gun/RandomOrigin
 /RES/Gun/RandomDirection
 /gun/particle e-
-/gun/energy ${energy} GeV
+/gun/momentumAmp ${momentum} GeV
 
 /control/alias moduleRot -${rotation}
 /control/alias moduleInternalRot ${angle}
@@ -97,7 +99,7 @@ sub make_macro_file{
 /RES/Fit/Method blobel
 
 /RES/Data/OverWriteFile true
-/RES/Data/SetFileName ${result_dir}/perdaix_${energy}_GeV_${angleString}_deg_msc.root
+/RES/Data/SetFileName ${result_dir}/perdaix_${momentumString}_GeV_${angleString}_deg_msc.root
 /RES/Run/StoreResults
 
 /run/initialize
