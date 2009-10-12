@@ -9,7 +9,7 @@ use strict;
 # RUN script
 #
 
-my $firstRunNumber = 1300;
+my $firstRunNumber = 1400;
 
 my $numberOfEventsPerRun = 10000;
 
@@ -20,9 +20,11 @@ my $minAngle = 0.1;
 my $maxAngle = 5.0;
 my $angleStep = 0.1;
 
-my $condor_dir = "/home/home4/institut_1b/beischer/src/geant4/resolution/condor";
-my $result_dir = "/home/home4/institut_1b/beischer/src/geant4/resolution/results";
-my $executable = "/home/home4/institut_1b/beischer/geant4/9.2.p02/i686-slc5-gcc43/bin/Linux-g++/resolution";
+my $project_dir = "/home/home4/institut_1b/beischer/src/geant4/resolution";
+my $condor_dir  = "${project_dir}/condor";
+my $table_dir   = "${project_dir}/tables";
+my $result_dir  = "${project_dir}/results";
+my $executable  = "$ENV{G4BIN}/$ENV{G4SYSTEM}/resolution";
 
 ################################################################################################################
 
@@ -31,17 +33,18 @@ my $currentRun = $firstRunNumber;
 for (my $angle = $minAngle; $angle <= $maxAngle; $angle += $angleStep) {
     for (my $momentum = $minMomentum; $momentum <= $maxMomentum; $momentum += $momentumStep) {
 
+    my $momentumString = sprintf("%.1f", $momentum);
+    my $angleString = sprintf("%.2f", $angle);
+    my $filename = "${result_dir}/perdaix_${momentumString}_GeV_${angleString}_deg_inhom.root";
+
     print "Run $currentRun:\n";
     my $condorfile = &make_condor_file($currentRun);
     print "$condorfile\n";
-    my $macrofile = &make_macro_file($currentRun, $momentum, $angle, $numberOfEventsPerRun);
+    my $macrofile = &make_macro_file($currentRun, $momentum, $angle, $numberOfEventsPerRun, $filename);
     print "$macrofile\n";
 
-    my $momentumString = sprintf("%.1f", $momentum);
-    my $angleString = sprintf("%.2f", $angle);
-
-    unlink("${result_dir}/perdaix_${momentumString}_GeV_${angleString}_deg_msc.root");
-    system "condor_submit", "$condorfile";
+    unlink($filename);
+    system "echo", "condor_submit", "$condorfile";
     ++$currentRun;
   }
 }
@@ -49,7 +52,7 @@ for (my $angle = $minAngle; $angle <= $maxAngle; $angle += $angleStep) {
 sub make_macro_file{
   # make a macro file, first argument is run number, second is current value (to be placed in macro template below)
 
-  my ($currentRun, $momentum, $angle, $nEvents) = @_;
+  my ($currentRun, $momentum, $angle, $nEvents, $filename) = @_;
 
   my $rotation = $angle/2.;
 
@@ -92,19 +95,19 @@ sub make_macro_file{
 /RES/Det/SetModuleInternalRotation 3 {moduleInternalRot}
 /RES/Det/SetModuleWidth 3 20.736
 
-#/RES/Field/SetInhomFieldFrom tables/perdaix_07_jul_2009.table
-/RES/Field/SetDummyField 0.27 0.0 0.0 tesla
+/RES/Field/SetInhomFieldFrom ${table_dir}/perdaix_07_jul_2009.table
+#/RES/Field/SetDummyField 0.27 0.0 0.0 tesla
 #/RES/Field/SetUniformField 0.3 0.0 0.0 tesla
 
 /RES/Fit/Method blobel
 
 /RES/Data/OverWriteFile true
-/RES/Data/SetFileName ${result_dir}/perdaix_${momentumString}_GeV_${angleString}_deg_msc.root
+/RES/Data/SetFileName ${filename}
 /RES/Run/StoreResults
 
 /run/initialize
 
-/process/activate msc
+/process/inactivate msc
 /RES/Run/Generate ${nEvents}
 /process/inactivate msc
 /RES/Run/Reconstruct
