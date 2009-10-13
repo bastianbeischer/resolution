@@ -168,16 +168,17 @@ void RES_TrackFitter::SetStartParametesToGeneratedParticle()
   G4double z0 = m_currentGenEvent.GetHitPosition(0).z();
   G4double z1 = m_currentGenEvent.GetHitPosition(1).z();
 
-  // there is something wrong here: it should be pt instead of p (left unfixed because this method is not used at the moment)
-  m_parameter[0] = 1./p;
+  double phi = atan((y1-y0)/(z1-z0));
+  double theta = atan((x1-x0)/(z1-z0));
+
+  m_parameter[0] = cos(theta)/p;
   m_parameter[1] = y0;
-  m_parameter[2] = atan((y1-y0)/(z1-z0));
+  m_parameter[2] = phi;
   m_parameter[3] = x0;
-  m_parameter[4] = atan((x1-x0)/(z1-z0));
+  m_parameter[4] = theta;
 
   for (int i = 0; i < 5; i++)
     m_step[i] = 0.1*m_parameter[i];
-
 }
 
 void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double &y0, G4double &dxdz, G4double &dydz)

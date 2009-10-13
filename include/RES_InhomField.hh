@@ -4,8 +4,7 @@
 #include "G4MagneticField.hh"
 #include "globals.hh"
 
-class TH3D;
-class RES_InhomFieldMessenger;
+class RES_Axis;
 
 class RES_InhomField : public G4MagneticField
 {
@@ -21,15 +20,14 @@ private:
   void ReadData();
 
 public:
-  G4String  m_dataFileName;
-
-  G4int nBins_x, nBins_y, nBins_z;           // bins for the histograms
-  G4double x0, x1, y0, y1, z0, z1, R;        // dimensions
-
-  TH3D*     m_field_x;
-  TH3D*     m_field_y;
-  TH3D*     m_field_z;
-
+  G4String      m_dataFileName;
+  RES_Axis*     m_axis_x;
+  RES_Axis*     m_axis_y;
+  RES_Axis*     m_axis_z;
+  G4double***   m_field_x;
+  G4double***   m_field_y;
+  G4double***   m_field_z;
+  
 };
 
 #endif /* RES_InhomField_hh */

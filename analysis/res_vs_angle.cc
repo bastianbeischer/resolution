@@ -95,11 +95,11 @@ int main(int argc, char** argv)
   int i = 0;
   
   double angleMin = 0.0;
-  double angleMax = 89.95;
-  double angleStep = 0.05;
+  double angleMax = 5.0;
+  double angleStep = 0.1;
   for (double angle = angleMin; angle < angleMax; angle += angleStep) {
     char filename[100];
-    sprintf(filename, "../results/perdaix_1.0_GeV_%.2f_deg.root", angle);
+    sprintf(filename, "../results/perdaix_1.0_GeV_%.2f_deg_msc.root", angle);
     TFile file(filename);
 
     if (file.IsZombie())
