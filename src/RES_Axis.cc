@@ -18,7 +18,7 @@ G4double RES_Axis::GetBinCenter(G4int binX)
 
 G4int RES_Axis::GetBin(G4double x) 
 {
-  G4int value = floor((x-x0)/(x1-x0) * nBins);
+  G4int value = (G4int) floor((x-x0)/(x1-x0) * nBins);
   if (value < 0) return -1;
   if (value > nBins) return nBins;
   return value;

@@ -486,7 +486,7 @@ G4int RES_TrackFitter::DoBlobelFit(G4int npar)
 
   G4int nHits = m_currentGenEvent.GetNbOfHits();
   // npar has been put to -npar before
-  G4double dof = nHits - (-npar);
+  G4int dof = nHits - (-npar);
   m_currentRecEvent.SetChi2(chi2);
   m_currentRecEvent.SetDof(dof);
 
@@ -525,7 +525,7 @@ G4int RES_TrackFitter::DoMinuitFit(G4int npar)
   // in this step a new rec event will be created with (hopefully) identical properties than the result of the minimization. this should be done properly in the future...
   G4double chi2 = Chi2InModuleFrame();
   G4int nHits = m_currentRecEvent.GetNbOfHits();
-  G4double dof = nHits - npar;
+  G4int dof = nHits - npar;
   m_currentRecEvent.SetChi2(chi2);
   m_currentRecEvent.SetDof(dof);
 
