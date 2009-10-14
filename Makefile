@@ -22,6 +22,13 @@ EXTRALIBS += -L./$(BlobelDir) -lBlobel
 CPPFLAGS += -I$(BlobelDir)
 EXTRA_LINK_DEPENDENCIES += $(BlobelLib)
 
+MillepedeDir := ./millepede
+MillepedeLib := $(MillepedeDir)/libMillepede.so
+EXTRALIBS += -L./$(MillepedeDir) -lMillepede
+CPPFLAGS += -I$(MillepedeDir)
+EXTRA_LINK_DEPENDENCIES += $(MillepedeLib)
+
+
 .PHONY: all
 all: TAGS lib bin
 
@@ -48,4 +55,10 @@ $(BlobelLib): $(BlobelDir)/*.h $(BlobelDir)/*.f
 	@echo
 	@echo "Creating shared lib libBlobel.so ..."
 	@$(MAKE) -C $(BlobelDir)
+	@echo
+
+$(MillepedeLib): $(MillepedeDir)/*.h $(MillepedeDir)/*.f 
+	@echo
+	@echo "Creating shared lib libMillepede.so ..."
+	@$(MAKE) -C $(MillepedeDir)
 	@echo

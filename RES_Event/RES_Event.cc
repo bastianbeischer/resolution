@@ -1,4 +1,4 @@
-// $Id: RES_Event.cc,v 1.7 2009/10/14 09:24:35 beischer Exp $
+// $Id: RES_Event.cc,v 1.8 2009/10/14 16:51:37 beischer Exp $
 
 #include "RES_Event.hh"
 
@@ -9,6 +9,7 @@ RES_Event::RES_Event() :
   m_moduleID(0),
   m_fiberID(0),
   m_hits(0),
+  m_smearedHits(0),
   m_transverseMomentum(0.),
   m_momentum(0.),
   m_eventType(generated),
@@ -25,6 +26,10 @@ RES_Event::RES_Event(const RES_Event& other)
   m_hits.clear();
   for (unsigned int i = 0; i < other.m_hits.size(); i++) {
     m_hits.push_back(other.m_hits.at(i));
+  }
+  m_smearedHits.clear();
+  for (unsigned int i = 0; i < other.m_smearedHits.size(); i++) {
+    m_smearedHits.push_back(other.m_smearedHits.at(i));
   }
   m_transverseMomentum = other.m_transverseMomentum;
   m_momentum = other.m_momentum;
@@ -46,6 +51,10 @@ const RES_Event& RES_Event::operator=(const RES_Event& right)
   for (unsigned int i = 0; i < right.m_hits.size(); i++) {
     m_hits.push_back(right.m_hits.at(i));
   }
+  m_smearedHits.clear();
+  for (unsigned int i = 0; i < right.m_smearedHits.size(); i++) {
+    m_smearedHits.push_back(right.m_smearedHits.at(i));
+  }
   m_transverseMomentum = right.m_transverseMomentum;
   m_momentum = right.m_momentum;
   m_eventType = right.m_eventType;
@@ -59,4 +68,8 @@ void RES_Event::AddHit(int module_ID, int fiber_ID, double x, double y, double z
   m_moduleID.push_back(module_ID);
   m_fiberID.push_back(fiber_ID);
   m_hits.push_back(TVector3(x,y,z));
+}
+void RES_Event::AddSmearedHit(double x, double y, double z)
+{
+  m_smearedHits.push_back(TVector3(x,y,z));
 }

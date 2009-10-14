@@ -1,4 +1,4 @@
-// $Id: RES_DetectorConstruction.cc,v 1.12 2009/10/14 09:24:26 beischer Exp $
+// $Id: RES_DetectorConstruction.cc,v 1.13 2009/10/14 16:51:31 beischer Exp $
 
 #include "RES_DetectorConstruction.hh"
 
@@ -55,10 +55,13 @@ RES_DetectorConstruction::RES_DetectorConstruction() :
 
   // define default module parameters
   m_moduleDefaultWidth = 6.912 * cm;
+  m_moduleDefaultLength = 30. * cm;
   m_moduleFoamThickness = 0.3 * cm;
   m_modulePlasticThickness = 0.01 * cm;
-  m_moduleLength = 30. * cm;
   m_moduleFiberThickness = 0.1 * cm;
+  m_moduleDefaultSigmaU = m_moduleDefaultLength/sqrt(12);
+  m_moduleDefaultSigmaV = 50. * um;
+  m_moduleDefaultSigmaZ = 0. * cm;
 }
 
 RES_DetectorConstruction::~RES_DetectorConstruction()
@@ -89,14 +92,14 @@ G4VPhysicalVolume* RES_DetectorConstruction::Construct()
 
   for (unsigned int i = 0; i < m_modulePlacements.size(); i++) {
     // detector modules
-    G4Box* currentModuleSolid = new G4Box("module", 0.5*m_moduleLength, 0.5*m_moduleWidth[i], 0.5*m_moduleHeight);
+    G4Box* currentModuleSolid = new G4Box("module", 0.5*m_moduleLength[i], 0.5*m_moduleWidth[i], 0.5*m_moduleHeight);
     G4LogicalVolume* currentModuleLogic = new G4LogicalVolume(currentModuleSolid, m_moduleMaterial, "module", 0, 0, 0); // CHANGE MATERIAL HERE
     G4RotationMatrix* currentModuleRotation = new G4RotationMatrix(m_moduleAngles[i], 0., 0.);
     G4PVPlacement* currentModulePlacement = new G4PVPlacement(currentModuleRotation, m_modulePlacements[i], currentModuleLogic, "module", worldLog, false, i);
     m_modules.push_back(currentModulePlacement);
 
     // interior of modules
-    G4Box* currentFiberSolid = new G4Box("moduleFiber", 0.5*m_moduleLength, 0.5*m_moduleWidth[i], 0.5*m_moduleFiberThickness);
+    G4Box* currentFiberSolid = new G4Box("moduleFiber", 0.5*m_moduleLength[i], 0.5*m_moduleWidth[i], 0.5*m_moduleFiberThickness);
     G4LogicalVolume* currentFiberLogic = new G4LogicalVolume(currentFiberSolid, m_moduleFiberMaterial, "moduleFiber", 0, 0, 0);
     G4RotationMatrix* currentInternalRotation = new G4RotationMatrix(m_moduleInternalAngles[i], 0., 0.);
     G4PVPlacement* currentUpperFiberPlacement = new G4PVPlacement(0, G4ThreeVector(0, 0, 0.5*m_moduleGap + 0.5*m_moduleFiberThickness),
@@ -106,7 +109,7 @@ G4VPhysicalVolume* RES_DetectorConstruction::Construct()
     m_moduleUpperFiber.push_back(currentUpperFiberPlacement);
     m_moduleLowerFiber.push_back(currentLowerFiberPlacement);
 
-    G4Box* currentPlasticSolid = new G4Box("modulePlastic", 0.5*m_moduleLength, 0.5*m_moduleWidth[i], 0.5*m_modulePlasticThickness);
+    G4Box* currentPlasticSolid = new G4Box("modulePlastic", 0.5*m_moduleLength[i], 0.5*m_moduleWidth[i], 0.5*m_modulePlasticThickness);
     G4LogicalVolume* currentPlasticLogic = new G4LogicalVolume(currentPlasticSolid, m_modulePlasticMaterial, "modulePlastic", 0, 0, 0);
     G4PVPlacement* currentUpperPlasticPlacement = new G4PVPlacement(0, G4ThreeVector(0,0,0.5*m_moduleFoamThickness + 0.5*m_modulePlasticThickness),
                                                                     currentPlasticLogic, "modulePlastic", currentModuleLogic, false, 0);
@@ -115,7 +118,7 @@ G4VPhysicalVolume* RES_DetectorConstruction::Construct()
     m_moduleUpperPlastic.push_back(currentUpperPlasticPlacement);
     m_moduleLowerPlastic.push_back(currentLowerPlasticPlacement);
 
-    G4Box* currentFoamSolid = new G4Box("moduleFoam", 0.5*m_moduleLength, 0.5*m_moduleWidth[i], 0.5*m_moduleFoamThickness);
+    G4Box* currentFoamSolid = new G4Box("moduleFoam", 0.5*m_moduleLength[i], 0.5*m_moduleWidth[i], 0.5*m_moduleFoamThickness);
     G4LogicalVolume* currentFoamLogic = new G4LogicalVolume(currentFoamSolid, m_moduleFoamMaterial, "moduleFoam", 0, 0, 0);
     G4PVPlacement* currentUpperFoamPlacement = new G4PVPlacement(0, G4ThreeVector(0,0,0.5*m_moduleFoamThickness), currentFoamLogic, "moduleFoam", currentModuleLogic, false, 0);
     G4PVPlacement* currentLowerFoamPlacement = new G4PVPlacement(currentInternalRotation, G4ThreeVector(0,0,-0.5*m_moduleFoamThickness),
@@ -171,7 +174,7 @@ G4bool RES_DetectorConstruction::TrackInAcceptance(G4ThreeVector position, G4Thr
     G4double dz = m_modulePlacements[i].z() - position.z();
     G4double l = dz / direction.z();
     G4ThreeVector currentPosition = position + l*direction;
-    if (fabs(currentPosition.x() - m_modulePlacements[i].x()) > 0.5*m_moduleLength)   {retVal = false;}
+    if (fabs(currentPosition.x() - m_modulePlacements[i].x()) > 0.5*m_moduleLength[i])   {retVal = false;}
     if (fabs(currentPosition.y() - m_modulePlacements[i].y()) > 0.5*m_moduleWidth[i]) {retVal = false;}
   }
 

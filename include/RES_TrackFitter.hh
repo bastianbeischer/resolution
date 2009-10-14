@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitter.hh,v 1.16 2009/10/14 09:24:28 beischer Exp $
+// $Id: RES_TrackFitter.hh,v 1.17 2009/10/14 16:51:34 beischer Exp $
 
 #ifndef RES_TrackFitter_hh
 #define RES_TrackFitter_hh
@@ -36,8 +36,7 @@ public:
 private:
   RES_TrackFitter();
 
-  void     SetSpatialResolutions();
-  void     SmearHits();
+  void     CopyHits();
   void     SetStartParametesToGeneratedParticle();
   void     FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double &y0, G4double &dxdz, G4double &dydz);
   void     CalculateStartParameters();
@@ -61,10 +60,6 @@ private:
   G4double*              m_lowerBound;
   G4double*              m_upperBound;
   FitMethod              m_fitMethod;
-
-  G4double               m_sigmaU;
-  G4double               m_sigmaV;
-  G4double               m_sigmaZ;
 
   G4double               m_initialCharge;
 

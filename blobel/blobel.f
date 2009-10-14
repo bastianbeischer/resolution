@@ -1,4 +1,4 @@
-// $Id: blobel.f,v 1.2 2009/10/14 09:24:34 beischer Exp $
+* $Id: blobel.f,v 1.3 2009/10/14 16:51:36 beischer Exp $
 
 ************************************************************************
       SUBROUTINE DAPLCON(X,VX,F,IRET,CHSQ)

@@ -1,4 +1,4 @@
-// $Id: RES_Event.hh,v 1.6 2009/10/14 09:24:35 beischer Exp $
+// $Id: RES_Event.hh,v 1.7 2009/10/14 16:51:37 beischer Exp $
 
 #ifndef RES_Event_hh
 #define RES_Event_hh
@@ -40,14 +40,17 @@ public:
   inline int          GetDof()                       {return m_dof;}
   inline unsigned int GetNbOfHits()                  {return m_hits.size();}
   inline TVector3     GetHitPosition(unsigned int i) {assert(i < m_hits.size()); return m_hits.at(i);}
+  inline TVector3     GetSmearedHitPosition(unsigned int i) {assert(i < m_smearedHits.size()); return m_smearedHits.at(i);}
 
   void AddHit(int module_ID, int fiber_ID, double x, double y, double z);
+  void AddSmearedHit(double x, double y, double z);
 
 private:
   int                   m_ID;
   std::vector<int>      m_moduleID;
   std::vector<int>      m_fiberID;
   std::vector<TVector3> m_hits;
+  std::vector<TVector3> m_smearedHits;
   double                m_transverseMomentum;
   double                m_momentum;
   EventType             m_eventType;

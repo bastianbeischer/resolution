@@ -1,4 +1,4 @@
-// $Id: RES_DetectorMessenger.cc,v 1.7 2009/10/14 09:24:25 beischer Exp $
+// $Id: RES_DetectorMessenger.cc,v 1.8 2009/10/14 16:51:31 beischer Exp $
 
 #include "RES_DetectorMessenger.hh"
 
@@ -43,11 +43,9 @@ RES_DetectorMessenger::RES_DetectorMessenger(RES_DetectorConstruction* detector)
   m_setModuleWidthCmd->SetParameterName("widthString", false);
   m_setModuleWidthCmd->AvailableForStates(G4State_PreInit);
 
-  m_setModuleLengthCmd = new G4UIcmdWithADoubleAndUnit("/RES/Det/ModuleLength", this);
-  m_setModuleLengthCmd->SetGuidance("Set the module length");
-  m_setModuleLengthCmd->SetParameterName("length", false);
-  m_setModuleLengthCmd->SetDefaultUnit("cm");
-  m_setModuleLengthCmd->SetUnitCategory("Length");
+  m_setModuleLengthCmd = new G4UIcmdWithAString("/RES/Det/SetModuleLength", this);
+  m_setModuleLengthCmd->SetGuidance("Set the module length for the given module");
+  m_setModuleLengthCmd->SetParameterName("lengthString", false);
   m_setModuleLengthCmd->AvailableForStates(G4State_PreInit);
 
   m_setModuleFiberThicknessCmd = new G4UIcmdWithADoubleAndUnit("/RES/Det/ModuleFiberThickness", this);
@@ -95,12 +93,14 @@ void RES_DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
     m_detector->SetModuleInternalAngle(iModule, angle);
   }
   if (command == m_setModuleWidthCmd) {
-    G4int iModule = m_setModuleRotationCmd->ConvertToInt(newValue.substr(0,1).c_str());
-    G4double width = m_setModuleRotationCmd->ConvertToDouble(newValue.substr(2,newValue.length()).c_str()) * cm;
+    G4int iModule = m_setModuleWidthCmd->ConvertToInt(newValue.substr(0,1).c_str());
+    G4double width = m_setModuleWidthCmd->ConvertToDouble(newValue.substr(2,newValue.length()).c_str()) * cm;
     m_detector->SetModuleWidth(iModule, width);
   }
   if (command == m_setModuleLengthCmd) {
-    m_detector->SetModuleLength(m_setModuleLengthCmd->GetNewDoubleValue(newValue));
+    G4int iModule = m_setModuleLengthCmd->ConvertToInt(newValue.substr(0,1).c_str());
+    G4double length = m_setModuleLengthCmd->ConvertToDouble(newValue.substr(2,newValue.length()).c_str()) * cm;
+    m_detector->SetModuleLength(iModule, length);
   }
   if (command == m_setModuleFiberThicknessCmd) {
     m_detector->SetModuleFiberThickness(m_setModuleFiberThicknessCmd->GetNewDoubleValue(newValue));

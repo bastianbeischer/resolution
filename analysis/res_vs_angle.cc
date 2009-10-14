@@ -1,4 +1,4 @@
-// $Id: res_vs_angle.cc,v 1.5 2009/10/14 09:24:34 beischer Exp $
+// $Id: res_vs_angle.cc,v 1.6 2009/10/14 16:51:37 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -96,13 +96,15 @@ int main(int argc, char** argv)
 
   int i = 0;
   
-  double angleMin = 0.0;
-  double angleMax = 5.0;
+  double angleMin = 0.1;
+  double angleMax = 10.0;
   double angleStep = 0.1;
   for (double angle = angleMin; angle < angleMax; angle += angleStep) {
     char filename[100];
-    sprintf(filename, "../results/perdaix_1.0_GeV_%.2f_deg_msc.root", angle);
+    sprintf(filename, "../results/perdaix_1.0_GeV_%.2f_deg_inhom.root", angle);
     TFile file(filename);
+
+    std::cout << "Opening file: " << filename << std::endl;
 
     if (file.IsZombie())
       continue;
@@ -133,6 +135,8 @@ int main(int argc, char** argv)
     muVsAngleGraph.SetPoint(i, angle, mu);
     muVsAngleGraph.SetPointError(i, 0.0, muErr);
     i++;
+
+    std::cout << "  --> " << genTree->GetEntries() << " events processed" << std::endl;
 
     file.Close();
   }

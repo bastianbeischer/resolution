@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitter.cc,v 1.35 2009/10/14 09:24:22 beischer Exp $
+// $Id: RES_TrackFitter.cc,v 1.36 2009/10/14 16:51:30 beischer Exp $
 
 #include <cmath>
 #include <fstream>
@@ -38,10 +38,7 @@ void MinuitChi2Wrapper(int& npar, double* /*gin*/, double& f, double* par, int /
 RES_TrackFitter::RES_TrackFitter() :
   m_verbose(0),
   m_smearedHits(0),
-  m_fitMethod(blobel),
-  m_sigmaU(0.),
-  m_sigmaV(0.),
-  m_sigmaZ(0.)
+  m_fitMethod(blobel)
 {
   m_messenger = new RES_TrackFitMessenger(this);
   m_parameter = new double[5];
@@ -76,8 +73,7 @@ RES_Event RES_TrackFitter::Fit()
   G4ParticleGun* gun = genAction->GetParticleGun();
   m_initialCharge = gun->GetParticleCharge();
 
-  SetSpatialResolutions();
-  SmearHits();
+  CopyHits();
   CalculateStartParameters();
   //SetStartParametesToGeneratedParticle();
 
@@ -103,57 +99,16 @@ RES_Event RES_TrackFitter::Fit()
   return m_currentRecEvent;
 }
 
-void RES_TrackFitter::SetSpatialResolutions()
+void RES_TrackFitter::CopyHits()
 {
-  RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
-  G4double moduleLength = det->GetModuleLength();
-  m_sigmaU = moduleLength/sqrt(12.);
-  m_sigmaV = 50.*um;
-  m_sigmaZ = 0.*um;
-}
-
-void RES_TrackFitter::SmearHits()
-{
-  RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
-
   G4int nHits = m_currentGenEvent.GetNbOfHits();
 
   delete[] m_smearedHits;
   m_smearedHits = new G4ThreeVector[nHits];
 
-  // CLHEP::HepRandom::setTheSeed(1234);
-  for (G4int i = 0; i < nHits; i++) {
-    G4int iModule = m_currentGenEvent.GetModuleID(i);
-    G4int iFiber  = m_currentGenEvent.GetFiberID(i);
-    G4double angle = det->GetModuleAngle(iModule);
-    if (iFiber > 0) angle += det->GetModuleInternalAngle(iModule);
-    
-    // collect hit information
-    G4double x = m_currentGenEvent.GetHitPosition(i).x();
-    G4double y = m_currentGenEvent.GetHitPosition(i).y();
-    G4double z = m_currentGenEvent.GetHitPosition(i).z();
-    G4ThreeVector hit(x,y,z);
+  for (int i = 0; i < nHits; i++)
+    m_smearedHits[i] = G4ThreeVector(m_currentGenEvent.GetSmearedHitPosition(i). x(), m_currentGenEvent.GetSmearedHitPosition(i). y(), m_currentGenEvent.GetSmearedHitPosition(i). z());
 
-    // transform from detector reference frame (x,y,z) to module frame (u,v,z), smear the hits, transform back to detector frame
-    G4RotationMatrix forwardRotation(angle, 0., 0.);
-    G4RotationMatrix backwardRotation(-angle, 0., 0.);
-
-    if (m_verbose > 2)
-      G4cout << "original hit: " << i << " --> " << hit << G4endl;
-
-    if (m_fitMethod == transverse)
-      hit.setX(0.);
-
-    hit = forwardRotation*hit;
-    //    hit.setX(CLHEP::RandFlat::shoot());
-    //    hit.setX(CLHEP::RandGauss::shoot(0., m_sigmaU));
-    hit.setX(0.);
-    hit.setY(CLHEP::RandGauss::shoot(hit.y(), m_sigmaV));
-    hit.setZ(CLHEP::RandGauss::shoot(hit.z(), m_sigmaZ));
-    hit = backwardRotation*hit;
-
-    m_smearedHits[i] = hit;
-  }
   if (m_verbose > 2)
     for (int i = 0; i < nHits; i++)
       G4cout << "smeared hit: " << i << " --> " << m_smearedHits[i] << G4endl;
@@ -240,6 +195,8 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
     G4double angle = det->GetModuleAngle(iModule);
     if (iFiber > 0) angle += det->GetModuleInternalAngle(iModule);
 
+    G4double sigmaV = det->GetModuleSigmaV(iModule);
+
     // Rot is the matrix that maps u,v, to x,y (i.e. the backward rotation)
     TMatrixD Rot(2,2); 
     Rot(0,0) = cos(angle);
@@ -250,7 +207,7 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
     V1(0,0) = 0.;
     V1(0,1) = 0.;
     V1(1,0) = 0.;
-    V1(1,1) = m_sigmaV*m_sigmaV;
+    V1(1,1) = sigmaV*sigmaV;
     TMatrixD RotTrans(2,2);
     RotTrans.Transpose(Rot);
     TMatrixD V2(2,2);
@@ -400,29 +357,6 @@ void RES_TrackFitter::CalculateStartParameters()
       }
     }
 
-    //restore u components of hits
-    // for (G4int i = 0; i < nHits; i++) {
-    // RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
-    // G4int iModule = m_currentGenEvent.GetModuleID(i);
-    // G4int iFiber  = m_currentGenEvent.GetFiberID(i);
-    // G4double angle = det->GetModuleAngle(iModule);
-    // if (iFiber > 0) angle += det->GetModuleInternalAngle(iModule);
-
-    //   G4RotationMatrix forwardRotation(angle, 0., 0.);
-    //   G4RotationMatrix backwardRotation(-angle, 0., 0.);
-    //   G4ThreeVector straightLine(x[i],y[i],z[i]);
-
-    //   m_smearedHits[i] = forwardRotation*m_smearedHits[i];
-    //   straightLine     = forwardRotation*straightLine;
-
-    //   // m_smearedHits[i].setX(straightLine.x());
-
-    //   m_smearedHits[i] = backwardRotation*m_smearedHits[i];
-
-    //   if (m_verbose > 1)
-    //     G4cout << "restored hit: " << i << " --> " << m_smearedHits[i] << G4endl;
-    // }
-
     G4double deltaTheta = dy_over_dz_bottom - dy_over_dz_top;
 
     G4double B = 0.27;
@@ -437,8 +371,11 @@ void RES_TrackFitter::CalculateStartParameters()
     m_parameter[3] = x[0];
     m_parameter[4] = theta;
 
+    RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
+    G4double sigmaV = det->GetModuleSigmaV(0);
+
     G4double sigmaEllipsis = 1.*mm;
-    G4double sigmaPhi   = sqrt(2) * m_sigmaV      / ((z[1]-z[0])*(1 + pow((y[1]-y[0])/(z[1]-z[0]),2.0)));
+    G4double sigmaPhi   = sqrt(2) * sigmaV      / ((z[1]-z[0])*(1 + pow((y[1]-y[0])/(z[1]-z[0]),2.0)));
     G4double sigmaTheta = sqrt(2) * sigmaEllipsis / ((z[1]-z[0])*(1 + pow((x[1]-x[0])/(z[1]-z[0]),2.0)));
 
     delete[] x;
@@ -447,7 +384,7 @@ void RES_TrackFitter::CalculateStartParameters()
     delete[] k;
 
     m_step[0] = 0.1*m_parameter[0];
-    m_step[1] = m_sigmaV;
+    m_step[1] = sigmaV;
     m_step[2] = sigmaPhi;
     m_step[3] = sigmaEllipsis;
     m_step[4] = sigmaTheta;
@@ -581,18 +518,19 @@ G4double RES_TrackFitter::Chi2InDetFrame()
     G4double angle = det->GetModuleAngle(iModule);
     if (iFiber > 0) angle += det->GetModuleInternalAngle(iModule);
 
+    G4double sigmaU = det->GetModuleSigmaU(iModule);
+    G4double sigmaV = det->GetModuleSigmaV(iModule);
+   
     G4double s = sin(angle);
     G4double c = cos(angle);
     G4double dx = m_smearedHits[i].x() - m_currentRecEvent.GetHitPosition(i).x();
     G4double dy = m_smearedHits[i].y() - m_currentRecEvent.GetHitPosition(i).y();
-    chi2 += pow(dx*m_sigmaU*s, 2.);
-    chi2 += pow(dy*m_sigmaV*s, 2.);
-    chi2 += pow(dx*m_sigmaV*c, 2.);
-    chi2 += pow(dy*m_sigmaU*c, 2.);
-    chi2 += 2.*dx*dy*s*c*(pow(m_sigmaV,2.) - pow(m_sigmaU, 2.));
+    chi2 += pow(dx*sigmaU*s / (sigmaU * sigmaV), 2.);
+    chi2 += pow(dy*sigmaV*s / (sigmaU * sigmaV), 2.);
+    chi2 += pow(dx*sigmaV*c / (sigmaU * sigmaV), 2.);
+    chi2 += pow(dy*sigmaU*c / (sigmaU * sigmaV), 2.);
+    chi2 += (2.*dx*dy*s*c*(pow(sigmaV,2.) - pow(sigmaU, 2.)))/pow(sigmaU * sigmaV, 2.);
   }
-  
-  chi2 /= pow(m_sigmaU*m_sigmaV, 2.);
     
   return chi2;
 }
@@ -650,11 +588,14 @@ G4double RES_TrackFitter::Chi2InModuleFrame()
     hit = forwardRotation*hit;
     m_smearedHits[i] = forwardRotation*m_smearedHits[i];
     
+    //G4double sigmaU = det->GetModuleSigmaU(iModule);
+    G4double sigmaV = det->GetModuleSigmaV(iModule);
+
     //G4double du = m_smearedHits[i].x() - hit.x();
-    //chi2 += pow(du/m_sigmaU,2.);
+    //chi2 += pow(du/sigmaU,2.);
 
     G4double dv = m_smearedHits[i].y() - hit.y();
-    chi2 += pow(dv/m_sigmaV,2.);
+    chi2 += pow(dv/sigmaV,2.);
 
     m_smearedHits[i] = backwardRotation*m_smearedHits[i];
   }
@@ -664,8 +605,7 @@ G4double RES_TrackFitter::Chi2InModuleFrame()
 
 void RES_TrackFitter::ScanChi2Function(G4int i, G4int j, G4String filename)
 {
-  SetSpatialResolutions();
-  SmearHits();
+  CopyHits();
   //CalculateStartParameters();
   SetStartParametesToGeneratedParticle();
   
