@@ -1,4 +1,4 @@
-// $Id: RES_EventActionGeneration.cc,v 1.9 2009/10/14 16:51:31 beischer Exp $
+// $Id: RES_EventActionGeneration.cc,v 1.10 2009/10/14 17:29:04 beischer Exp $
 
 #include "RES_EventActionGeneration.hh"
 
@@ -64,6 +64,9 @@ void RES_EventActionGeneration::SmearHits(RES_Event* event)
   G4int nHits = event->GetNbOfHits();
   RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
 
+  // G4double xBias[8] = {0.2, 0.4, 0.3, -0.2, 0.6, 0.7, 0.8, 0.5};
+  // G4double yBias[8] = {-0.2, 0.256, -0.2, 0.1, 0.4, 0.25, 0.9, -0.3};
+
   for (int i = 0; i < nHits; i++) {
     G4int iModule = event->GetModuleID(i);
     G4int iFiber  = event->GetFiberID(i);
@@ -94,6 +97,9 @@ void RES_EventActionGeneration::SmearHits(RES_Event* event)
     hit.setY(CLHEP::RandGauss::shoot(hit.y(), sigmaV));
     hit.setZ(CLHEP::RandGauss::shoot(hit.z(), sigmaZ));
     hit = backwardRotation*hit;
+
+    // hit.setX(hit.x() - xBias[i]);
+    // hit.setY(hit.x() - xBias[i]);
 
     event->AddSmearedHit(hit.x(), hit.y(), hit.z());
   }

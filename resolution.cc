@@ -1,4 +1,4 @@
-// $Id: resolution.cc,v 1.6 2009/10/14 09:24:36 beischer Exp $
+// $Id: resolution.cc,v 1.7 2009/10/14 17:29:05 beischer Exp $
 
 #include "RES_RunManager.hh"
 #include "RES_DetectorConstruction.hh"
@@ -6,6 +6,7 @@
 #include "RES_PrimaryGeneratorAction.hh"
 #include "RES_FieldManager.hh"
 #include "RES_DataHandler.hh"
+#include "RES_AlignmentManager.hh"
 #include "RES_FiberHit.hh"
 
 #include "G4TransportationManager.hh"
@@ -21,6 +22,7 @@ int main(int argc, char** argv)
 {
   // create a new RunManager
   RES_RunManager* runManager = new RES_RunManager();
+  RES_AlignmentManager* alignmentManager = new RES_AlignmentManager();
 
   // set user initializations
   RES_DetectorConstruction* detectorConstruction = new RES_DetectorConstruction();

@@ -8,7 +8,7 @@ FFLAGS += -fPIC
 all: $(LIB)
 
 clean:
-	@echo "Cleaning up blobel ..."
+	@echo "Cleaning up millepede ..."
 	@rm -f *.o $(LIB)
 
 $(LIB): millepede1.o

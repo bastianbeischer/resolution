@@ -41,6 +41,7 @@ TAGS: $(G4TARGET).cc src/*.cc include/*.hh $(RES_EventDir)/*.cc $(RES_EventDir)/
 clean::
 	@$(MAKE) -C $(RES_EventDir) clean
 	@$(MAKE) -C $(BlobelDir) clean
+	@$(MAKE) -C $(MillepedeDir) clean
 	@$(MAKE) -C analysis clean
 	@$(MAKE) -C test clean
 	@rm -f TAGS;
