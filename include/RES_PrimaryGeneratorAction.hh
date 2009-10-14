@@ -1,3 +1,5 @@
+// $Id: RES_PrimaryGeneratorAction.hh,v 1.5 2009/10/14 09:24:30 beischer Exp $
+
 #ifndef RES_PrimaryGeneratorAction_hh
 #define RES_PrimaryGeneratorAction_hh
 

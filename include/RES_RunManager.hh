@@ -1,3 +1,5 @@
+// $Id: RES_RunManager.hh,v 1.7 2009/10/14 09:24:30 beischer Exp $
+
 #ifndef RES_RunManager_hh
 #define RES_RunManager_hh
 

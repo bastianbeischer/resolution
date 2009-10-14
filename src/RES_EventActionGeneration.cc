@@ -1,3 +1,5 @@
+// $Id: RES_EventActionGeneration.cc,v 1.8 2009/10/14 09:24:25 beischer Exp $
+
 #include "RES_EventActionGeneration.hh"
 
 #include "RES_RunManager.hh"

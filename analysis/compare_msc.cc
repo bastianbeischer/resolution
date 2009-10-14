@@ -1,3 +1,5 @@
+// $Id: compare_msc.cc,v 1.3 2009/10/14 09:24:34 beischer Exp $
+
 #include <TApplication.h>
 #include <TFile.h>
 #include <TTree.h>

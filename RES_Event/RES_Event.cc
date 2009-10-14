@@ -1,3 +1,5 @@
+// $Id: RES_Event.cc,v 1.7 2009/10/14 09:24:35 beischer Exp $
+
 #include "RES_Event.hh"
 
 ClassImp( RES_Event );

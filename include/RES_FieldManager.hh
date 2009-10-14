@@ -1,3 +1,5 @@
+// $Id: RES_FieldManager.hh,v 1.3 2009/10/14 09:24:31 beischer Exp $
+
 #ifndef RES_FieldManager_hh
 #define RES_FieldManager_hh
 

@@ -1,3 +1,5 @@
+// $Id: RES_EventActionReconstruction.hh,v 1.3 2009/10/14 09:24:31 beischer Exp $
+
 #ifndef RES_EventActionReconstruction_hh
 #define RES_EventActionReconstruction_hh
 

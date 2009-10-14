@@ -1,3 +1,5 @@
+// $Id: RES_InhomField.hh,v 1.3 2009/10/14 09:24:30 beischer Exp $
+
 #ifndef RES_InhomField_hh
 #define RES_InhomField_hh
 

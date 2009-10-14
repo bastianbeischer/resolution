@@ -1,3 +1,5 @@
+// $Id: RES_DummyField.cc,v 1.2 2009/10/14 09:24:25 beischer Exp $
+
 #include "RES_DummyField.hh"
 
 #include "globals.hh"

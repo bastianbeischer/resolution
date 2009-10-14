@@ -1,3 +1,5 @@
+// $Id: RES_DetectorMessenger.hh,v 1.7 2009/10/14 09:24:32 beischer Exp $
+
 #ifndef RES_DetectorMessenger_hh
 #define RES_DetectorMessenger_hh
 

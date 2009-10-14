@@ -1,3 +1,5 @@
+// $Id: RES_FiberSD.hh,v 1.2 2009/10/14 09:24:31 beischer Exp $
+
 #ifndef RES_FiberSD_hh
 #define RES_FiberSD_hh
 

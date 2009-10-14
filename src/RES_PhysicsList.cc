@@ -1,3 +1,5 @@
+// $Id: RES_PhysicsList.cc,v 1.3 2009/10/14 09:24:24 beischer Exp $
+
 #include "RES_PhysicsList.hh"
 
 #include "G4ParticleTypes.hh"

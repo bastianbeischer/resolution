@@ -1,3 +1,5 @@
+// $Id: resolution.cc,v 1.6 2009/10/14 09:24:36 beischer Exp $
+
 #include "RES_RunManager.hh"
 #include "RES_DetectorConstruction.hh"
 #include "RES_PhysicsList.hh"

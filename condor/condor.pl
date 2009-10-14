@@ -9,7 +9,7 @@ use strict;
 # RUN script
 #
 
-my $firstRunNumber = 1400;
+my $firstRunNumber = 1450;
 
 my $numberOfEventsPerRun = 10000;
 
@@ -35,7 +35,7 @@ for (my $angle = $minAngle; $angle <= $maxAngle; $angle += $angleStep) {
 
     my $momentumString = sprintf("%.1f", $momentum);
     my $angleString = sprintf("%.2f", $angle);
-    my $filename = "${result_dir}/perdaix_${momentumString}_GeV_${angleString}_deg_inhom.root";
+    my $filename = "${result_dir}/perdaix_${momentumString}_GeV_${angleString}_deg_inhom_msc.root";
 
     print "Run $currentRun:\n";
     my $condorfile = &make_condor_file($currentRun);
@@ -44,7 +44,7 @@ for (my $angle = $minAngle; $angle <= $maxAngle; $angle += $angleStep) {
     print "$macrofile\n";
 
     unlink($filename);
-    system "echo", "condor_submit", "$condorfile";
+    system "condor_submit", "$condorfile";
     ++$currentRun;
   }
 }
@@ -107,7 +107,7 @@ sub make_macro_file{
 
 /run/initialize
 
-/process/inactivate msc
+/process/activate msc
 /RES/Run/Generate ${nEvents}
 /process/inactivate msc
 /RES/Run/Reconstruct

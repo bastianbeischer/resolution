@@ -1,3 +1,5 @@
+// $Id: chi2_dist.cc,v 1.2 2009/10/14 09:24:35 beischer Exp $
+
 #include <iostream>
 #include <fstream>
 

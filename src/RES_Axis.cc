@@ -1,3 +1,5 @@
+// $Id: RES_Axis.cc,v 1.3 2009/10/14 09:24:26 beischer Exp $
+
 #include "RES_Axis.hh"
 
 RES_Axis::RES_Axis(G4double x0, G4double x1, G4int nBins)

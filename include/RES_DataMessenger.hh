@@ -1,3 +1,5 @@
+// $Id: RES_DataMessenger.hh,v 1.3 2009/10/14 09:24:32 beischer Exp $
+
 #ifndef RES_DataMessenger_hh
 #define RES_DataMessenger_hh
 

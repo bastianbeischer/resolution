@@ -1,3 +1,5 @@
+// $Id: RES_FiberSD.cc,v 1.5 2009/10/14 09:24:25 beischer Exp $
+
 #include "RES_FiberSD.hh"
 
 #include "G4HCofThisEvent.hh"

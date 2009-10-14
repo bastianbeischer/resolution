@@ -1,3 +1,5 @@
+// $Id: res_vs_angle.cc,v 1.5 2009/10/14 09:24:34 beischer Exp $
+
 #include <iostream>
 #include <cmath>
 

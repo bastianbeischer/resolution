@@ -1,3 +1,5 @@
+// $Id: RES_Event.hh,v 1.6 2009/10/14 09:24:35 beischer Exp $
+
 #ifndef RES_Event_hh
 #define RES_Event_hh
 

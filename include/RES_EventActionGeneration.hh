@@ -1,3 +1,5 @@
+// $Id: RES_EventActionGeneration.hh,v 1.2 2009/10/14 09:24:31 beischer Exp $
+
 #ifndef RES_EventActionGeneration_hh
 #define RES_EventActionGeneration_hh
 

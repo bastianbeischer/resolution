@@ -1,5 +1,4 @@
-
-// $Id: blobel.h,v 1.1 2009/08/21 15:32:16 beischer Exp $
+// $Id: blobel.h,v 1.2 2009/10/14 09:24:33 beischer Exp $
 
 extern "C" void dvalley_( double& f, double a[], int& nc );
 #define DVALLEY dvalley_

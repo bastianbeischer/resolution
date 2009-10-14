@@ -1,3 +1,5 @@
+// $Id: RES_DetectorConstruction.cc,v 1.12 2009/10/14 09:24:26 beischer Exp $
+
 #include "RES_DetectorConstruction.hh"
 
 #include "RES_DetectorMessenger.hh"

@@ -1,3 +1,5 @@
+// $Id: RES_DetectorConstruction.hh,v 1.10 2009/10/14 09:24:32 beischer Exp $
+
 #ifndef RES_DetectorConstruction_hh
 #define RES_DetectorConstruction_hh
 

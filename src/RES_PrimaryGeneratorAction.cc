@@ -1,3 +1,5 @@
+// $Id: RES_PrimaryGeneratorAction.cc,v 1.8 2009/10/14 09:24:24 beischer Exp $
+
 #include "RES_PrimaryGeneratorAction.hh"
 
 #include "RES_PrimaryGeneratorMessenger.hh"

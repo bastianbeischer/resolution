@@ -1,3 +1,5 @@
+// $Id: RES_InhomField.cc,v 1.5 2009/10/14 09:24:24 beischer Exp $
+
 #include "RES_InhomField.hh"
 
 #include "RES_Axis.hh"

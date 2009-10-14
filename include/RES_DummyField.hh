@@ -1,3 +1,5 @@
+// $Id: RES_DummyField.hh,v 1.2 2009/10/14 09:24:32 beischer Exp $
+
 #ifndef RES_DummyField_hh
 #define RES_DummyField_hh
 

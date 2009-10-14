@@ -1,3 +1,5 @@
+// $Id: RES_PrimaryGeneratorMessenger.hh,v 1.3 2009/10/14 09:24:30 beischer Exp $
+
 #ifndef RES_PrimaryGeneratorMessenger_hh
 #define RES_PrimaryGeneratorMessenger_hh
 
