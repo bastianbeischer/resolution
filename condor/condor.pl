@@ -9,7 +9,7 @@ use strict;
 # RUN script
 #
 
-my $firstRunNumber = 1450;
+my $firstRunNumber = 1500;
 
 my $numberOfEventsPerRun = 10000;
 
@@ -17,7 +17,7 @@ my $minMomentum = 1;
 my $maxMomentum = 1;
 my $momentumStep = 1;
 my $minAngle = 0.1;
-my $maxAngle = 5.0;
+my $maxAngle = 10.0;
 my $angleStep = 0.1;
 
 my $project_dir = "/home/home4/institut_1b/beischer/src/geant4/resolution";
