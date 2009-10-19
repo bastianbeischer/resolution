@@ -1,4 +1,4 @@
-// $Id: millepede1.h,v 1.1 2009/10/14 16:51:32 beischer Exp $
+// $Id: millepede1.h,v 1.2 2009/10/19 09:24:19 beischer Exp $
 
 extern "C" void initgl_( int& nagb, int& nalc, int& nstdev, int& iprlim );
 #define INITGL initgl_
@@ -26,3 +26,6 @@ extern "C" void parsig_( int& i, float& value );
 
 extern "C" void initun_( int& nIter, float& otherVal );
 #define INITUN initun_
+
+extern "C" void parglo_ ( float* par);
+#define PARGLO parglo_

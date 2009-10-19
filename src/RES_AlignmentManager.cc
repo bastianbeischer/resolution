@@ -1,4 +1,4 @@
-// $Id: RES_AlignmentManager.cc,v 1.2 2009/10/14 17:29:04 beischer Exp $
+// $Id: RES_AlignmentManager.cc,v 1.3 2009/10/19 09:24:18 beischer Exp $
 
 #include "RES_AlignmentManager.hh"
 
@@ -7,6 +7,8 @@
 #include "RES_DataHandler.hh"
 #include "RES_RunManager.hh"
 #include "RES_Event.hh"
+
+#include "TMatrixD.h"
 
 #include "millepede1.h"
 
@@ -36,18 +38,31 @@ void RES_AlignmentManager::StartAlignment()
   m_dataHandler->LoadGeneratedEntry(0);
   RES_Event event = m_dataHandler->GetCurrentEvent();
 
-  int nHits, nGlobal, nLocal, nStdDev, iPrLim, iPar, nIter;
-  float fixvalue, cutvalue;
+  unsigned int nHits;
+  int nGlobal, nLocal, nStdDev, iPar, nIter, iPrLim;
+  float fixvalue, rhs, cutvalue;
   
   nHits = event.GetNbOfHits();
   nGlobal = 2*nHits;
 
   delete[] m_parameters;
   m_parameters = new float[nGlobal];
+  for (int i = 0 ; i < nGlobal; i++)
+    m_parameters[i] = 0.;
+  
+  float* constraints = new float[nGlobal];
+  for (int i = 0; i < nGlobal; i++)
+    constraints[i] = 0.;
 
-  INITGL(nGlobal, nLocal = 4, nStdDev = 3, iPrLim = 1);
-  PARSIG(iPar = 1, fixvalue = 0.);
-  PARSIG(iPar = 2, fixvalue = 0.);
+  for(int i = 1; i < nHits; i++) {
+    constraints[2*i+1] = 1.0/(event.GetHitPosition(i).z() - event.GetHitPosition(0).z()) ;
+  }
+
+  INITGL(nGlobal, nLocal = 4, nStdDev = 0, iPrLim = 1);
+  // PARSIG(iPar = 1, fixvalue = 0.);
+  // PARSIG(iPar = 2, fixvalue = 0.);
+  // PARGLO(m_parameters);
+  CONSTF(constraints, rhs = 0.);
   INITUN(nIter = 11, cutvalue = 100.);
 
   float* dergb = new float[nGlobal];
@@ -64,7 +79,7 @@ void RES_AlignmentManager::StartAlignment()
     
     if (event.GetNbOfHits() != nHits) continue;
 
-    for (int iHit = 0; iHit < nHits; iHit++) {
+    for (unsigned int iHit = 0; iHit < nHits; iHit++) {
 
       RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
       G4int iModule = event.GetModuleID(iHit);
@@ -80,14 +95,41 @@ void RES_AlignmentManager::StartAlignment()
       float fz = smearedHit.z();
       float k = fz - z0;
 
-      dergb[2*iHit]   = 1;
+      G4double sigmaV = det->GetModuleSigmaV(iModule);
+
+      // Rot is the matrix that maps u,v, to x,y (i.e. the backward rotation)
+      TMatrixD Rot(2,2); 
+      Rot(0,0) = cos(angle);
+      Rot(0,1) = sin(angle);
+      Rot(1,0) = -sin(angle);
+      Rot(1,1) = cos(angle);
+      TMatrixD V1(2,2);
+      V1(0,0) = 0.;
+      V1(0,1) = 0.;
+      V1(1,0) = 0.;
+      V1(1,1) = sigmaV*sigmaV;
+      TMatrixD RotTrans(2,2);
+      RotTrans.Transpose(Rot);
+      TMatrixD V2(2,2);
+      V2 = Rot * V1 * RotTrans;
+    
+      TMatrixD Lin(1,2);
+      Lin(0,0) = 1.;
+      Lin(0,1) = -cotan;
+      TMatrixD LinTrans(2,1);
+      LinTrans.Transpose(Lin);
+      TMatrixD V3 = TMatrixD(1,1);
+      V3 = Lin * V2 * LinTrans;
+
+      dergb[2*iHit]   = 1.;
       dergb[2*iHit+1] = -cotan;
-      derlc[0]     = 1.;
-      derlc[1]     = -cotan;
-      derlc[2]     = k;
-      derlc[3]     = -k*cotan;
-      float y      = fx - fy*cotan;
-      float sigma  = 1.;
+      derlc[0]        = 1.;
+      derlc[1]        = -cotan;
+      derlc[2]        = k;
+      derlc[3]        = -k*cotan;
+      float y         = fx - fy*cotan;
+      float sigma     = sqrt(V3(0,0));
+
       EQULOC(dergb, derlc, y, sigma);
 
     }
@@ -97,6 +139,11 @@ void RES_AlignmentManager::StartAlignment()
   }
 
   FITGLO(m_parameters);
+
+  for(int i = 0 ; i < nGlobal; i++) {
+    std::cout << " >>> Result of Alignment: " << std::endl;
+    std::cout << "       parameter " << i << " --> " << m_parameters[i] << std::endl;
+  }
 
   delete[] dergb;
   delete[] derlc;
