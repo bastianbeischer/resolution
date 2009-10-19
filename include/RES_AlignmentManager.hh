@@ -1,7 +1,9 @@
-// $Id: RES_AlignmentManager.hh,v 1.1 2009/10/14 16:51:36 beischer Exp $
+// $Id: RES_AlignmentManager.hh,v 1.2 2009/10/19 12:27:45 beischer Exp $
 
 #ifndef RES_AlignmentManager_hh
 #define RES_AlignmentManager_hh
+
+#include "globals.hh"
 
 class RES_AlignmentMessenger;
 class RES_DataHandler;
@@ -15,6 +17,7 @@ public:
   
 public:
   void StartAlignment();
+  void SetVerbose(G4int verbose) {m_verbose = verbose;}
 
 private:
 
@@ -22,7 +25,8 @@ private:
   RES_AlignmentMessenger* m_messenger;
   RES_DataHandler*        m_dataHandler;
 
-  float*                  m_parameters;
+  G4float*                m_parameters;
+  G4int                   m_verbose;
 
 };
 

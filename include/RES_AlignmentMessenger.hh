@@ -1,4 +1,4 @@
-// $Id: RES_AlignmentMessenger.hh,v 1.2 2009/10/14 17:29:04 beischer Exp $
+// $Id: RES_AlignmentMessenger.hh,v 1.3 2009/10/19 12:27:44 beischer Exp $
 
 #ifndef RES_AlignmentMessenger_hh
 #define RES_AlignmentMessenger_hh
@@ -9,6 +9,7 @@ class RES_AlignmentManager;
 class G4UIcommand;
 class G4UIdirectory;
 class G4UIcmdWithoutParameter;
+class G4UIcmdWithAnInteger;
 
 class RES_AlignmentMessenger : public G4UImessenger
 {
@@ -25,6 +26,7 @@ private:
   G4UIdirectory*           m_directory;
 
   G4UIcmdWithoutParameter* m_startAlignmentCmd;
+  G4UIcmdWithAnInteger*    m_verboseCmd;
 
 };
 
