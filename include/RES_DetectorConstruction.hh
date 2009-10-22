@@ -1,4 +1,4 @@
-// $Id: RES_DetectorConstruction.hh,v 1.11 2009/10/14 16:51:35 beischer Exp $
+// $Id: RES_DetectorConstruction.hh,v 1.12 2009/10/22 14:45:15 beischer Exp $
 
 #ifndef RES_DetectorConstruction_hh
 #define RES_DetectorConstruction_hh
@@ -58,6 +58,15 @@ public:
   }
   inline void SetModuleLength(G4int module, G4double length) {
     m_moduleLength[module] = length;
+  }
+  inline void SetModuleSigmaU(G4int module, G4double sigmaU) {
+    m_moduleSigmaU[module] = sigmaU;
+  }
+  inline void SetModuleSigmaV(G4int module, G4double sigmaV) {
+    m_moduleSigmaV[module] = sigmaV;
+  }
+  inline void SetModuleSigmaZ(G4int module, G4double sigmaZ) {
+    m_moduleSigmaZ[module] = sigmaZ;
   }
   inline void SetModuleFiberThickness(G4double fiberThickness) {
     m_moduleFiberThickness = fiberThickness;

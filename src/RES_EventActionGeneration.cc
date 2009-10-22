@@ -1,4 +1,4 @@
-// $Id: RES_EventActionGeneration.cc,v 1.12 2009/10/19 12:27:44 beischer Exp $
+// $Id: RES_EventActionGeneration.cc,v 1.13 2009/10/22 14:45:14 beischer Exp $
 
 #include "RES_EventActionGeneration.hh"
 
@@ -64,8 +64,8 @@ void RES_EventActionGeneration::SmearHits(RES_Event* event)
   G4int nHits = event->GetNbOfHits();
   RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
 
-  G4double xBias[6] = {0.*mm,  2.6*mm, 0.25*mm, 0.*mm};
-  G4double yBias[6] = {0.*mm,  2.*mm,  0.87*mm, 0.*mm};
+  G4double xBias[4] = {0.*mm,  0.*mm, 0.*mm, 0.*mm};
+  G4double yBias[4] = {0.*mm,  0.025*mm,  0.*mm, 0.*mm};
 
   for (int i = 0; i < nHits; i++) {
     G4int iModule = event->GetModuleID(i);

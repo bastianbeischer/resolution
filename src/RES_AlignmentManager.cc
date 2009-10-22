@@ -1,4 +1,4 @@
-// $Id: RES_AlignmentManager.cc,v 1.4 2009/10/19 12:27:44 beischer Exp $
+// $Id: RES_AlignmentManager.cc,v 1.5 2009/10/22 14:45:15 beischer Exp $
 
 #include "RES_AlignmentManager.hh"
 
@@ -65,11 +65,11 @@ void RES_AlignmentManager::StartAlignment()
   }
 
   INITGL(nGlobal, nLocal = 4, nStdDev = 0, iPrLim = m_verbose);
-  //PARSIG(iPar = 1, sigma = 0.);
-  //PARSIG(iPar = 2, sigma = 0.);
   //PARGLO(m_parameters);
   //CONSTF(x_constraints, rhs = 0.);
   //CONSTF(y_constraints, rhs = 0.);
+  PARSIG(iPar = 1, sigma = 0.);
+  PARSIG(iPar = 2, sigma = 0.);
   INITUN(nIter = 11, cutvalue = 100.);
 
   G4float* dergb = new G4float[nGlobal];
@@ -134,8 +134,8 @@ void RES_AlignmentManager::StartAlignment()
       derlc[1]            = -cotan;
       derlc[2]            = k;
       derlc[3]            = -k*cotan;
-      G4float y             = fx - fy*cotan;
-      G4float sigma         = sqrt(V3(0,0));
+      G4float y           = fx - fy*cotan;
+      G4float sigma       = sqrt(V3(0,0));
 
       EQULOC(dergb, derlc, y, sigma);
 
