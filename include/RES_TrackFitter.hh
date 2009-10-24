@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitter.hh,v 1.17 2009/10/14 16:51:34 beischer Exp $
+// $Id: RES_TrackFitter.hh,v 1.18 2009/10/24 16:29:35 beischer Exp $
 
 #ifndef RES_TrackFitter_hh
 #define RES_TrackFitter_hh
@@ -24,7 +24,7 @@ public:
 public:
   static RES_TrackFitter* GetInstance();
 
-  inline void SetCurrentGenEvent(RES_Event event) {m_currentGenEvent = event;}
+  inline void SetCurrentGenEvent(RES_Event event) {m_currentGenEvent = event; CopyHits();}
   inline void SetCurrentRecEvent(RES_Event event) {m_currentRecEvent = event;}
   inline void SetVerbose(G4int verbose) {m_verbose = verbose;}
   inline void SetFitMethod(FitMethod method) {m_fitMethod = method;}
@@ -33,12 +33,15 @@ public:
 
   void ScanChi2Function(G4int i, G4int j, G4String filename);
 
+public:
+  void     CopyHits();
+  void     FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double &y0, G4double &dxdz, G4double &dydz);
+
 private:
   RES_TrackFitter();
 
-  void     CopyHits();
+
   void     SetStartParametesToGeneratedParticle();
-  void     FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double &y0, G4double &dxdz, G4double &dydz);
   void     CalculateStartParameters();
   G4int    DoBlobelFit(G4int npar);
   G4int    DoMinuitFit(G4int npar);

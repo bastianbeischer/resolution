@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitter.cc,v 1.36 2009/10/14 16:51:30 beischer Exp $
+// $Id: RES_TrackFitter.cc,v 1.37 2009/10/24 16:29:32 beischer Exp $
 
 #include <cmath>
 #include <fstream>
@@ -73,7 +73,6 @@ RES_Event RES_TrackFitter::Fit()
   G4ParticleGun* gun = genAction->GetParticleGun();
   m_initialCharge = gun->GetParticleCharge();
 
-  CopyHits();
   CalculateStartParameters();
   //SetStartParametesToGeneratedParticle();
 
@@ -605,7 +604,6 @@ G4double RES_TrackFitter::Chi2InModuleFrame()
 
 void RES_TrackFitter::ScanChi2Function(G4int i, G4int j, G4String filename)
 {
-  CopyHits();
   //CalculateStartParameters();
   SetStartParametesToGeneratedParticle();
   

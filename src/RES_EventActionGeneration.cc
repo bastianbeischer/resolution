@@ -1,4 +1,4 @@
-// $Id: RES_EventActionGeneration.cc,v 1.13 2009/10/22 14:45:14 beischer Exp $
+// $Id: RES_EventActionGeneration.cc,v 1.14 2009/10/24 16:29:35 beischer Exp $
 
 #include "RES_EventActionGeneration.hh"
 
@@ -64,14 +64,16 @@ void RES_EventActionGeneration::SmearHits(RES_Event* event)
   G4int nHits = event->GetNbOfHits();
   RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
 
-  G4double xBias[4] = {0.*mm,  0.*mm, 0.*mm, 0.*mm};
-  G4double yBias[4] = {0.*mm,  0.025*mm,  0.*mm, 0.*mm};
+  G4double xBias[4]     = {0.*mm,  0.*mm, 0.*mm, 0.*mm};
+  G4double yBias[4]     = {0.*mm,  0.025*mm,  0.*mm, 0.*mm};
+  G4double angleBias[4] = {0., 1.*M_PI/180., 0., 0.};
 
   for (int i = 0; i < nHits; i++) {
     G4int iModule = event->GetModuleID(i);
     G4int iFiber  = event->GetFiberID(i);
     G4double angle = det->GetModuleAngle(iModule);
     if (iFiber > 0) angle += det->GetModuleInternalAngle(iModule);
+    angle += angleBias[i/2];
     
     // collect hit information
     G4double x = event->GetHitPosition(i).x();

@@ -1,4 +1,4 @@
-// $Id: res_vs_mom.cc,v 1.3 2009/10/14 09:24:34 beischer Exp $
+// $Id: res_vs_mom.cc,v 1.4 2009/10/24 16:29:36 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -114,7 +114,7 @@ int main(int argc, char** argv)
   double momStep = 0.5;
   for (double mom = momMin; mom <= momMax; mom += momStep) {
     char filename[100];
-    sprintf(filename, "../results/perdaix_%.1f_GeV_5.00_deg.root", mom);
+    sprintf(filename, "../results/perdaix_%.1f_GeV_5.00_deg_inhom_msc.root", mom);
     TFile file(filename);
 
     if (file.IsZombie())
