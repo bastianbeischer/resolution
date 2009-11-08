@@ -1,10 +1,11 @@
-// $Id: RES_EventActionGeneration.cc,v 1.15 2009/11/08 15:01:19 beischer Exp $
+// $Id: RES_EventActionGeneration.cc,v 1.16 2009/11/08 17:09:11 beischer Exp $
 
 #include "RES_EventActionGeneration.hh"
 
 #include "RES_DetectorConstruction.hh"
 #include "RES_RunManager.hh"
 #include "RES_DataHandler.hh"
+#include "RES_AlignmentManager.hh"
 #include "RES_FiberSD.hh"
 
 #include "G4Event.hh"
@@ -64,16 +65,15 @@ void RES_EventActionGeneration::SmearHits(RES_Event* event)
   G4int nHits = event->GetNbOfHits();
   RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
 
-  G4double xBias[6]     = {0.*mm,  0.*mm, 0.*mm, 0.*mm, 0.*mm, 0.*mm};
-  G4double yBias[6]     = {0.*mm,  1.2*mm, 3.4*mm, 2.5*mm, -2.3*mm, 0.*mm};
-  G4double angleBias[6] = {0., 0., 0., 0., 0., 0.};
-
   for (int i = 0; i < nHits; i++) {
     G4int iModule = event->GetModuleID(i);
     G4int iFiber  = event->GetFiberID(i);
     G4double angle = det->GetModuleAngle(iModule);
     if (iFiber > 0) angle += det->GetModuleInternalAngle(iModule);
-    angle += angleBias[i/2];
+
+    RES_AlignmentManager* alignMgr = RES_AlignmentManager::GetInstance();
+
+    angle += alignMgr->GetAngleShift(iModule);
     
     // collect hit information
     G4double x = event->GetHitPosition(i).x();
@@ -100,6 +100,8 @@ void RES_EventActionGeneration::SmearHits(RES_Event* event)
       sigmaZ = det->GetModuleLowerSigmaZ(iModule);
     }
 
+
+
     hit = forwardRotation*hit;
     //    hit.setX(CLHEP::RandFlat::shoot());
     //    hit.setX(CLHEP::RandGauss::shoot(0., sigmaU));
@@ -108,8 +110,8 @@ void RES_EventActionGeneration::SmearHits(RES_Event* event)
     hit.setZ(CLHEP::RandGauss::shoot(hit.z(), sigmaZ));
     hit = backwardRotation*hit;
 
-    hit.setX(hit.x() + xBias[i/2]);
-    hit.setY(hit.y() + yBias[i/2]);
+    hit.setX(hit.x() + alignMgr->GetXshift(iModule));
+    hit.setY(hit.y() + alignMgr->GetYshift(iModule));
 
     event->AddSmearedHit(hit.x(), hit.y(), hit.z());
   }

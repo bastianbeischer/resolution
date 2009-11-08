@@ -1,4 +1,4 @@
-// $Id: RES_AlignmentManager.cc,v 1.7 2009/11/08 15:01:19 beischer Exp $
+// $Id: RES_AlignmentManager.cc,v 1.8 2009/11/08 17:09:11 beischer Exp $
 
 #include "RES_AlignmentManager.hh"
 
@@ -15,6 +15,8 @@
 
 #include <iostream>
 
+RES_AlignmentManager* RES_AlignmentManager::m_instance = 0;
+
 RES_AlignmentManager::RES_AlignmentManager() :
   m_parameters(0),
   m_verbose(0)
@@ -29,6 +31,12 @@ RES_AlignmentManager::~RES_AlignmentManager()
 {
   delete m_messenger;
   delete[] m_parameters;
+}
+
+RES_AlignmentManager* RES_AlignmentManager::GetInstance()
+{
+  if (!m_instance) m_instance = new RES_AlignmentManager();
+  return m_instance;
 }
 
 void RES_AlignmentManager::StartAlignment()
