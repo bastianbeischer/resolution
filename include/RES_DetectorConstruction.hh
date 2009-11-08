@@ -1,4 +1,4 @@
-// $Id: RES_DetectorConstruction.hh,v 1.12 2009/10/22 14:45:15 beischer Exp $
+// $Id: RES_DetectorConstruction.hh,v 1.13 2009/11/08 15:01:18 beischer Exp $
 
 #ifndef RES_DetectorConstruction_hh
 #define RES_DetectorConstruction_hh
@@ -33,9 +33,12 @@ public:
   inline G4double GetModuleLength(unsigned int i) {assert(i < m_moduleLength.size()); return m_moduleLength[i];}
   inline G4double GetModuleAngle(unsigned int i) {assert(i < m_moduleAngles.size()); return m_moduleAngles.at(i);}
   inline G4double GetModuleInternalAngle(unsigned int i) {assert(i < m_moduleInternalAngles.size()); return m_moduleInternalAngles.at(i);}
-  inline G4double GetModuleSigmaU(unsigned int i) {assert(i < m_moduleSigmaU.size()); return m_moduleSigmaU.at(i);}
-  inline G4double GetModuleSigmaV(unsigned int i) {assert(i < m_moduleSigmaV.size()); return m_moduleSigmaV.at(i);}
-  inline G4double GetModuleSigmaZ(unsigned int i) {assert(i < m_moduleSigmaZ.size()); return m_moduleSigmaZ.at(i);}
+  inline G4double GetModuleUpperSigmaU(unsigned int i) {assert(i < m_moduleUpperSigmaU.size()); return m_moduleUpperSigmaU.at(i);}
+  inline G4double GetModuleUpperSigmaV(unsigned int i) {assert(i < m_moduleUpperSigmaV.size()); return m_moduleUpperSigmaV.at(i);}
+  inline G4double GetModuleUpperSigmaZ(unsigned int i) {assert(i < m_moduleUpperSigmaZ.size()); return m_moduleUpperSigmaZ.at(i);}
+  inline G4double GetModuleLowerSigmaU(unsigned int i) {assert(i < m_moduleLowerSigmaU.size()); return m_moduleLowerSigmaU.at(i);}
+  inline G4double GetModuleLowerSigmaV(unsigned int i) {assert(i < m_moduleLowerSigmaV.size()); return m_moduleLowerSigmaV.at(i);}
+  inline G4double GetModuleLowerSigmaZ(unsigned int i) {assert(i < m_moduleLowerSigmaZ.size()); return m_moduleLowerSigmaZ.at(i);}
 
   inline void AddModulePlacement(G4ThreeVector where) {
     m_modulePlacements.push_back(where);
@@ -43,9 +46,12 @@ public:
     m_moduleInternalAngles.push_back(0);
     m_moduleLength.push_back(m_moduleDefaultLength);
     m_moduleWidth.push_back(m_moduleDefaultWidth);
-    m_moduleSigmaU.push_back(m_moduleDefaultSigmaU);
-    m_moduleSigmaV.push_back(m_moduleDefaultSigmaV);
-    m_moduleSigmaZ.push_back(m_moduleDefaultSigmaZ);
+    m_moduleUpperSigmaU.push_back(m_moduleDefaultSigmaU);
+    m_moduleUpperSigmaV.push_back(m_moduleDefaultSigmaV);
+    m_moduleUpperSigmaZ.push_back(m_moduleDefaultSigmaZ);
+    m_moduleLowerSigmaU.push_back(m_moduleDefaultSigmaU);
+    m_moduleLowerSigmaV.push_back(m_moduleDefaultSigmaV);
+    m_moduleLowerSigmaZ.push_back(m_moduleDefaultSigmaZ);
   }
   inline void SetModuleAngle(G4int module, G4double angle) {
     m_moduleAngles[module] = angle;
@@ -59,14 +65,23 @@ public:
   inline void SetModuleLength(G4int module, G4double length) {
     m_moduleLength[module] = length;
   }
-  inline void SetModuleSigmaU(G4int module, G4double sigmaU) {
-    m_moduleSigmaU[module] = sigmaU;
+  inline void SetModuleUpperSigmaU(G4int module, G4double sigmaU) {
+    m_moduleUpperSigmaU[module] = sigmaU;
   }
-  inline void SetModuleSigmaV(G4int module, G4double sigmaV) {
-    m_moduleSigmaV[module] = sigmaV;
+  inline void SetModuleUpperSigmaV(G4int module, G4double sigmaV) {
+    m_moduleUpperSigmaV[module] = sigmaV;
   }
-  inline void SetModuleSigmaZ(G4int module, G4double sigmaZ) {
-    m_moduleSigmaZ[module] = sigmaZ;
+  inline void SetModuleUpperSigmaZ(G4int module, G4double sigmaZ) {
+    m_moduleUpperSigmaZ[module] = sigmaZ;
+  }
+  inline void SetModuleLowerSigmaU(G4int module, G4double sigmaU) {
+    m_moduleLowerSigmaU[module] = sigmaU;
+  }
+  inline void SetModuleLowerSigmaV(G4int module, G4double sigmaV) {
+    m_moduleLowerSigmaV[module] = sigmaV;
+  }
+  inline void SetModuleLowerSigmaZ(G4int module, G4double sigmaZ) {
+    m_moduleLowerSigmaZ[module] = sigmaZ;
   }
   inline void SetModuleFiberThickness(G4double fiberThickness) {
     m_moduleFiberThickness = fiberThickness;
@@ -107,9 +122,12 @@ private:
   std::vector<G4double>           m_moduleInternalAngles;
   std::vector<G4double>           m_moduleLength;
   std::vector<G4double>           m_moduleWidth;
-  std::vector<G4double>           m_moduleSigmaU;
-  std::vector<G4double>           m_moduleSigmaV;
-  std::vector<G4double>           m_moduleSigmaZ;
+  std::vector<G4double>           m_moduleUpperSigmaU;
+  std::vector<G4double>           m_moduleUpperSigmaV;
+  std::vector<G4double>           m_moduleUpperSigmaZ;
+  std::vector<G4double>           m_moduleLowerSigmaU;
+  std::vector<G4double>           m_moduleLowerSigmaV;
+  std::vector<G4double>           m_moduleLowerSigmaZ;
 
   G4VPhysicalVolume*              m_world;
   std::vector<G4VPhysicalVolume*> m_modules;

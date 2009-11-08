@@ -1,4 +1,4 @@
-// $Id: RES_AlignmentManager.cc,v 1.6 2009/10/24 16:29:35 beischer Exp $
+// $Id: RES_AlignmentManager.cc,v 1.7 2009/11/08 15:01:19 beischer Exp $
 
 #include "RES_AlignmentManager.hh"
 
@@ -116,7 +116,11 @@ void RES_AlignmentManager::StartAlignment()
         G4float k = fz - z0;
         G4float y = fx - fy*cotan;
 
-        G4double sigmaV = det->GetModuleSigmaV(iModule);
+        G4double sigmaV = 0.;
+        if (iFiber == 0)
+          sigmaV = det->GetModuleUpperSigmaV(iModule);
+        else
+          sigmaV = det->GetModuleUpperSigmaV(iModule);
         // Rot is the matrix that maps u,v, to x,y (i.e. the backward rotation)
         TMatrixD Rot(2,2); 
         Rot(0,0) = cos(angle);

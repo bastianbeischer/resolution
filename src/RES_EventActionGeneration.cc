@@ -1,4 +1,4 @@
-// $Id: RES_EventActionGeneration.cc,v 1.14 2009/10/24 16:29:35 beischer Exp $
+// $Id: RES_EventActionGeneration.cc,v 1.15 2009/11/08 15:01:19 beischer Exp $
 
 #include "RES_EventActionGeneration.hh"
 
@@ -64,9 +64,9 @@ void RES_EventActionGeneration::SmearHits(RES_Event* event)
   G4int nHits = event->GetNbOfHits();
   RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
 
-  G4double xBias[4]     = {0.*mm,  0.*mm, 0.*mm, 0.*mm};
-  G4double yBias[4]     = {0.*mm,  0.025*mm,  0.*mm, 0.*mm};
-  G4double angleBias[4] = {0., 1.*M_PI/180., 0., 0.};
+  G4double xBias[6]     = {0.*mm,  0.*mm, 0.*mm, 0.*mm, 0.*mm, 0.*mm};
+  G4double yBias[6]     = {0.*mm,  1.2*mm, 3.4*mm, 2.5*mm, -2.3*mm, 0.*mm};
+  G4double angleBias[6] = {0., 0., 0., 0., 0., 0.};
 
   for (int i = 0; i < nHits; i++) {
     G4int iModule = event->GetModuleID(i);
@@ -88,9 +88,17 @@ void RES_EventActionGeneration::SmearHits(RES_Event* event)
     // if (m_fitMethod == transverse)
     //   hit.setX(0.);
 
-    //G4double sigmaU = det->GetModuleSigmaU(iModule);
-    G4double sigmaV = det->GetModuleSigmaV(iModule);
-    G4double sigmaZ = det->GetModuleSigmaZ(iModule);
+    G4double sigmaU, sigmaV, sigmaZ;
+    if (iFiber == 0) {
+      sigmaU = det->GetModuleUpperSigmaU(iModule);
+      sigmaV = det->GetModuleUpperSigmaV(iModule);
+      sigmaZ = det->GetModuleUpperSigmaZ(iModule);
+    }
+    else {
+      sigmaU = det->GetModuleLowerSigmaU(iModule);
+      sigmaV = det->GetModuleLowerSigmaV(iModule);
+      sigmaZ = det->GetModuleLowerSigmaZ(iModule);
+    }
 
     hit = forwardRotation*hit;
     //    hit.setX(CLHEP::RandFlat::shoot());

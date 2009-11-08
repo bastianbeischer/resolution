@@ -1,4 +1,4 @@
-// $Id: test.cc,v 1.6 2009/10/14 09:24:22 beischer Exp $
+// $Id: test.cc,v 1.7 2009/11/08 15:01:20 beischer Exp $
 
 #include "RES_Event.hh"
 
@@ -21,24 +21,20 @@ int main(int argc, char** argv)
   genTree->SetBranchAddress("event", &genEvent);
   recTree->SetBranchAddress("event", &recEvent);
 
+  std::cout << "Generated events:" << std::endl;
   for (unsigned int i = 0; i < genTree->GetEntries(); i++) {
     genTree->GetEntry(i);
-    std::cout << genEvent->GetNbOfHits() << std::endl;
+    std::cout << "--------------------------------------------------" << std::endl;
+    std::cout << "ID: " << genEvent->GetID() << " --> "
+              << " p: " << genEvent->GetMomentum()
+              << " -----> chi2: " <<  genEvent->GetChi2() << std::endl;
+    for (unsigned int j = 0; j < genEvent->GetNbOfHits(); j++) {
+      std::cout << " (i,j): (" << genEvent->GetModuleID(j) << ", " << genEvent->GetFiberID(j) << ")"
+                << " x: " << genEvent->GetHitPosition(j).x() 
+                << " y: " << genEvent->GetHitPosition(j).y()
+                << " z: " << genEvent->GetHitPosition(j).z() << std::endl;
+    }
   }
-  // std::cout << "Generated events:" << std::endl;
-  // for (unsigned int i = 0; i < genTree->GetEntries(); i++) {
-  //   genTree->GetEntry(i);
-  //   std::cout << "--------------------------------------------------" << std::endl;
-  //   std::cout << "ID: " << genEvent->GetID() << " --> "
-  //             << " p: " << genEvent->GetMomentum()
-  //             << " -----> chi2: " <<  genEvent->GetChi2() << std::endl;
-  //   for (unsigned int j = 0; j < genEvent->GetNbOfHits(); j++) {
-  //     std::cout << " (i,j): (" << genEvent->GetModuleID(j) << ", " << genEvent->GetFiberID(j) << ")"
-  //               << " x: " << genEvent->GetHitPosition(j).x() 
-  //               << " y: " << genEvent->GetHitPosition(j).y()
-  //               << " z: " << genEvent->GetHitPosition(j).z() << std::endl;
-  //   }
-  // }
 
   // std::cout << "Reconstructed events:" << std::endl;
   // for (unsigned int i = 0; i < recTree->GetEntries(); i++) {

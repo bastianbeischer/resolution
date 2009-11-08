@@ -1,4 +1,4 @@
-// $Id: RES_DetectorMessenger.hh,v 1.9 2009/10/22 14:45:15 beischer Exp $
+// $Id: RES_DetectorMessenger.hh,v 1.10 2009/11/08 15:01:18 beischer Exp $
 
 #ifndef RES_DetectorMessenger_hh
 #define RES_DetectorMessenger_hh
@@ -35,10 +35,12 @@ private:
   G4UIcmdWithAString*        m_setModuleLengthCmd;
   G4UIcmdWithADoubleAndUnit* m_setModuleFiberThicknessCmd;
   G4UIcmdWithADoubleAndUnit* m_setModuleGapCmd;
-  G4UIcmdWithAString*        m_setModuleSigmaUCmd;
-  G4UIcmdWithAString*        m_setModuleSigmaVCmd;
-  G4UIcmdWithAString*        m_setModuleSigmaZCmd;
-
+  G4UIcmdWithAString*        m_setModuleUpperSigmaUCmd;
+  G4UIcmdWithAString*        m_setModuleUpperSigmaVCmd;
+  G4UIcmdWithAString*        m_setModuleUpperSigmaZCmd;
+  G4UIcmdWithAString*        m_setModuleLowerSigmaUCmd;
+  G4UIcmdWithAString*        m_setModuleLowerSigmaVCmd;
+  G4UIcmdWithAString*        m_setModuleLowerSigmaZCmd;
 };
 
 #endif /* RES_DetectorMessenger_hh */

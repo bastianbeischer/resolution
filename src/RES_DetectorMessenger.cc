@@ -1,4 +1,4 @@
-// $Id: RES_DetectorMessenger.cc,v 1.9 2009/10/22 14:45:14 beischer Exp $
+// $Id: RES_DetectorMessenger.cc,v 1.10 2009/11/08 15:01:19 beischer Exp $
 
 #include "RES_DetectorMessenger.hh"
 
@@ -62,20 +62,35 @@ RES_DetectorMessenger::RES_DetectorMessenger(RES_DetectorConstruction* detector)
   m_setModuleGapCmd->SetUnitCategory("Length");
   m_setModuleGapCmd->AvailableForStates(G4State_PreInit);
 
-  m_setModuleSigmaUCmd = new G4UIcmdWithAString("/RES/Det/SetModuleSigmaU", this);
-  m_setModuleSigmaUCmd->SetGuidance("Specify the resolution along the fiber (in um!).");
-  m_setModuleSigmaUCmd->SetParameterName("sigmaUString", false);
-  m_setModuleSigmaUCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
+  m_setModuleUpperSigmaUCmd = new G4UIcmdWithAString("/RES/Det/SetModuleUpperSigmaU", this);
+  m_setModuleUpperSigmaUCmd->SetGuidance("Specify the resolution along the fiber (in um!).");
+  m_setModuleUpperSigmaUCmd->SetParameterName("sigmaUString", false);
+  m_setModuleUpperSigmaUCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
 
-  m_setModuleSigmaVCmd = new G4UIcmdWithAString("/RES/Det/SetModuleSigmaV", this);
-  m_setModuleSigmaVCmd->SetGuidance("Specify the resolution along the fiber (in um!).");
-  m_setModuleSigmaVCmd->SetParameterName("sigmaVString", false);
-  m_setModuleSigmaVCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
+  m_setModuleUpperSigmaVCmd = new G4UIcmdWithAString("/RES/Det/SetModuleUpperSigmaV", this);
+  m_setModuleUpperSigmaVCmd->SetGuidance("Specify the resolution along the fiber (in um!).");
+  m_setModuleUpperSigmaVCmd->SetParameterName("sigmaVString", false);
+  m_setModuleUpperSigmaVCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
 
-  m_setModuleSigmaZCmd = new G4UIcmdWithAString("/RES/Det/SetModuleSigmaZ", this);
-  m_setModuleSigmaZCmd->SetGuidance("Specify the resolution along the fiber (in um!).");
-  m_setModuleSigmaZCmd->SetParameterName("sigmaZString", false);
-  m_setModuleSigmaZCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
+  m_setModuleUpperSigmaZCmd = new G4UIcmdWithAString("/RES/Det/SetModuleUpperSigmaZ", this);
+  m_setModuleUpperSigmaZCmd->SetGuidance("Specify the resolution along the fiber (in um!).");
+  m_setModuleUpperSigmaZCmd->SetParameterName("sigmaZString", false);
+  m_setModuleUpperSigmaZCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
+  
+  m_setModuleLowerSigmaUCmd = new G4UIcmdWithAString("/RES/Det/SetModuleLowerSigmaU", this);
+  m_setModuleLowerSigmaUCmd->SetGuidance("Specify the resolution along the fiber (in um!).");
+  m_setModuleLowerSigmaUCmd->SetParameterName("sigmaUString", false);
+  m_setModuleLowerSigmaUCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
+
+  m_setModuleLowerSigmaVCmd = new G4UIcmdWithAString("/RES/Det/SetModuleLowerSigmaV", this);
+  m_setModuleLowerSigmaVCmd->SetGuidance("Specify the resolution along the fiber (in um!).");
+  m_setModuleLowerSigmaVCmd->SetParameterName("sigmaVString", false);
+  m_setModuleLowerSigmaVCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
+
+  m_setModuleLowerSigmaZCmd = new G4UIcmdWithAString("/RES/Det/SetModuleLowerSigmaZ", this);
+  m_setModuleLowerSigmaZCmd->SetGuidance("Specify the resolution along the fiber (in um!).");
+  m_setModuleLowerSigmaZCmd->SetParameterName("sigmaZString", false);
+  m_setModuleLowerSigmaZCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
 }
 
 RES_DetectorMessenger::~RES_DetectorMessenger()
@@ -89,9 +104,12 @@ RES_DetectorMessenger::~RES_DetectorMessenger()
   delete m_setModuleLengthCmd;
   delete m_setModuleFiberThicknessCmd;
   delete m_setModuleGapCmd;
-  delete m_setModuleSigmaUCmd;
-  delete m_setModuleSigmaVCmd;
-  delete m_setModuleSigmaZCmd;
+  delete m_setModuleUpperSigmaUCmd;
+  delete m_setModuleUpperSigmaVCmd;
+  delete m_setModuleUpperSigmaZCmd;
+  delete m_setModuleLowerSigmaUCmd;
+  delete m_setModuleLowerSigmaVCmd;
+  delete m_setModuleLowerSigmaZCmd;
 }
 
 void RES_DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
@@ -125,20 +143,35 @@ void RES_DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
   if (command == m_setModuleGapCmd) {
     m_detector->SetModuleGap(m_setModuleGapCmd->GetNewDoubleValue(newValue));
   }
-  if (command == m_setModuleSigmaUCmd) {
-    G4int iModule = m_setModuleSigmaUCmd->ConvertToInt(newValue.substr(0,1).c_str());
-    G4double sigmaU = m_setModuleSigmaUCmd->ConvertToDouble(newValue.substr(2,newValue.length()).c_str()) * um;
-    m_detector->SetModuleSigmaU(iModule, sigmaU);
+  if (command == m_setModuleUpperSigmaUCmd) {
+    G4int iModule = m_setModuleUpperSigmaUCmd->ConvertToInt(newValue.substr(0,1).c_str());
+    G4double sigmaU = m_setModuleUpperSigmaUCmd->ConvertToDouble(newValue.substr(2,newValue.length()).c_str()) * um;
+    m_detector->SetModuleUpperSigmaU(iModule, sigmaU);
   }
-  if (command == m_setModuleSigmaVCmd) {
-    G4int iModule = m_setModuleSigmaVCmd->ConvertToInt(newValue.substr(0,1).c_str());
-    G4double sigmaV = m_setModuleSigmaVCmd->ConvertToDouble(newValue.substr(2,newValue.length()).c_str()) * um;
-    m_detector->SetModuleSigmaV(iModule, sigmaV);
+  if (command == m_setModuleUpperSigmaVCmd) {
+    G4int iModule = m_setModuleUpperSigmaVCmd->ConvertToInt(newValue.substr(0,1).c_str());
+    G4double sigmaV = m_setModuleUpperSigmaVCmd->ConvertToDouble(newValue.substr(2,newValue.length()).c_str()) * um;
+    m_detector->SetModuleUpperSigmaV(iModule, sigmaV);
   }
-  if (command == m_setModuleSigmaZCmd) {
-    G4int iModule = m_setModuleSigmaZCmd->ConvertToInt(newValue.substr(0,1).c_str());
-    G4double sigmaZ = m_setModuleSigmaZCmd->ConvertToDouble(newValue.substr(2,newValue.length()).c_str()) * um;
-    m_detector->SetModuleSigmaZ(iModule, sigmaZ);
+  if (command == m_setModuleUpperSigmaZCmd) {
+    G4int iModule = m_setModuleUpperSigmaZCmd->ConvertToInt(newValue.substr(0,1).c_str());
+    G4double sigmaZ = m_setModuleUpperSigmaZCmd->ConvertToDouble(newValue.substr(2,newValue.length()).c_str()) * um;
+    m_detector->SetModuleUpperSigmaZ(iModule, sigmaZ);
+  }
+  if (command == m_setModuleLowerSigmaUCmd) {
+    G4int iModule = m_setModuleLowerSigmaUCmd->ConvertToInt(newValue.substr(0,1).c_str());
+    G4double sigmaU = m_setModuleLowerSigmaUCmd->ConvertToDouble(newValue.substr(2,newValue.length()).c_str()) * um;
+    m_detector->SetModuleLowerSigmaU(iModule, sigmaU);
+  }
+  if (command == m_setModuleLowerSigmaVCmd) {
+    G4int iModule = m_setModuleLowerSigmaVCmd->ConvertToInt(newValue.substr(0,1).c_str());
+    G4double sigmaV = m_setModuleLowerSigmaVCmd->ConvertToDouble(newValue.substr(2,newValue.length()).c_str()) * um;
+    m_detector->SetModuleLowerSigmaV(iModule, sigmaV);
+  }
+  if (command == m_setModuleLowerSigmaZCmd) {
+    G4int iModule = m_setModuleLowerSigmaZCmd->ConvertToInt(newValue.substr(0,1).c_str());
+    G4double sigmaZ = m_setModuleLowerSigmaZCmd->ConvertToDouble(newValue.substr(2,newValue.length()).c_str()) * um;
+    m_detector->SetModuleLowerSigmaZ(iModule, sigmaZ);
   }
 }
 

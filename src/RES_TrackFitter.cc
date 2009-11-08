@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitter.cc,v 1.37 2009/10/24 16:29:32 beischer Exp $
+// $Id: RES_TrackFitter.cc,v 1.38 2009/11/08 15:01:20 beischer Exp $
 
 #include <cmath>
 #include <fstream>
@@ -194,7 +194,11 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
     G4double angle = det->GetModuleAngle(iModule);
     if (iFiber > 0) angle += det->GetModuleInternalAngle(iModule);
 
-    G4double sigmaV = det->GetModuleSigmaV(iModule);
+    G4double sigmaV;
+    if (iFiber == 0)
+      sigmaV = det->GetModuleUpperSigmaV(iModule);
+    else
+      sigmaV = det->GetModuleLowerSigmaV(iModule);
 
     // Rot is the matrix that maps u,v, to x,y (i.e. the backward rotation)
     TMatrixD Rot(2,2); 
@@ -371,7 +375,7 @@ void RES_TrackFitter::CalculateStartParameters()
     m_parameter[4] = theta;
 
     RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
-    G4double sigmaV = det->GetModuleSigmaV(0);
+    G4double sigmaV = det->GetModuleUpperSigmaV(0);
 
     G4double sigmaEllipsis = 1.*mm;
     G4double sigmaPhi   = sqrt(2) * sigmaV      / ((z[1]-z[0])*(1 + pow((y[1]-y[0])/(z[1]-z[0]),2.0)));
@@ -517,8 +521,16 @@ G4double RES_TrackFitter::Chi2InDetFrame()
     G4double angle = det->GetModuleAngle(iModule);
     if (iFiber > 0) angle += det->GetModuleInternalAngle(iModule);
 
-    G4double sigmaU = det->GetModuleSigmaU(iModule);
-    G4double sigmaV = det->GetModuleSigmaV(iModule);
+    G4double sigmaU, sigmaV;
+
+    if (iFiber == 0) {
+      sigmaU = det->GetModuleUpperSigmaU(iModule);
+      sigmaV = det->GetModuleUpperSigmaV(iModule);
+    }
+    else {
+      sigmaU = det->GetModuleLowerSigmaU(iModule);
+      sigmaV = det->GetModuleLowerSigmaV(iModule);
+    }
    
     G4double s = sin(angle);
     G4double c = cos(angle);
@@ -587,8 +599,15 @@ G4double RES_TrackFitter::Chi2InModuleFrame()
     hit = forwardRotation*hit;
     m_smearedHits[i] = forwardRotation*m_smearedHits[i];
     
-    //G4double sigmaU = det->GetModuleSigmaU(iModule);
-    G4double sigmaV = det->GetModuleSigmaV(iModule);
+    G4double sigmaU, sigmaV;
+    if (iFiber == 0) {
+      sigmaU = det->GetModuleUpperSigmaU(iModule);
+      sigmaV = det->GetModuleUpperSigmaV(iModule);
+    }
+    else {
+      sigmaU = det->GetModuleLowerSigmaU(iModule);
+      sigmaV = det->GetModuleLowerSigmaV(iModule);
+    }
 
     //G4double du = m_smearedHits[i].x() - hit.x();
     //chi2 += pow(du/sigmaU,2.);
