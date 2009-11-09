@@ -1,4 +1,4 @@
-// $Id: RES_AlignmentMessenger.hh,v 1.4 2009/11/08 17:09:11 beischer Exp $
+// $Id: RES_AlignmentMessenger.hh,v 1.5 2009/11/09 09:27:21 beischer Exp $
 
 #ifndef RES_AlignmentMessenger_hh
 #define RES_AlignmentMessenger_hh
@@ -27,7 +27,9 @@ private:
   G4UIdirectory*           m_directory;
 
   G4UIcmdWithoutParameter* m_startAlignmentCmd;
+  G4UIcmdWithAString*      m_setXshiftCmd;
   G4UIcmdWithAString*      m_setYshiftCmd;
+  G4UIcmdWithAString*      m_setAngleShiftCmd;
   G4UIcmdWithAnInteger*    m_verboseCmd;
 
 };

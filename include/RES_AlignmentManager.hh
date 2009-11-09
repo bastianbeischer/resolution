@@ -1,4 +1,4 @@
-// $Id: RES_AlignmentManager.hh,v 1.3 2009/11/08 17:09:11 beischer Exp $
+// $Id: RES_AlignmentManager.hh,v 1.4 2009/11/09 09:27:21 beischer Exp $
 
 #ifndef RES_AlignmentManager_hh
 #define RES_AlignmentManager_hh
@@ -21,6 +21,7 @@ public:
   void StartAlignment();
   void SetXshift(unsigned int i, float shift) {m_xShifts[i] = shift;}
   void SetYshift(unsigned int i, float shift) {m_yShifts[i] = shift;}
+  void SetAngleShift(unsigned int i, float shift) {m_angleShifts[i] = shift;}
   void SetVerbose(G4int verbose) {m_verbose = verbose;}
 
   G4float GetXshift(unsigned int i) {return m_xShifts[i];}

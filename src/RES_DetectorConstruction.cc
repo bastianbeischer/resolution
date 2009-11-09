@@ -1,4 +1,4 @@
-// $Id: RES_DetectorConstruction.cc,v 1.15 2009/11/08 15:01:19 beischer Exp $
+// $Id: RES_DetectorConstruction.cc,v 1.16 2009/11/09 09:27:21 beischer Exp $
 
 #include "RES_DetectorConstruction.hh"
 
@@ -48,9 +48,9 @@ RES_DetectorConstruction::RES_DetectorConstruction() :
 
 
   // define world dimensions
-  m_worldX = 4.0*m;
-  m_worldY = 4.0*m;
-  m_worldZ = 4.0*m;
+  m_worldX = 1.0*m;
+  m_worldY = 1.0*m;
+  m_worldZ = 1.0*m;
 
 
   // define default module parameters
