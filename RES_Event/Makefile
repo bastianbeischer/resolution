@@ -12,7 +12,7 @@ clean:
 	@rm -f *.o $(DICT).* $(LIB)
 
 $(LIB): $(DICT).o RES_Event.o
-	$(LD) -o $(LIB) $(DICT).o RES_Event.o -shared
+	$(LD) -o $(LIB) $(DICT).o RES_Event.o -shared `root-config --libs`
 	@echo "DONE."
 
 $(DICT).cc: RES_Event.hh RES_Event.cc
