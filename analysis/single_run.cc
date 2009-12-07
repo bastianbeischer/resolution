@@ -1,4 +1,4 @@
-// $Id: single_run.cc,v 1.5 2009/10/14 09:24:34 beischer Exp $
+// $Id: single_run.cc,v 1.6 2009/12/07 15:45:48 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -14,6 +14,7 @@
 #include <TH1D.h>
 #include <TMath.h>
 #include <TCanvas.h>
+#include <TStyle.h>
 
 double MS(double p, double m, double L, double X0) {
   double beta = p / sqrt(p*p + m*m);
@@ -150,6 +151,7 @@ int main(int argc, char** argv)
   }
 
 
+  gStyle->SetOptFit(11);
   TCanvas canvas("canvas", "canvas", 1024, 768);
   canvas.Draw();
   canvas.Divide(1,2);
@@ -208,6 +210,7 @@ int main(int argc, char** argv)
   totalYhist.GetYaxis()->SetTitle("N");
 
   TF1 chi2Dist("chi2Dist", chi2dist, 0.0, 100.0, 2);
+  chi2Dist.SetNpx(1000);
   //  chi2Dist.SetParameter(0,recEvent->GetDof());
 
   chi2Dist.SetParameters(1000, 3);

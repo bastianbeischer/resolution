@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitter.cc,v 1.38 2009/11/08 15:01:20 beischer Exp $
+// $Id: RES_TrackFitter.cc,v 1.39 2009/12/07 15:45:48 beischer Exp $
 
 #include <cmath>
 #include <fstream>
@@ -139,61 +139,36 @@ void RES_TrackFitter::SetStartParametesToGeneratedParticle()
 
 void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double &y0, G4double &dxdz, G4double &dydz)
 {
-  G4int nHits = n1 - n0;
+  unsigned int nHits = n1 - n0;
   RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
   
-  G4double z0 = 0.;
-  G4double* k = new G4double[nHits];
-  G4double** f = new G4double*[nHits];
-  for (int i = 0; i < nHits; i++)
-    f[i] = new G4double[3];
-  G4double** alpha = new G4double*[nHits];
-  for (int i = 0; i < nHits; i++)
-    alpha[i] = new G4double[2];
 
-  for (int i = 0; i < nHits; i++) {
-    G4int iModule = m_currentGenEvent.GetModuleID(i);
-    G4int iFiber  = m_currentGenEvent.GetFiberID(i);
-    G4double angle = det->GetModuleAngle(iModule);
-    if (iFiber > 0) angle += det->GetModuleInternalAngle(iModule);
-    alpha[i][0] = cos(angle);
-    alpha[i][1] = sin(angle);
-    f[i][0] = m_smearedHits[i+n0].x();
-    f[i][1] = m_smearedHits[i+n0].y();
-    f[i][2] = m_smearedHits[i+n0].z();
-    k[i]    = f[i][2] - z0;
-  }
+  float z0 = 0.0;
 
-  int nRow = nHits;
-  int nCol = 4;
+  unsigned int nRow = nHits;
+  unsigned int nCol = 4;
 
   TMatrixD A(nRow,nCol);
-  for (int i = 0; i < nRow; i++)
-    for (int j = 0; j < nCol; j++)
+  for (unsigned int i = 0; i < nRow; i++)
+    for (unsigned int j = 0; j < nCol; j++)
       A(i,j) = 0.;
 
-  for (int i = 0; i < nRow; i++) {
-    A(i,0) = 1.;
-    A(i,1) = -alpha[i][0]/alpha[i][1];
-    A(i,2) = k[i];
-    A(i,3) = -k[i]*alpha[i][0]/alpha[i][1];
-  }
-
   TVectorD b(nRow);
-  for (int i = 0; i < nRow; i++)
-    b(i) = f[i][0] - f[i][1]*alpha[i][0]/alpha[i][1];
+  for (unsigned int i = 0; i < nRow; i++)
+    b(i) = 0.;
 
   TMatrixD U(nRow,nRow);
-  for (int i = 0; i < nRow; i++)
-    for (int j = 0; j < nRow; j++)
+  for (unsigned int i = 0; i < nRow; i++)
+    for (unsigned int j = 0; j < nRow; j++)
       U(i,j) = 0.;
 
-  for (int i = 0; i < nHits; i++) {
+  for (unsigned int i = 0; i < nHits; i++) {
+
+    G4ThreeVector pos = m_smearedHits[i+n0];
     G4int iModule = m_currentGenEvent.GetModuleID(i);
     G4int iFiber  = m_currentGenEvent.GetFiberID(i);
     G4double angle = det->GetModuleAngle(iModule);
     if (iFiber > 0) angle += det->GetModuleInternalAngle(iModule);
-
     G4double sigmaV;
     if (iFiber == 0)
       sigmaV = det->GetModuleUpperSigmaV(iModule);
@@ -215,18 +190,38 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
     RotTrans.Transpose(Rot);
     TMatrixD V2(2,2);
     V2 = Rot * V1 * RotTrans;
-    
     TMatrixD Lin(1,2);
-    Lin(0,0) = 1.;
-    Lin(0,1) = -alpha[i][0]/alpha[i][1];
+
+    G4float k = pos.z() - z0;
+    G4bool useTangens = fabs(angle) < M_PI/4. ? true : false;
+    if (useTangens) {
+      float tangens = sin(angle)/cos(angle);
+      Lin(0,0)      = -tangens;
+      Lin(0,1)      = 1.;
+      A(i,0)        = -tangens;
+      A(i,1)        = 1.;
+      A(i,2)        = -k*tangens;
+      A(i,3)        = k;
+      b(i)          = -tangens*pos.x() + pos.y();
+    }
+    else {
+      float cotangens = cos(angle)/sin(angle);
+      Lin(0,0)        = 1.;
+      Lin(0,1)        = -cotangens;
+      A(i,0)          = 1.;
+      A(i,1)          = -cotangens;
+      A(i,2)          = k;
+      A(i,3)          = -k*cotangens;
+      b(i)            = pos.x() - cotangens*pos.y();
+    }
+
     TMatrixD LinTrans(2,1);
     LinTrans.Transpose(Lin);
     TMatrixD V3 = TMatrixD(1,1);
     V3 = Lin * V2 * LinTrans;
-    
     U(i,i) = V3(0,0);
   }
-
+  
   U.Invert();
   TMatrixD Uinv = U;
   TMatrixD ATranspose(nCol,nRow);
@@ -238,6 +233,13 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
   TVectorD solution(nCol);
   solution = Minv * c;
 
+  // TMatrixD vec(nRow,1);
+  // for (unsigned int i = 0; i < nRow; i++)
+  //   vec(i,0) = (A*solution - b)(i);
+  // TMatrixD vecTrans(1,nRow);
+  // vecTrans.Transpose(vec);
+  // float chi2 = (vecTrans * Uinv * vec)(0,0);
+
   x0   = solution(0);
   y0   = solution(1);
   dxdz = solution(2);
@@ -246,21 +248,21 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
   if (m_verbose > 1) {
 
     TMatrixD Lin(2*nRow,nCol);
-    for (int i = 0; i < 2*nRow; i++)
-      for (int j = 0; j < nCol; j++)
+    for (unsigned int i = 0; i < 2*nRow; i++)
+      for (unsigned int j = 0; j < nCol; j++)
         Lin(i,j) = 0.;
-    for (int i = 0; i < 2*nRow; i++){
+    for (unsigned int i = 0; i < 2*nRow; i++){
       Lin(i,i%2)     = 1.;
-      Lin(i,(i%2)+2) = k[i/2];
+      Lin(i,(i%2)+2) = m_smearedHits[i/2].z() - z0;
     }
     TMatrixD LinTrans(nCol, 2*nRow);
     LinTrans.Transpose(Lin);
     TMatrixD Cov(2*nRow, 2*nRow);
     Cov = Lin * Minv * LinTrans;
 
-    for (int i = 0; i < nHits; i++)
+    for (unsigned int i = 0; i < nHits; i++)
       G4cout << "resolution in x" << i << " --> " << sqrt(Cov(2*i,2*i)) << " mm" << G4endl;
-    for (int i = 0; i < nHits; i++)
+    for (unsigned int i = 0; i < nHits; i++)
       G4cout << "resolution in y" << i << " --> " << sqrt(Cov(2*i+1,2*i+1)) << " mm" << G4endl;
 
     if (m_verbose > 2) {
@@ -269,14 +271,6 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
     }
 
   }
-
-  delete[] k;
-  for(int i = 0; i < nHits; i++)
-    delete[] f[i];
-  delete[] f;
-  for(int i = 0; i < nHits; i++)
-    delete[] alpha[i];
-  delete[] alpha;
 }
 
 void RES_TrackFitter::CalculateStartParameters()
