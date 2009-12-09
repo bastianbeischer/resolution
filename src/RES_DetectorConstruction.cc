@@ -1,4 +1,4 @@
-// $Id: RES_DetectorConstruction.cc,v 1.16 2009/11/09 09:27:21 beischer Exp $
+// $Id: RES_DetectorConstruction.cc,v 1.17 2009/12/09 21:43:31 beischer Exp $
 
 #include "RES_DetectorConstruction.hh"
 
@@ -88,7 +88,7 @@ G4VPhysicalVolume* RES_DetectorConstruction::Construct()
   // world
   G4Box* worldSolid         = new G4Box("world", 0.5*m_worldX, 0.5*m_worldY, 0.5*m_worldZ);
   G4LogicalVolume* worldLog = new G4LogicalVolume(worldSolid, m_worldMaterial, "world", 0, 0, 0);
-  m_world                    = new G4PVPlacement(0, G4ThreeVector(), worldLog, "world", 0, false, 0);
+  m_world                   = new G4PVPlacement(0, G4ThreeVector(), worldLog, "world", 0, false, 0);
 
   for (unsigned int i = 0; i < m_modulePlacements.size(); i++) {
     // detector modules
@@ -129,7 +129,6 @@ G4VPhysicalVolume* RES_DetectorConstruction::Construct()
     // SENSTIVE DETECTOR FOR THESE FIBERS
     currentFiberLogic->SetSensitiveDetector(aFiberSD);  
   }
-
 
   // --------------------------------------------
   // Visualization attributes

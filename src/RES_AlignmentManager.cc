@@ -1,4 +1,4 @@
-// $Id: RES_AlignmentManager.cc,v 1.8 2009/11/08 17:09:11 beischer Exp $
+// $Id: RES_AlignmentManager.cc,v 1.9 2009/12/09 21:43:31 beischer Exp $
 
 #include "RES_AlignmentManager.hh"
 
@@ -50,7 +50,7 @@ void RES_AlignmentManager::StartAlignment()
 
   unsigned int nHits;
   G4int nGlobal, nLocal, nStdDev, iPar, nIter, iPrLim;
-  G4float sigma, rhs, cutvalue;
+  G4float sigma, /*rhs,*/ cutvalue;
   
   nHits = event.GetNbOfHits();
   int nModules = nHits/2;

@@ -1,4 +1,4 @@
-// $Id: resolution.cc,v 1.8 2009/11/08 17:09:10 beischer Exp $
+// $Id: resolution.cc,v 1.9 2009/12/09 21:43:32 beischer Exp $
 
 #include "RES_RunManager.hh"
 #include "RES_DetectorConstruction.hh"
@@ -22,7 +22,7 @@ int main(int argc, char** argv)
 {
   // create a new RunManager
   RES_RunManager* runManager = new RES_RunManager();
-  RES_AlignmentManager* alignmentManager = RES_AlignmentManager::GetInstance();
+  RES_AlignmentManager::GetInstance();
 
   // set user initializations
   RES_DetectorConstruction* detectorConstruction = new RES_DetectorConstruction();

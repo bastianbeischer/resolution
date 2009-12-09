@@ -1,10 +1,13 @@
-// $Id: RES_PhysicsList.cc,v 1.3 2009/10/14 09:24:24 beischer Exp $
+// $Id: RES_PhysicsList.cc,v 1.4 2009/12/09 21:43:31 beischer Exp $
 
 #include "RES_PhysicsList.hh"
 
 #include "G4ParticleTypes.hh"
+#include "G4MultipleScattering.hh"
 #include "G4eMultipleScattering.hh"
 #include "G4hMultipleScattering.hh"
+#include "G4eIonisation.hh"
+#include "G4eBremsstrahlung.hh"
 #include "G4ProcessManager.hh"
 
 RES_PhysicsList::RES_PhysicsList()
@@ -32,8 +35,8 @@ void RES_PhysicsList::ConstructEM()
     } else if (particleName == "e-") {
       //electron
       pmanager->AddProcess(new G4eMultipleScattering,-1, 1, 1);
-      // pmanager->AddProcess(new G4eIonisation,        -1, 2, 2);
-      // pmanager->AddProcess(new G4eBremsstrahlung,    -1, 3, 3);      
+      pmanager->AddProcess(new G4eIonisation,        -1, 2, 2);
+      pmanager->AddProcess(new G4eBremsstrahlung,    -1, 3, 3);      
 
     } else if (particleName == "e+") {
       //positron
