@@ -1,4 +1,4 @@
-// $Id: compare_msc.cc,v 1.5 2009/12/09 21:43:31 beischer Exp $
+// $Id: compare_msc.cc,v 1.6 2009/12/09 22:14:39 beischer Exp $
 
 #include <TApplication.h>
 #include <TFile.h>
@@ -29,36 +29,47 @@ int main(int argc, char** argv)
 
   TTree* genTree1 = (TTree*) file1.Get("resolution_gen_tree");
   TTree* genTree2 = (TTree*) file2.Get("resolution_gen_tree");
+  TTree* recTree1 = (TTree*) file1.Get("resolution_rec_tree");
+  TTree* recTree2 = (TTree*) file2.Get("resolution_rec_tree");
 
   RES_Event* genEvent1 = new RES_Event;
   RES_Event* genEvent2 = new RES_Event;
+  RES_Event* recEvent1 = new RES_Event;
+  RES_Event* recEvent2 = new RES_Event;
   genTree1->SetBranchAddress("event", &genEvent1);
   genTree2->SetBranchAddress("event", &genEvent2);
+  recTree1->SetBranchAddress("event", &recEvent1);
+  recTree2->SetBranchAddress("event", &recEvent2);
 
   genTree1->GetEntry(0);
   int nHits = genEvent1->GetNbOfHits();
 
   TH1D** xHist = new TH1D*[nHits];
+  int nBins = 100;
   for (int i = 0;i < nHits; i++) {
     char title[256];
     sprintf(title, "xHist%d", i);
-    xHist[i] = new TH1D(title,title, 100, -1.0, 1.0);
+    xHist[i] = new TH1D(title,title, nBins, -0.3, 0.3);
   }
   TH1D** yHist = new TH1D*[nHits];
   for (int i = 0;i < nHits; i++) {
     char title[256];
     sprintf(title, "yHist%d", i);
-    yHist[i] = new TH1D(title,title, 100, -1.0, 1.0);
+    yHist[i] = new TH1D(title,title, nBins, -0.3, 0.3);
   }
 
   for (int i = 0; i < genTree1->GetEntries(); i++) {
     genTree1->GetEntry(i);
     genTree2->GetEntry(i);
-    if ( (genEvent1->GetNbOfHits() < nHits) || (genEvent2->GetNbOfHits() < nHits) )
+    recTree1->GetEntry(i);
+    recTree2->GetEntry(i);
+    if ( (genEvent1->GetNbOfHits() < nHits) || (genEvent2->GetNbOfHits() < nHits) || (recEvent1->GetNbOfHits() < nHits) || (recEvent1->GetNbOfHits() < nHits) )
       continue;
     for (int j = 0; j < nHits; j++) {
-      xHist[j]->Fill(genEvent1->GetHitPosition(j).x() - genEvent2->GetHitPosition(j).x());
-      yHist[j]->Fill(genEvent1->GetHitPosition(j).y() - genEvent2->GetHitPosition(j).y());
+      // xHist[j]->Fill(genEvent1->GetHitPosition(j).x() - genEvent2->GetHitPosition(j).x());
+      // yHist[j]->Fill(genEvent1->GetHitPosition(j).y() - genEvent2->GetHitPosition(j).y());
+      xHist[j]->Fill(recEvent1->GetHitPosition(j).x() - genEvent1->GetHitPosition(j).x());
+      yHist[j]->Fill(recEvent1->GetHitPosition(j).y() - genEvent1->GetHitPosition(j).y());
     }
   }
 
@@ -99,6 +110,8 @@ int main(int argc, char** argv)
 
   delete genEvent1;
   delete genEvent2;
+  delete recEvent1;
+  delete recEvent2;
 
   for (int i = 0; i < nHits; i++)
     delete xHist[i];
