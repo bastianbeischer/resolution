@@ -1,4 +1,4 @@
-// $Id: compare_msc.cc,v 1.3 2009/10/14 09:24:34 beischer Exp $
+// $Id: compare_msc.cc,v 1.4 2009/12/09 19:34:25 beischer Exp $
 
 #include <TApplication.h>
 #include <TFile.h>
@@ -72,9 +72,9 @@ int main(int argc, char** argv)
     xHist[i]->Draw();
     xHist[i]->GetXaxis()->SetTitle(xtitle);
     xHist[i]->GetYaxis()->SetTitle("N");
-    xHist[i]->Fit("gaus", "Q");
-    TF1* fitFunc = xHist[i]->GetFunction("gaus");
-    std::cout << "x" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
+    // xHist[i]->Fit("gaus", "Q");
+    // TF1* fitFunc = xHist[i]->GetFunction("gaus");
+    // std::cout << "x" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
   }
 
   TCanvas canvas3("canvas3", "canvas3", 1024, 768);
@@ -87,9 +87,9 @@ int main(int argc, char** argv)
     yHist[i]->Draw();
     yHist[i]->GetXaxis()->SetTitle(ytitle);
     yHist[i]->GetYaxis()->SetTitle("N");
-    yHist[i]->Fit("gaus", "Q");
-    TF1* fitFunc = yHist[i]->GetFunction("gaus");
-    std::cout << "y" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
+    //    yHist[i]->Fit("gaus", "Q");
+    //    TF1* fitFunc = yHist[i]->GetFunction("gaus");
+    //    std::cout << "y" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
   }
 
   app.Run();

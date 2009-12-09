@@ -1,4 +1,4 @@
-// $Id: RES_InhomField.cc,v 1.5 2009/10/14 09:24:24 beischer Exp $
+// $Id: RES_InhomField.cc,v 1.6 2009/12/09 19:34:25 beischer Exp $
 
 #include "RES_InhomField.hh"
 
@@ -132,6 +132,10 @@ void RES_InhomField::ReadData()
   while (!file.eof()) {
     file >> x >> y >> z >> f_x >> f_y >> f_z;
 
+    x/=10.;
+    y/=10.;
+    z/=10.;
+
     nX = m_axis_x->GetBin(x);
     nY = m_axis_y->GetBin(y);
     nZ = m_axis_z->GetBin(z);
@@ -139,30 +143,30 @@ void RES_InhomField::ReadData()
     m_field_y[nX][nY][nZ] = f_y;
     m_field_z[nX][nY][nZ] = f_z;
 
-    // mirror to get the full world
-    if (y != 0.0) {
-      nX = m_axis_x->GetBin(x);
-      nY = m_axis_y->GetBin(-y);
-      nZ = m_axis_z->GetBin(z);
-      m_field_x[nX][nY][nZ] = f_x;
-      m_field_y[nX][nY][nZ] = -f_y;
-      m_field_z[nX][nY][nZ] = f_z;
-    }
-    if (z != 0.0) {
-      nX = m_axis_x->GetBin(x);
-      nY = m_axis_y->GetBin(y);
-      nZ = m_axis_z->GetBin(-z);
-      m_field_x[nX][nY][nZ] = f_x;
-      m_field_y[nX][nY][nZ] = f_y;
-      m_field_z[nX][nY][nZ] = -f_z;
-    }
-    if ( (y != 0.0) && (z != 0) ) {
-      nX = m_axis_x->GetBin(x);
-      nY = m_axis_y->GetBin(-y);
-      nZ = m_axis_z->GetBin(-z);
-      m_field_x[nX][nY][nZ] = f_x;
-      m_field_y[nX][nY][nZ] = -f_y;
-      m_field_z[nX][nY][nZ] = -f_z;
-    }
+    // // mirror to get the full world
+    // if (y != 0.0) {
+    //   nX = m_axis_x->GetBin(x);
+    //   nY = m_axis_y->GetBin(-y);
+    //   nZ = m_axis_z->GetBin(z);
+    //   m_field_x[nX][nY][nZ] = f_x;
+    //   m_field_y[nX][nY][nZ] = -f_y;
+    //   m_field_z[nX][nY][nZ] = f_z;
+    // }
+    // if (z != 0.0) {
+    //   nX = m_axis_x->GetBin(x);
+    //   nY = m_axis_y->GetBin(y);
+    //   nZ = m_axis_z->GetBin(-z);
+    //   m_field_x[nX][nY][nZ] = f_x;
+    //   m_field_y[nX][nY][nZ] = f_y;
+    //   m_field_z[nX][nY][nZ] = -f_z;
+    // }
+    // if ( (y != 0.0) && (z != 0) ) {
+    //   nX = m_axis_x->GetBin(x);
+    //   nY = m_axis_y->GetBin(-y);
+    //   nZ = m_axis_z->GetBin(-z);
+    //   m_field_x[nX][nY][nZ] = f_x;
+    //   m_field_y[nX][nY][nZ] = -f_y;
+    //   m_field_z[nX][nY][nZ] = -f_z;
+    // }
   }
 }

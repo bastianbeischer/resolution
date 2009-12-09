@@ -1,4 +1,4 @@
-// $Id: single_run.cc,v 1.6 2009/12/07 15:45:48 beischer Exp $
+// $Id: single_run.cc,v 1.7 2009/12/09 19:34:25 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -107,23 +107,40 @@ int main(int argc, char** argv)
   //  TH1D resHist("resHist", "resHist", 100, 0.5, 1.5);
   TH1D ptHist("ptHist", "ptHist", 100, 1. - 5.*momRes, 1. + 5.*momRes);
   int nHits = genEvent->GetNbOfHits();
-  TH1D** xHist = new TH1D*[nHits];
+  int nBins = 100;
+  TH1D** xDeltaGenHist = new TH1D*[nHits];
   for (int i = 0;i < nHits; i++) {
     char title[256];
-    sprintf(title, "xHist%d", i);
-    xHist[i] = new TH1D(title,title, 100, -20, 20);
+    sprintf(title, "xDeltaGenHist%d", i);
+    xDeltaGenHist[i] = new TH1D(title,title, nBins, -20, 20);
   }
-  TH1D** yHist = new TH1D*[nHits];
+  TH1D** yDeltaGenHist = new TH1D*[nHits];
   for (int i = 0;i < nHits; i++) {
     char title[256];
-    sprintf(title, "yHist%d", i);
-    yHist[i] = new TH1D(title,title, 100, -1.0, 1.0);
+    sprintf(title, "yDeltaGenHist%d", i);
+    if (i == 0 || i == nHits - 2) yDeltaGenHist[i] = new TH1D(title,title, 500, -0.3, 0.3);
+    else yDeltaGenHist[i] = new TH1D(title,title, nBins, -0.3, 0.3);
+  }
+  TH1D** xDeltaSmearedHist = new TH1D*[nHits];
+  for (int i = 0;i < nHits; i++) {
+    char title[256];
+    sprintf(title, "xDeltaSmearedHist%d", i);
+    xDeltaSmearedHist[i] = new TH1D(title,title, nBins, -20, 20);
+  }
+  TH1D** yDeltaSmearedHist = new TH1D*[nHits];
+  for (int i = 0;i < nHits; i++) {
+    char title[256];
+    sprintf(title, "yDeltaSmearedHist%d", i);
+    if (i == 0 || i == nHits - 2) yDeltaSmearedHist[i] = new TH1D(title,title, 500, -0.3, 0.3);
+    else yDeltaSmearedHist[i] = new TH1D(title,title, nBins, -0.3, 0.3);
   }
 
-  TH1D totalXhist("totalXhist", "totalXhist", 100, -20, 20);
-  TH1D totalYhist("totalYhist", "totalYhist", 100, -1.0, 1.0);
+  TH1D totalXhist("totalXhist", "totalXhist", 500, -20, 20);
+  TH1D totalYhist("totalYhist", "totalYhist", 500, -0.3, 0.3);
 
   TH1D chi2Hist("chi2Hist", "chi2Hist", 500, 0.0, 100.0);
+
+  TH1D angleHist("angleHist", "angleHist", 500, -5e-3, 5e-3);
 
   char title[128];
   sprintf(title, "#chi^{2} Distribution (dof = %d)", recEvent->GetDof());
@@ -139,11 +156,18 @@ int main(int argc, char** argv)
     resHist.Fill(genEvent->GetMomentum()/recEvent->GetMomentum());
     ptHist.Fill(genEvent->GetTransverseMomentum()/recEvent->GetTransverseMomentum());
     for (int i = 0; i < nHitsRec; i++) {
-      xHist[i]->Fill(genEvent->GetHitPosition(i).x() - recEvent->GetHitPosition(i).x());
-      yHist[i]->Fill(genEvent->GetHitPosition(i).y() - recEvent->GetHitPosition(i).y());
+      xDeltaGenHist[i]->Fill(genEvent->GetHitPosition(i).x() - recEvent->GetHitPosition(i).x());
+      yDeltaGenHist[i]->Fill(genEvent->GetHitPosition(i).y() - recEvent->GetHitPosition(i).y());
+      xDeltaSmearedHist[i]->Fill(genEvent->GetSmearedHitPosition(i).x() - recEvent->GetHitPosition(i).x());
+      yDeltaSmearedHist[i]->Fill(genEvent->GetSmearedHitPosition(i).y() - recEvent->GetHitPosition(i).y());
       totalXhist.Fill(genEvent->GetHitPosition(i).x() - recEvent->GetHitPosition(i).x());
       totalYhist.Fill(genEvent->GetHitPosition(i).y() - recEvent->GetHitPosition(i).y());
     }
+
+    double angle1 = (genEvent->GetHitPosition(1).y() - genEvent->GetHitPosition(0).y())/(genEvent->GetHitPosition(1).z() - genEvent->GetHitPosition(0).z());
+    double angle2 = (genEvent->GetHitPosition(nHitsGen-1).y() - genEvent->GetHitPosition(nHitsGen-2).y())/(genEvent->GetHitPosition(nHitsGen-1).z() - genEvent->GetHitPosition(nHitsGen-2).z());
+    angleHist.Fill(angle2-angle1);
+
     chi2Hist.Fill(recEvent->GetChi2());
     char title[128];
     sprintf(title, "#chi^{2} Distribution (dof = %d)", recEvent->GetDof());
@@ -174,11 +198,11 @@ int main(int argc, char** argv)
     char xtitle[256];
     sprintf(xtitle, "(x_{%d,sim} - x_{%d,rec}) / mm", i, i);
     canvas2.cd(i+1);
-    xHist[i]->Draw();
-    xHist[i]->GetXaxis()->SetTitle(xtitle);
-    xHist[i]->GetYaxis()->SetTitle("N");
-    xHist[i]->Fit("gaus", "Q");
-    TF1* fitFunc = xHist[i]->GetFunction("gaus");
+    xDeltaGenHist[i]->Draw();
+    xDeltaGenHist[i]->GetXaxis()->SetTitle(xtitle);
+    xDeltaGenHist[i]->GetYaxis()->SetTitle("N");
+    xDeltaGenHist[i]->Fit("gaus", "Q");
+    TF1* fitFunc = xDeltaGenHist[i]->GetFunction("gaus");
     std::cout << "x" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
   }
 
@@ -189,22 +213,53 @@ int main(int argc, char** argv)
     char ytitle[256];
     sprintf(ytitle, "(y_{%d,sim} - y_{%d,rec}) / mm", i, i);
     canvas3.cd(i+1);
-    yHist[i]->Draw();
-    yHist[i]->GetXaxis()->SetTitle(ytitle);
-    yHist[i]->GetYaxis()->SetTitle("N");
-    yHist[i]->Fit("gaus", "Q");
-    TF1* fitFunc = yHist[i]->GetFunction("gaus");
+    yDeltaGenHist[i]->Draw();
+    yDeltaGenHist[i]->GetXaxis()->SetTitle(ytitle);
+    yDeltaGenHist[i]->GetYaxis()->SetTitle("N");
+    yDeltaGenHist[i]->Fit("gaus", "Q");
+    TF1* fitFunc = yDeltaGenHist[i]->GetFunction("gaus");
     std::cout << "y" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
   }
 
   TCanvas canvas4("canvas4", "canvas4", 1024, 768);
+  canvas4.Divide(nHits/2,2);
   canvas4.Draw();
-  canvas4.Divide(1,2);
-  canvas4.cd(1);
+
+  for (int i = 0; i < nHits; i++) {
+    char xtitle[256];
+    sprintf(xtitle, "(x_{%d,sim} - x_{%d,rec}) / mm", i, i);
+    canvas4.cd(i+1);
+    xDeltaSmearedHist[i]->Draw();
+    xDeltaSmearedHist[i]->GetXaxis()->SetTitle(xtitle);
+    xDeltaSmearedHist[i]->GetYaxis()->SetTitle("N");
+    xDeltaSmearedHist[i]->Fit("gaus", "Q");
+    TF1* fitFunc = xDeltaSmearedHist[i]->GetFunction("gaus");
+    std::cout << "x" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
+  }
+
+  TCanvas canvas5("canvas5", "canvas5", 1024, 768);
+  canvas5.Divide(nHits/2,2);
+  canvas5.Draw();
+  for (int i = 0; i < nHits; i++) {
+    char ytitle[256];
+    sprintf(ytitle, "(y_{%d,sim} - y_{%d,rec}) / mm", i, i);
+    canvas5.cd(i+1);
+    yDeltaSmearedHist[i]->Draw();
+    yDeltaSmearedHist[i]->GetXaxis()->SetTitle(ytitle);
+    yDeltaSmearedHist[i]->GetYaxis()->SetTitle("N");
+    yDeltaSmearedHist[i]->Fit("gaus", "Q");
+    TF1* fitFunc = yDeltaSmearedHist[i]->GetFunction("gaus");
+    std::cout << "y" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
+  }
+
+  TCanvas canvas6("canvas6", "canvas6", 1024, 768);
+  canvas6.Draw();
+  canvas6.Divide(1,2);
+  canvas6.cd(1);
   totalXhist.Draw();
   totalXhist.GetXaxis()->SetTitle("(x_{sim,total} - x_{rec,total}) / mm");
   totalXhist.GetYaxis()->SetTitle("N");
-  canvas4.cd(2);
+  canvas6.cd(2);
   totalYhist.Draw();
   totalYhist.GetXaxis()->SetTitle("(y_{sim,total} - y_{rec,total}) / mm");
   totalYhist.GetYaxis()->SetTitle("N");
@@ -215,14 +270,21 @@ int main(int argc, char** argv)
 
   chi2Dist.SetParameters(1000, 3);
 
-  TCanvas canvas5("canvas5", "canvas5", 1024, 768);
-  canvas5.Draw();
+  TCanvas canvas7("canvas7", "canvas7", 1024, 768);
+  canvas7.Draw();
   chi2Hist.Draw();
   chi2Hist.GetXaxis()->SetTitle("#chi^{2}");
   chi2Hist.GetYaxis()->SetTitle("N");
   chi2Hist.Fit(&chi2Dist, "E");
   chi2Dist.Draw("SAME");
   chi2Dist.SetLineColor(kRed);
+
+  TCanvas canvas8("canvas8", "canvas8", 1024, 768);
+  canvas8.Draw();
+  angleHist.Draw();
+  angleHist.GetXaxis()->SetTitle("#Delta #theta [rad]");
+  angleHist.GetYaxis()->SetTitle("N");
+
 
   app.Run();
 
@@ -231,12 +293,12 @@ int main(int argc, char** argv)
   file.Close();
 
   for (int i = 0; i < nHits; i++)
-    delete xHist[i];
-  delete xHist;
+    delete xDeltaGenHist[i];
+  delete xDeltaGenHist;
 
   for (int i = 0; i < nHits; i++)
-    delete yHist[i];
-  delete yHist;
+    delete yDeltaGenHist[i];
+  delete yDeltaGenHist;
 
 
   return 1;
