@@ -1,4 +1,4 @@
-// $Id: single_run.cc,v 1.7 2009/12/09 19:34:25 beischer Exp $
+// $Id: single_run.cc,v 1.8 2009/12/10 15:51:57 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -152,7 +152,7 @@ int main(int argc, char** argv)
     recTree->GetEntry(i);
     int nHitsGen = genEvent->GetNbOfHits();
     int nHitsRec = recEvent->GetNbOfHits();
-    if (nHits == 0 || nHitsGen != nHitsRec) continue;
+    if (nHits == 0 || (nHitsGen != nHitsRec)) continue;
     resHist.Fill(genEvent->GetMomentum()/recEvent->GetMomentum());
     ptHist.Fill(genEvent->GetTransverseMomentum()/recEvent->GetTransverseMomentum());
     for (int i = 0; i < nHitsRec; i++) {

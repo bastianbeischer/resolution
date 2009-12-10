@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitter.cc,v 1.39 2009/12/07 15:45:48 beischer Exp $
+// $Id: RES_TrackFitter.cc,v 1.40 2009/12/10 15:51:57 beischer Exp $
 
 #include <cmath>
 #include <fstream>
@@ -65,6 +65,7 @@ RES_TrackFitter* RES_TrackFitter::GetInstance()
 
 RES_Event RES_TrackFitter::Fit()
 {
+  // this has to be redone (use efficiencies, don't require all hits, remove the hardcoded 8)...
   G4int nHits = m_currentGenEvent.GetNbOfHits();
   if (nHits < 8) return m_currentRecEvent;
 
@@ -73,13 +74,9 @@ RES_Event RES_TrackFitter::Fit()
   G4ParticleGun* gun = genAction->GetParticleGun();
   m_initialCharge = gun->GetParticleCharge();
 
+  // straight line fit is done here...
   CalculateStartParameters();
   //SetStartParametesToGeneratedParticle();
-
-  G4double chi2 = Chi2InModuleFrame();
-  G4int dof = nHits - 4;
-  m_currentRecEvent.SetChi2(chi2);
-  m_currentRecEvent.SetDof(dof);
 
   switch (m_fitMethod) {
   case blobel:
@@ -105,13 +102,13 @@ void RES_TrackFitter::CopyHits()
   delete[] m_smearedHits;
   m_smearedHits = new G4ThreeVector[nHits];
 
-  for (int i = 0; i < nHits; i++)
+  for (int i = 0; i < nHits; i++) {
     m_smearedHits[i] = G4ThreeVector(m_currentGenEvent.GetSmearedHitPosition(i). x(), m_currentGenEvent.GetSmearedHitPosition(i). y(), m_currentGenEvent.GetSmearedHitPosition(i). z());
+  }
 
   if (m_verbose > 2)
     for (int i = 0; i < nHits; i++)
       G4cout << "smeared hit: " << i << " --> " << m_smearedHits[i] << G4endl;
-
 }
 
 void RES_TrackFitter::SetStartParametesToGeneratedParticle()
@@ -139,36 +136,59 @@ void RES_TrackFitter::SetStartParametesToGeneratedParticle()
 
 void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double &y0, G4double &dxdz, G4double &dydz)
 {
-  unsigned int nHits = n1 - n0;
   RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
-  
 
+  // only fit from n0 to n1! (useful if segments of the track are to be fitted)
+  unsigned int nHits = n1 - n0;
+
+  // this parameter is arbitrary. z0 = 0 should minimize correlations...
   float z0 = 0.0;
 
+  // basic dimensions of matrices
   unsigned int nRow = nHits;
   unsigned int nCol = 4;
 
+  // declare matrices for the calculation
   TMatrixD A(nRow,nCol);
-  for (unsigned int i = 0; i < nRow; i++)
-    for (unsigned int j = 0; j < nCol; j++)
-      A(i,j) = 0.;
-
   TVectorD b(nRow);
-  for (unsigned int i = 0; i < nRow; i++)
-    b(i) = 0.;
-
   TMatrixD U(nRow,nRow);
-  for (unsigned int i = 0; i < nRow; i++)
-    for (unsigned int j = 0; j < nRow; j++)
-      U(i,j) = 0.;
+  TMatrixD CombineXandY(1,2);
+  TMatrixD SolutionToPositions(2*nRow,nCol);
 
   for (unsigned int i = 0; i < nHits; i++) {
 
+    // get information from detector...
     G4ThreeVector pos = m_smearedHits[i+n0];
     G4int iModule = m_currentGenEvent.GetModuleID(i);
     G4int iFiber  = m_currentGenEvent.GetFiberID(i);
     G4double angle = det->GetModuleAngle(iModule);
     if (iFiber > 0) angle += det->GetModuleInternalAngle(iModule);
+
+    // fill the matrices
+    G4float k = pos.z() - z0;
+    G4bool useTangens = fabs(angle) < M_PI/4. ? true : false;
+    if (useTangens) {
+      float tangens     = sin(angle)/cos(angle);
+      CombineXandY(0,0) = -tangens;
+      CombineXandY(0,1) = 1.;
+      A(i,0)            = -tangens;
+      A(i,1)            = 1.;
+      A(i,2)            = -k*tangens;
+      A(i,3)            = k;
+      b(i)              = -tangens*pos.x() + pos.y();
+    }
+    else {
+      float cotangens   = cos(angle)/sin(angle);
+      CombineXandY(0,0) = 1.;
+      CombineXandY(0,1) = -cotangens;
+      A(i,0)            = 1.;
+      A(i,1)            = -cotangens;
+      A(i,2)            = k;
+      A(i,3)            = -k*cotangens;
+      b(i)              = pos.x() - cotangens*pos.y();
+    }
+
+    // calculate covariance matrix
     G4double sigmaV;
     if (iFiber == 0)
       sigmaV = det->GetModuleUpperSigmaV(iModule);
@@ -190,38 +210,14 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
     RotTrans.Transpose(Rot);
     TMatrixD V2(2,2);
     V2 = Rot * V1 * RotTrans;
-    TMatrixD Lin(1,2);
-
-    G4float k = pos.z() - z0;
-    G4bool useTangens = fabs(angle) < M_PI/4. ? true : false;
-    if (useTangens) {
-      float tangens = sin(angle)/cos(angle);
-      Lin(0,0)      = -tangens;
-      Lin(0,1)      = 1.;
-      A(i,0)        = -tangens;
-      A(i,1)        = 1.;
-      A(i,2)        = -k*tangens;
-      A(i,3)        = k;
-      b(i)          = -tangens*pos.x() + pos.y();
-    }
-    else {
-      float cotangens = cos(angle)/sin(angle);
-      Lin(0,0)        = 1.;
-      Lin(0,1)        = -cotangens;
-      A(i,0)          = 1.;
-      A(i,1)          = -cotangens;
-      A(i,2)          = k;
-      A(i,3)          = -k*cotangens;
-      b(i)            = pos.x() - cotangens*pos.y();
-    }
-
-    TMatrixD LinTrans(2,1);
-    LinTrans.Transpose(Lin);
+    TMatrixD CombineXandYTrans(2,1);
+    CombineXandYTrans.Transpose(CombineXandY);
     TMatrixD V3 = TMatrixD(1,1);
-    V3 = Lin * V2 * LinTrans;
-    U(i,i) = V3(0,0);
+    V3 = CombineXandY * V2 * CombineXandYTrans;
+    U(i,i) = V3(0,0); // this is the sigma for the i'th measurement
   }
   
+  // calculate solution
   U.Invert();
   TMatrixD Uinv = U;
   TMatrixD ATranspose(nCol,nRow);
@@ -233,32 +229,40 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
   TVectorD solution(nCol);
   solution = Minv * c;
 
-  // TMatrixD vec(nRow,1);
-  // for (unsigned int i = 0; i < nRow; i++)
-  //   vec(i,0) = (A*solution - b)(i);
-  // TMatrixD vecTrans(1,nRow);
-  // vecTrans.Transpose(vec);
-  // float chi2 = (vecTrans * Uinv * vec)(0,0);
+  // calculate chi2 and track positions from fit parameters
+  TMatrixD vec(nRow,1);
+  for (unsigned int i = 0; i < nRow; i++)
+    vec(i,0) = (A*solution - b)(i);
+  TMatrixD vecTrans(1,nRow);
+  vecTrans.Transpose(vec);
+  G4double chi2 = (vecTrans * Uinv * vec)(0,0);
 
-  x0   = solution(0);
-  y0   = solution(1);
-  dxdz = solution(2);
-  dydz = solution(3);
+  // SolutionToPositions is the linear transformation that maps the solution to positions
+  for (unsigned int i = 0; i < 2*nRow; i++){
+    SolutionToPositions(i,i%2)     = 1.;
+    SolutionToPositions(i,(i%2)+2) = m_smearedHits[i/2].z() - z0;
+  }
+  TVectorD positions = SolutionToPositions*solution;
 
+  // Fill information in m_currentRecEvent (usually done in RES_EventActionReconstruction)
+  m_currentRecEvent = RES_Event();
+  for (unsigned int i = 0; i < nHits; i++) {
+    G4int iModule = m_currentGenEvent.GetModuleID(i);
+    G4int iFiber  = m_currentGenEvent.GetFiberID(i);
+    m_currentRecEvent.AddHit(iModule, iFiber, positions(2*i), positions(2*i+1), m_smearedHits[i].z());
+  }
+  m_currentRecEvent.SetChi2(chi2);
+  m_currentRecEvent.SetDof(nHits - 4);
+  m_currentRecEvent.SetEventType(reconstructed);
+  m_currentRecEvent.SetMomentum(DBL_MAX);
+  m_currentRecEvent.SetTransverseMomentum(DBL_MAX);
+
+  // print covariance matrix if the user wants to
   if (m_verbose > 1) {
-
-    TMatrixD Lin(2*nRow,nCol);
-    for (unsigned int i = 0; i < 2*nRow; i++)
-      for (unsigned int j = 0; j < nCol; j++)
-        Lin(i,j) = 0.;
-    for (unsigned int i = 0; i < 2*nRow; i++){
-      Lin(i,i%2)     = 1.;
-      Lin(i,(i%2)+2) = m_smearedHits[i/2].z() - z0;
-    }
-    TMatrixD LinTrans(nCol, 2*nRow);
-    LinTrans.Transpose(Lin);
+    TMatrixD SolutionToPositionsTrans(nCol, 2*nRow);
+    SolutionToPositionsTrans.Transpose(SolutionToPositions);
     TMatrixD Cov(2*nRow, 2*nRow);
-    Cov = Lin * Minv * LinTrans;
+    Cov = SolutionToPositions * Minv * SolutionToPositionsTrans;
 
     for (unsigned int i = 0; i < nHits; i++)
       G4cout << "resolution in x" << i << " --> " << sqrt(Cov(2*i,2*i)) << " mm" << G4endl;
@@ -269,8 +273,13 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
       G4cout << "covariance matrix for this fit:" << G4endl;
       Cov.Print();
     }
-
   }
+
+  // return information from the fit.
+  x0   = solution(0);
+  y0   = solution(1);
+  dxdz = solution(2);
+  dydz = solution(3);
 }
 
 void RES_TrackFitter::CalculateStartParameters()

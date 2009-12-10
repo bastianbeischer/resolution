@@ -1,4 +1,4 @@
-// $Id: test.cc,v 1.7 2009/11/08 15:01:20 beischer Exp $
+// $Id: test.cc,v 1.8 2009/12/10 15:51:57 beischer Exp $
 
 #include "RES_Event.hh"
 
@@ -36,20 +36,20 @@ int main(int argc, char** argv)
     }
   }
 
-  // std::cout << "Reconstructed events:" << std::endl;
-  // for (unsigned int i = 0; i < recTree->GetEntries(); i++) {
-  //   std::cout << "--------------------------------------------------" << std::endl;
-  //   std::cout << "ID: " << recEvent->GetID() << " --> "
-  //             << " p: " << recEvent->GetMomentum()
-  //             << " -----> chi2: " <<  recEvent->GetChi2() << std::endl;
-  //   for (unsigned int j = 0; j < recEvent->GetNbOfHits(); j++) {
-  //     std::cout << " nHits: " << recEvent->GetNbOfHits();
-  //     std::cout << " (i,j): (" << recEvent->GetModuleID(j) << ", " << recEvent->GetFiberID(j) << ")"
-  //               << " x: " << recEvent->GetHitPosition(j).x() 
-  //               << " y: " << recEvent->GetHitPosition(j).y()
-  //               << " z: " << recEvent->GetHitPosition(j).z() << std::endl;
-  //   }
-  // }
+  std::cout << "Reconstructed events:" << std::endl;
+  for (unsigned int i = 0; i < recTree->GetEntries(); i++) {
+    std::cout << "--------------------------------------------------" << std::endl;
+    std::cout << "ID: " << recEvent->GetID() << " --> "
+              << " p: " << recEvent->GetMomentum()
+              << " -----> chi2: " <<  recEvent->GetChi2() << std::endl;
+    for (unsigned int j = 0; j < recEvent->GetNbOfHits(); j++) {
+      std::cout << " nHits: " << recEvent->GetNbOfHits();
+      std::cout << " (i,j): (" << recEvent->GetModuleID(j) << ", " << recEvent->GetFiberID(j) << ")"
+                << " x: " << recEvent->GetHitPosition(j).x() 
+                << " y: " << recEvent->GetHitPosition(j).y()
+                << " z: " << recEvent->GetHitPosition(j).z() << std::endl;
+    }
+  }
 
   return 0;
 }

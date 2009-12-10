@@ -1,4 +1,4 @@
-// $Id: RES_DetectorConstruction.hh,v 1.13 2009/11/08 15:01:18 beischer Exp $
+// $Id: RES_DetectorConstruction.hh,v 1.14 2009/12/10 15:51:57 beischer Exp $
 
 #ifndef RES_DetectorConstruction_hh
 #define RES_DetectorConstruction_hh
@@ -14,6 +14,8 @@ class RES_DetectorMessenger;
 class G4Box;
 class G4LogicalVolume;
 class G4VPhysicalVolume;
+
+enum ModuleType {fiber, silicon};
 
 class RES_DetectorConstruction : public G4VUserDetectorConstruction
 {
@@ -46,6 +48,8 @@ public:
     m_moduleInternalAngles.push_back(0);
     m_moduleLength.push_back(m_moduleDefaultLength);
     m_moduleWidth.push_back(m_moduleDefaultWidth);
+    m_moduleHeight.push_back(m_moduleDefaultHeight);
+    m_moduleType.push_back(fiber);
     m_moduleUpperSigmaU.push_back(m_moduleDefaultSigmaU);
     m_moduleUpperSigmaV.push_back(m_moduleDefaultSigmaV);
     m_moduleUpperSigmaZ.push_back(m_moduleDefaultSigmaZ);
@@ -83,6 +87,9 @@ public:
   inline void SetModuleLowerSigmaZ(G4int module, G4double sigmaZ) {
     m_moduleLowerSigmaZ[module] = sigmaZ;
   }
+  inline void SetModuleType(G4int iModule, ModuleType type) {
+    m_moduleType[iModule] = type;
+  }
   inline void SetModuleFiberThickness(G4double fiberThickness) {
     m_moduleFiberThickness = fiberThickness;
   }
@@ -106,18 +113,27 @@ private:
   G4Material*                     m_moduleFiberMaterial;
   G4Material*                     m_modulePlasticMaterial;
   G4Material*                     m_moduleFoamMaterial;
-  G4double                        m_moduleDefaultLength;
-  G4double                        m_moduleDefaultWidth;
+  G4double                        m_moduleDefaultLengthFiber;
+  G4double                        m_moduleDefaultWidthFiber;
+  G4double                        m_moduleDefaultSigmaUFiber;
+  G4double                        m_moduleDefaultSigmaVFiber;
+  G4double                        m_moduleDefaultSigmaZFiber;
   G4double                        m_moduleFiberThickness;
   G4double                        m_modulePlasticThickness;
   G4double                        m_moduleFoamThickness;
-  G4double                        m_moduleGap; 
-  G4double                        m_moduleHeight;
-  G4double                        m_moduleDefaultSigmaU;
-  G4double                        m_moduleDefaultSigmaV;
-  G4double                        m_moduleDefaultSigmaZ;
+  G4double                        m_moduleGapFiber;
+  G4double                        m_moduleHeightFiber;
+
+  G4Material*                     m_moduleSiliconMaterial;
+  G4Material*                     m_moduleKaptonMaterial;
+  G4double                        m_moduleDefaultLengthSilicon;
+  G4double                        m_moduleDefaultWidthSilicon;
+  G4double                        m_moduleDefaultHeightSilicon;
+  G4double                        m_moduleSiliconThickness;
+  G4double                        m_moduleKaptonThickness;
 
   std::vector<G4ThreeVector>      m_modulePlacements;
+  std::vector<ModuleType>         m_moduleType;
   std::vector<G4double>           m_moduleAngles;
   std::vector<G4double>           m_moduleInternalAngles;
   std::vector<G4double>           m_moduleLength;
@@ -137,7 +153,10 @@ private:
   std::vector<G4VPhysicalVolume*> m_moduleLowerFoam;
   std::vector<G4VPhysicalVolume*> m_moduleUpperPlastic;
   std::vector<G4VPhysicalVolume*> m_moduleLowerPlastic;
-
+  std::vector<G4VPhysicalVolume*> m_moduleSiliconUpperLayer;
+  std::vector<G4VPhysicalVolume*> m_moduleSiliconLowerLayer;
+  std::vector<G4VPhysicalVolume*> m_moduleKaptonUpperLayer;
+  std::vector<G4VPhysicalVolume*> m_moduleKaptonLowerLayer;
 };
 
 #endif /* RES_DetectorConstruction_hh */
