@@ -1,4 +1,4 @@
-// $Id: single_run.cc,v 1.8 2009/12/10 15:51:57 beischer Exp $
+// $Id: single_run.cc,v 1.9 2009/12/11 14:46:31 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -266,16 +266,16 @@ int main(int argc, char** argv)
 
   TF1 chi2Dist("chi2Dist", chi2dist, 0.0, 100.0, 2);
   chi2Dist.SetNpx(1000);
-  //  chi2Dist.SetParameter(0,recEvent->GetDof());
-
-  chi2Dist.SetParameters(1000, 3);
-
+  
+  chi2Dist.FixParameter(0, 1);
+  chi2Dist.FixParameter(1, recEvent->GetDof());
   TCanvas canvas7("canvas7", "canvas7", 1024, 768);
   canvas7.Draw();
   chi2Hist.Draw();
+  chi2Hist.Scale(1./(chi2Hist.Integral("WIDTH")));
   chi2Hist.GetXaxis()->SetTitle("#chi^{2}");
   chi2Hist.GetYaxis()->SetTitle("N");
-  chi2Hist.Fit(&chi2Dist, "E");
+  //  chi2Hist.Fit(&chi2Dist, "E");
   chi2Dist.Draw("SAME");
   chi2Dist.SetLineColor(kRed);
 
