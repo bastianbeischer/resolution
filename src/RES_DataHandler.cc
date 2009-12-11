@@ -1,8 +1,8 @@
-// $Id: RES_DataHandler.cc,v 1.8 2009/10/14 09:24:26 beischer Exp $
+// $Id: RES_DataHandler.cc,v 1.9 2009/12/11 12:52:24 beischer Exp $
 
 #include "RES_DataHandler.hh"
 
-#include "RES_FiberHit.hh"
+#include "RES_Hit.hh"
 #include "RES_DataMessenger.hh"
 
 #include "TFile.h"

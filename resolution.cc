@@ -1,4 +1,4 @@
-// $Id: resolution.cc,v 1.9 2009/12/09 21:43:32 beischer Exp $
+// $Id: resolution.cc,v 1.10 2009/12/11 12:52:22 beischer Exp $
 
 #include "RES_RunManager.hh"
 #include "RES_DetectorConstruction.hh"
@@ -7,7 +7,6 @@
 #include "RES_FieldManager.hh"
 #include "RES_DataHandler.hh"
 #include "RES_AlignmentManager.hh"
-#include "RES_FiberHit.hh"
 
 #include "G4TransportationManager.hh"
 #include "G4UIsession.hh"

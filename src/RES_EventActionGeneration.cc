@@ -1,4 +1,4 @@
-// $Id: RES_EventActionGeneration.cc,v 1.16 2009/11/08 17:09:11 beischer Exp $
+// $Id: RES_EventActionGeneration.cc,v 1.17 2009/12/11 12:52:24 beischer Exp $
 
 #include "RES_EventActionGeneration.hh"
 
@@ -6,7 +6,7 @@
 #include "RES_RunManager.hh"
 #include "RES_DataHandler.hh"
 #include "RES_AlignmentManager.hh"
-#include "RES_FiberSD.hh"
+#include "RES_SD.hh"
 
 #include "G4Event.hh"
 #include "G4SDManager.hh"
@@ -37,14 +37,14 @@ void RES_EventActionGeneration::EndOfEventAction(const G4Event* event)
     G4HCofThisEvent* HCofTE = event->GetHCofThisEvent();
     G4String collectionName = "fiberHitsCollection";
     G4int HCID = G4SDManager::GetSDMpointer()->GetCollectionID(collectionName);
-    RES_FiberHitsCollection* fiberHC = (RES_FiberHitsCollection*) HCofTE->GetHC(HCID);
+    RES_HitsCollection* HC = (RES_HitsCollection*) HCofTE->GetHC(HCID);
   
     RES_Event newEvent;
 
-    G4int NbHits = fiberHC->entries();
+    G4int NbHits = HC->entries();
     for (int i = 0; i < NbHits; i++) {
-      RES_FiberHit* hit = (*fiberHC)[i];
-      newEvent.AddHit(hit->GetModuleID(),hit->GetFiberID(),hit->GetPosition().x(),hit->GetPosition().y(),hit->GetPosition().z());
+      RES_Hit* hit = (*HC)[i];
+      newEvent.AddHit(hit->GetModuleID(),hit->GetLayerID(),hit->GetPosition().x(),hit->GetPosition().y(),hit->GetPosition().z());
     }
 
     newEvent.SetEventType(generated);
@@ -67,9 +67,9 @@ void RES_EventActionGeneration::SmearHits(RES_Event* event)
 
   for (int i = 0; i < nHits; i++) {
     G4int iModule = event->GetModuleID(i);
-    G4int iFiber  = event->GetFiberID(i);
+    G4int iLayer  = event->GetLayerID(i);
     G4double angle = det->GetModuleAngle(iModule);
-    if (iFiber > 0) angle += det->GetModuleInternalAngle(iModule);
+    if (iLayer > 0) angle += det->GetModuleInternalAngle(iModule);
 
     RES_AlignmentManager* alignMgr = RES_AlignmentManager::GetInstance();
 
@@ -89,7 +89,7 @@ void RES_EventActionGeneration::SmearHits(RES_Event* event)
     //   hit.setX(0.);
 
     G4double sigmaU, sigmaV, sigmaZ;
-    if (iFiber == 0) {
+    if (iLayer == 0) {
       sigmaU = det->GetModuleUpperSigmaU(iModule);
       sigmaV = det->GetModuleUpperSigmaV(iModule);
       sigmaZ = det->GetModuleUpperSigmaZ(iModule);

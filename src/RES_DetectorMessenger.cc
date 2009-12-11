@@ -1,4 +1,4 @@
-// $Id: RES_DetectorMessenger.cc,v 1.10 2009/11/08 15:01:19 beischer Exp $
+// $Id: RES_DetectorMessenger.cc,v 1.11 2009/12/11 12:52:24 beischer Exp $
 
 #include "RES_DetectorMessenger.hh"
 
@@ -28,6 +28,11 @@ RES_DetectorMessenger::RES_DetectorMessenger(RES_DetectorConstruction* detector)
   m_addModulePlacementCmd->SetUnitCategory("Length");
   m_addModulePlacementCmd->AvailableForStates(G4State_PreInit);
 
+  m_setModuleTypeCmd = new G4UIcmdWithAString("/RES/Det/SetModuleType", this);
+  m_setModuleTypeCmd->SetGuidance("Set the type of the module (silicon ladder/fiber module)");
+  m_setModuleTypeCmd->SetParameterName("typeString", false);
+  m_setModuleTypeCmd->AvailableForStates(G4State_PreInit);
+
   m_setModuleRotationCmd = new G4UIcmdWithAString("/RES/Det/SetModuleRotation", this);
   m_setModuleRotationCmd->SetGuidance("Set the rotation for the module.");
   m_setModuleRotationCmd->SetParameterName("rotationString", false);
@@ -55,12 +60,12 @@ RES_DetectorMessenger::RES_DetectorMessenger(RES_DetectorConstruction* detector)
   m_setModuleFiberThicknessCmd->SetUnitCategory("Length");
   m_setModuleFiberThicknessCmd->AvailableForStates(G4State_PreInit);
 
-  m_setModuleGapCmd = new G4UIcmdWithADoubleAndUnit("/RES/Det/SetModuleGap", this);
-  m_setModuleGapCmd->SetGuidance("Set the module gap");
-  m_setModuleGapCmd->SetParameterName("gap", false);
-  m_setModuleGapCmd->SetDefaultUnit("cm");
-  m_setModuleGapCmd->SetUnitCategory("Length");
-  m_setModuleGapCmd->AvailableForStates(G4State_PreInit);
+  m_setModuleGapFiberCmd = new G4UIcmdWithADoubleAndUnit("/RES/Det/SetModuleGapFiber", this);
+  m_setModuleGapFiberCmd->SetGuidance("Set the module gap");
+  m_setModuleGapFiberCmd->SetParameterName("gapFiber", false);
+  m_setModuleGapFiberCmd->SetDefaultUnit("cm");
+  m_setModuleGapFiberCmd->SetUnitCategory("Length");
+  m_setModuleGapFiberCmd->AvailableForStates(G4State_PreInit);
 
   m_setModuleUpperSigmaUCmd = new G4UIcmdWithAString("/RES/Det/SetModuleUpperSigmaU", this);
   m_setModuleUpperSigmaUCmd->SetGuidance("Specify the resolution along the fiber (in um!).");
@@ -98,12 +103,13 @@ RES_DetectorMessenger::~RES_DetectorMessenger()
   delete m_topDirectory;
   delete m_detDirectory;
   delete m_addModulePlacementCmd;
+  delete m_setModuleTypeCmd;
   delete m_setModuleRotationCmd;
   delete m_setModuleInternalRotationCmd;
   delete m_setModuleWidthCmd;
   delete m_setModuleLengthCmd;
   delete m_setModuleFiberThicknessCmd;
-  delete m_setModuleGapCmd;
+  delete m_setModuleGapFiberCmd;
   delete m_setModuleUpperSigmaUCmd;
   delete m_setModuleUpperSigmaVCmd;
   delete m_setModuleUpperSigmaZCmd;
@@ -121,6 +127,17 @@ void RES_DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
     G4int iModule = m_setModuleRotationCmd->ConvertToInt(newValue.substr(0,1).c_str());
     G4double angle = m_setModuleRotationCmd->ConvertToDouble(newValue.substr(2,newValue.length()).c_str()) * M_PI/180.;
     m_detector->SetModuleAngle(iModule, angle);
+  }
+  if (command == m_setModuleTypeCmd) {
+    G4int iModule = m_setModuleTypeCmd->ConvertToInt(newValue.substr(0,1).c_str());
+    G4String value = newValue.substr(2,newValue.length());
+    value.toLower();
+    ModuleType type;
+    if (value == "silicon")
+      type = silicon;
+    if (value == "fiber")
+      type = fiber;
+    m_detector->SetModuleType(iModule, type);
   }
   if (command == m_setModuleInternalRotationCmd) {
     G4int iModule = m_setModuleInternalRotationCmd->ConvertToInt(newValue.substr(0,1).c_str());
@@ -140,8 +157,8 @@ void RES_DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
   if (command == m_setModuleFiberThicknessCmd) {
     m_detector->SetModuleFiberThickness(m_setModuleFiberThicknessCmd->GetNewDoubleValue(newValue));
   }
-  if (command == m_setModuleGapCmd) {
-    m_detector->SetModuleGap(m_setModuleGapCmd->GetNewDoubleValue(newValue));
+  if (command == m_setModuleGapFiberCmd) {
+    m_detector->SetModuleGapFiber(m_setModuleGapFiberCmd->GetNewDoubleValue(newValue));
   }
   if (command == m_setModuleUpperSigmaUCmd) {
     G4int iModule = m_setModuleUpperSigmaUCmd->ConvertToInt(newValue.substr(0,1).c_str());

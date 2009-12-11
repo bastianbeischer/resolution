@@ -1,4 +1,4 @@
-// $Id: RES_Event.hh,v 1.7 2009/10/14 16:51:37 beischer Exp $
+// $Id: RES_Event.hh,v 1.8 2009/12/11 12:52:22 beischer Exp $
 
 #ifndef RES_Event_hh
 #define RES_Event_hh
@@ -32,7 +32,7 @@ public:
 
   inline int          GetID()                        {return m_ID;}
   inline int          GetModuleID(unsigned int i)    {assert(i <m_moduleID.size()); return m_moduleID.at(i);}
-  inline int          GetFiberID(unsigned int i)     {assert(i <m_fiberID.size()); return m_fiberID.at(i);}
+  inline int          GetLayerID(unsigned int i)     {assert(i <m_layerID.size()); return m_layerID.at(i);}
   inline EventType    GetEventType()                 {return m_eventType;}
   inline double       GetTransverseMomentum()        {return m_transverseMomentum;}
   inline double       GetMomentum()                  {return m_momentum;}
@@ -42,13 +42,13 @@ public:
   inline TVector3     GetHitPosition(unsigned int i) {assert(i < m_hits.size()); return m_hits.at(i);}
   inline TVector3     GetSmearedHitPosition(unsigned int i) {assert(i < m_smearedHits.size()); return m_smearedHits.at(i);}
 
-  void AddHit(int module_ID, int fiber_ID, double x, double y, double z);
+  void AddHit(int module_ID, int layer_ID, double x, double y, double z);
   void AddSmearedHit(double x, double y, double z);
 
 private:
   int                   m_ID;
   std::vector<int>      m_moduleID;
-  std::vector<int>      m_fiberID;
+  std::vector<int>      m_layerID;
   std::vector<TVector3> m_hits;
   std::vector<TVector3> m_smearedHits;
   double                m_transverseMomentum;

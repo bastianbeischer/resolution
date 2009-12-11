@@ -1,20 +1,20 @@
-// $Id: RES_FiberHit.cc,v 1.2 2009/10/14 09:24:25 beischer Exp $
+// $Id: RES_Hit.cc,v 1.1 2009/12/11 12:52:25 beischer Exp $
 
-#include "RES_FiberHit.hh"
+#include "RES_Hit.hh"
 
 #include "G4VVisManager.hh"
 #include "G4Circle.hh"
 #include "G4VisAttributes.hh"
 
-RES_FiberHit::RES_FiberHit()
+RES_Hit::RES_Hit()
 {
 }
 
-RES_FiberHit::~RES_FiberHit()
+RES_Hit::~RES_Hit()
 {
 }
 
-void RES_FiberHit::Draw()
+void RES_Hit::Draw()
 {
   G4VVisManager* pVVisManager = G4VVisManager::GetConcreteInstance();
   if(pVVisManager)
@@ -29,7 +29,7 @@ void RES_FiberHit::Draw()
   }
 }
 
-void RES_FiberHit::Print()
+void RES_Hit::Print()
 {
   G4cout<< "HIT: at (" << m_position.x()/cm << ", " << m_position.y()/cm << ", " << m_position.z()/cm << ") cm" << G4endl;
 }

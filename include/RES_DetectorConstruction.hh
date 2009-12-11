@@ -1,4 +1,4 @@
-// $Id: RES_DetectorConstruction.hh,v 1.14 2009/12/10 15:51:57 beischer Exp $
+// $Id: RES_DetectorConstruction.hh,v 1.15 2009/12/11 12:52:22 beischer Exp $
 
 #ifndef RES_DetectorConstruction_hh
 #define RES_DetectorConstruction_hh
@@ -46,16 +46,15 @@ public:
     m_modulePlacements.push_back(where);
     m_moduleAngles.push_back(0);
     m_moduleInternalAngles.push_back(0);
-    m_moduleLength.push_back(m_moduleDefaultLength);
-    m_moduleWidth.push_back(m_moduleDefaultWidth);
-    m_moduleHeight.push_back(m_moduleDefaultHeight);
+    m_moduleLength.push_back(m_moduleDefaultLengthFiber);
+    m_moduleWidth.push_back(m_moduleDefaultWidthFiber);
     m_moduleType.push_back(fiber);
-    m_moduleUpperSigmaU.push_back(m_moduleDefaultSigmaU);
-    m_moduleUpperSigmaV.push_back(m_moduleDefaultSigmaV);
-    m_moduleUpperSigmaZ.push_back(m_moduleDefaultSigmaZ);
-    m_moduleLowerSigmaU.push_back(m_moduleDefaultSigmaU);
-    m_moduleLowerSigmaV.push_back(m_moduleDefaultSigmaV);
-    m_moduleLowerSigmaZ.push_back(m_moduleDefaultSigmaZ);
+    m_moduleUpperSigmaU.push_back(m_moduleDefaultSigmaUFiber);
+    m_moduleUpperSigmaV.push_back(m_moduleDefaultSigmaVFiber);
+    m_moduleUpperSigmaZ.push_back(m_moduleDefaultSigmaZFiber);
+    m_moduleLowerSigmaU.push_back(m_moduleDefaultSigmaUFiber);
+    m_moduleLowerSigmaV.push_back(m_moduleDefaultSigmaVFiber);
+    m_moduleLowerSigmaZ.push_back(m_moduleDefaultSigmaZFiber);
   }
   inline void SetModuleAngle(G4int module, G4double angle) {
     m_moduleAngles[module] = angle;
@@ -89,12 +88,37 @@ public:
   }
   inline void SetModuleType(G4int iModule, ModuleType type) {
     m_moduleType[iModule] = type;
+    if (type == silicon) {
+      m_moduleInternalAngles[iModule] = M_PI/2.;
+      m_moduleLength[iModule] = m_moduleDefaultLengthSilicon;
+      m_moduleWidth[iModule] = m_moduleDefaultWidthSilicon;
+      m_moduleUpperSigmaU[iModule] = m_moduleDefaultUpperSigmaUSilicon;
+      m_moduleUpperSigmaV[iModule] = m_moduleDefaultUpperSigmaVSilicon;
+      m_moduleUpperSigmaZ[iModule] = m_moduleDefaultUpperSigmaZSilicon;
+      m_moduleLowerSigmaU[iModule] = m_moduleDefaultLowerSigmaUSilicon;
+      m_moduleLowerSigmaV[iModule] = m_moduleDefaultLowerSigmaVSilicon;
+      m_moduleLowerSigmaZ[iModule] = m_moduleDefaultLowerSigmaZSilicon;
+    }
+    else {
+      m_moduleInternalAngles[iModule] = 0.;
+      m_moduleLength[iModule] = m_moduleDefaultLengthFiber;
+      m_moduleWidth[iModule] = m_moduleDefaultWidthFiber;
+      m_moduleUpperSigmaU[iModule] = m_moduleDefaultSigmaUFiber;
+      m_moduleUpperSigmaV[iModule] = m_moduleDefaultSigmaVFiber;
+      m_moduleUpperSigmaZ[iModule] = m_moduleDefaultSigmaZFiber;
+      m_moduleLowerSigmaU[iModule] = m_moduleDefaultSigmaUFiber;
+      m_moduleLowerSigmaV[iModule] = m_moduleDefaultSigmaVFiber;
+      m_moduleLowerSigmaZ[iModule] = m_moduleDefaultSigmaZFiber;
+    }
   }
   inline void SetModuleFiberThickness(G4double fiberThickness) {
     m_moduleFiberThickness = fiberThickness;
   }
-  inline void SetModuleGap(G4double gap) {
-    m_moduleGap = gap;
+  inline void SetModuleGapFiber(G4double gap) {
+    m_moduleGapFiber = gap;
+  }
+  inline void SetModuleKaptonThickness(G4double kaptonThickness) {
+    m_moduleKaptonThickness = kaptonThickness;
   }
 
 private:
@@ -128,9 +152,16 @@ private:
   G4Material*                     m_moduleKaptonMaterial;
   G4double                        m_moduleDefaultLengthSilicon;
   G4double                        m_moduleDefaultWidthSilicon;
-  G4double                        m_moduleDefaultHeightSilicon;
   G4double                        m_moduleSiliconThickness;
   G4double                        m_moduleKaptonThickness;
+  G4double                        m_moduleGapSilicon;
+  G4double                        m_moduleHeightSilicon;
+  G4double                        m_moduleDefaultUpperSigmaUSilicon;
+  G4double                        m_moduleDefaultUpperSigmaVSilicon;
+  G4double                        m_moduleDefaultUpperSigmaZSilicon;
+  G4double                        m_moduleDefaultLowerSigmaUSilicon;
+  G4double                        m_moduleDefaultLowerSigmaVSilicon;
+  G4double                        m_moduleDefaultLowerSigmaZSilicon;
 
   std::vector<G4ThreeVector>      m_modulePlacements;
   std::vector<ModuleType>         m_moduleType;
@@ -153,10 +184,10 @@ private:
   std::vector<G4VPhysicalVolume*> m_moduleLowerFoam;
   std::vector<G4VPhysicalVolume*> m_moduleUpperPlastic;
   std::vector<G4VPhysicalVolume*> m_moduleLowerPlastic;
-  std::vector<G4VPhysicalVolume*> m_moduleSiliconUpperLayer;
-  std::vector<G4VPhysicalVolume*> m_moduleSiliconLowerLayer;
-  std::vector<G4VPhysicalVolume*> m_moduleKaptonUpperLayer;
-  std::vector<G4VPhysicalVolume*> m_moduleKaptonLowerLayer;
+  std::vector<G4VPhysicalVolume*> m_moduleUpperSilicon;
+  std::vector<G4VPhysicalVolume*> m_moduleLowerSilicon;
+  std::vector<G4VPhysicalVolume*> m_moduleUpperKapton;
+  std::vector<G4VPhysicalVolume*> m_moduleLowerKapton;
 };
 
 #endif /* RES_DetectorConstruction_hh */

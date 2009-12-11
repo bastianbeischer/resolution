@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitter.cc,v 1.40 2009/12/10 15:51:57 beischer Exp $
+// $Id: RES_TrackFitter.cc,v 1.41 2009/12/11 12:52:25 beischer Exp $
 
 #include <cmath>
 #include <fstream>
@@ -10,7 +10,6 @@
 #include "RES_RunManager.hh"
 #include "RES_DetectorConstruction.hh"
 #include "RES_PrimaryGeneratorAction.hh"
-#include "RES_FiberHit.hh"
 #include "blobel.h"
 
 #include "G4RunManager.hh"
@@ -160,9 +159,9 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
     // get information from detector...
     G4ThreeVector pos = m_smearedHits[i+n0];
     G4int iModule = m_currentGenEvent.GetModuleID(i);
-    G4int iFiber  = m_currentGenEvent.GetFiberID(i);
+    G4int iLayer  = m_currentGenEvent.GetLayerID(i);
     G4double angle = det->GetModuleAngle(iModule);
-    if (iFiber > 0) angle += det->GetModuleInternalAngle(iModule);
+    if (iLayer > 0) angle += det->GetModuleInternalAngle(iModule);
 
     // fill the matrices
     G4float k = pos.z() - z0;
@@ -190,7 +189,7 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
 
     // calculate covariance matrix
     G4double sigmaV;
-    if (iFiber == 0)
+    if (iLayer == 0)
       sigmaV = det->GetModuleUpperSigmaV(iModule);
     else
       sigmaV = det->GetModuleLowerSigmaV(iModule);
@@ -248,8 +247,8 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
   m_currentRecEvent = RES_Event();
   for (unsigned int i = 0; i < nHits; i++) {
     G4int iModule = m_currentGenEvent.GetModuleID(i);
-    G4int iFiber  = m_currentGenEvent.GetFiberID(i);
-    m_currentRecEvent.AddHit(iModule, iFiber, positions(2*i), positions(2*i+1), m_smearedHits[i].z());
+    G4int iLayer  = m_currentGenEvent.GetLayerID(i);
+    m_currentRecEvent.AddHit(iModule, iLayer, positions(2*i), positions(2*i+1), m_smearedHits[i].z());
   }
   m_currentRecEvent.SetChi2(chi2);
   m_currentRecEvent.SetDof(nHits - 4);
@@ -520,13 +519,13 @@ G4double RES_TrackFitter::Chi2InDetFrame()
 
   for( G4int i = 0 ; i < nHits ; i++ ) {
     G4int iModule = m_currentGenEvent.GetModuleID(i);
-    G4int iFiber  = m_currentGenEvent.GetFiberID(i);
+    G4int iLayer  = m_currentGenEvent.GetLayerID(i);
     G4double angle = det->GetModuleAngle(iModule);
-    if (iFiber > 0) angle += det->GetModuleInternalAngle(iModule);
+    if (iLayer > 0) angle += det->GetModuleInternalAngle(iModule);
 
     G4double sigmaU, sigmaV;
 
-    if (iFiber == 0) {
+    if (iLayer == 0) {
       sigmaU = det->GetModuleUpperSigmaU(iModule);
       sigmaV = det->GetModuleUpperSigmaV(iModule);
     }
@@ -592,9 +591,9 @@ G4double RES_TrackFitter::Chi2InModuleFrame()
 
   for( G4int i = 0 ; i < nHits ; i++ ) {
     G4int iModule = m_currentGenEvent.GetModuleID(i);
-    G4int iFiber  = m_currentGenEvent.GetFiberID(i);
+    G4int iLayer  = m_currentGenEvent.GetLayerID(i);
     G4double angle = det->GetModuleAngle(iModule);
-    if (iFiber > 0) angle += det->GetModuleInternalAngle(iModule);
+    if (iLayer > 0) angle += det->GetModuleInternalAngle(iModule);
     G4RotationMatrix forwardRotation(angle, 0, 0);
     G4RotationMatrix backwardRotation(-angle, 0, 0);
     G4ThreeVector hit(m_currentRecEvent.GetHitPosition(i).x(),m_currentRecEvent.GetHitPosition(i).y(),m_currentRecEvent.GetHitPosition(i).z());
@@ -603,7 +602,7 @@ G4double RES_TrackFitter::Chi2InModuleFrame()
     m_smearedHits[i] = forwardRotation*m_smearedHits[i];
     
     G4double sigmaU, sigmaV;
-    if (iFiber == 0) {
+    if (iLayer == 0) {
       sigmaU = det->GetModuleUpperSigmaU(iModule);
       sigmaV = det->GetModuleUpperSigmaV(iModule);
     }

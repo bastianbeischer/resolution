@@ -1,9 +1,9 @@
-// $Id: RES_EventActionReconstruction.cc,v 1.7 2009/10/14 09:24:25 beischer Exp $
+// $Id: RES_EventActionReconstruction.cc,v 1.8 2009/12/11 12:52:24 beischer Exp $
 
 #include "RES_EventActionReconstruction.hh"
 
 #include "RES_TrackFitter.hh"
-#include "RES_FiberSD.hh"
+#include "RES_SD.hh"
 #include "RES_Event.hh"
 
 #include "G4Event.hh"
@@ -28,15 +28,15 @@ void RES_EventActionReconstruction::EndOfEventAction(const G4Event* event)
   G4HCofThisEvent* HCofTE = event->GetHCofThisEvent();
   G4String collectionName = "fiberHitsCollection";
   G4int HCID = G4SDManager::GetSDMpointer()->GetCollectionID(collectionName);
-  RES_FiberHitsCollection* fiberHC = (RES_FiberHitsCollection*) HCofTE->GetHC(HCID);
+  RES_HitsCollection* HC = (RES_HitsCollection*) HCofTE->GetHC(HCID);
   
   RES_Event recEvent; 
 
-  G4int NbHits = fiberHC->entries();
+  G4int NbHits = HC->entries();
 
   for (int i = 0; i < NbHits; i++) {
-    RES_FiberHit* hit = (*fiberHC)[i];
-    recEvent.AddHit(hit->GetModuleID(),hit->GetFiberID(),hit->GetPosition().x(),hit->GetPosition().y(),hit->GetPosition().z());
+    RES_Hit* hit = (*HC)[i];
+    recEvent.AddHit(hit->GetModuleID(),hit->GetLayerID(),hit->GetPosition().x(),hit->GetPosition().y(),hit->GetPosition().z());
   }
 
   recEvent.SetEventType(reconstructed);

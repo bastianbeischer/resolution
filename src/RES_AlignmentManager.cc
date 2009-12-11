@@ -1,4 +1,4 @@
-// $Id: RES_AlignmentManager.cc,v 1.9 2009/12/09 21:43:31 beischer Exp $
+// $Id: RES_AlignmentManager.cc,v 1.10 2009/12/11 12:52:24 beischer Exp $
 
 #include "RES_AlignmentManager.hh"
 
@@ -111,9 +111,9 @@ void RES_AlignmentManager::StartAlignment()
 
         RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
         G4int iModule = event.GetModuleID(iHit);
-        G4int iFiber  = event.GetFiberID(iHit);
+        G4int iLayer  = event.GetLayerID(iHit);
         G4double angle = det->GetModuleAngle(iModule);
-        if (iFiber > 0) angle += det->GetModuleInternalAngle(iModule);
+        if (iLayer > 0) angle += det->GetModuleInternalAngle(iModule);
 
         G4ThreeVector smearedHit(event.GetSmearedHitPosition(iHit).x(), event.GetSmearedHitPosition(iHit).y(), event.GetSmearedHitPosition(iHit).z());
         G4float z0 = 0.;
@@ -125,7 +125,7 @@ void RES_AlignmentManager::StartAlignment()
         G4float y = fx - fy*cotan;
 
         G4double sigmaV = 0.;
-        if (iFiber == 0)
+        if (iLayer == 0)
           sigmaV = det->GetModuleUpperSigmaV(iModule);
         else
           sigmaV = det->GetModuleUpperSigmaV(iModule);
