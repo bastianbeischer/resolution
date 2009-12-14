@@ -1,4 +1,4 @@
-// $Id: RES_RunManager.hh,v 1.7 2009/10/14 09:24:30 beischer Exp $
+// $Id: RES_RunManager.hh,v 1.8 2009/12/14 08:52:51 beischer Exp $
 
 #ifndef RES_RunManager_hh
 #define RES_RunManager_hh
@@ -26,6 +26,7 @@ public:
 
   void StartGenerationRun(G4int nEvents);
   void StartReconstructionRun();
+  void StartReconstructionRunWithoutLayer(G4int layer);
   void ScanChi2Function(G4int iPar, G4int jPar, G4String filename);
 
 private:

@@ -1,4 +1,4 @@
-// $Id: RES_RunManager.cc,v 1.13 2009/10/14 09:24:23 beischer Exp $
+// $Id: RES_RunManager.cc,v 1.14 2009/12/14 08:52:52 beischer Exp $
 
 #include "RES_RunManager.hh"
 
@@ -73,6 +73,13 @@ void RES_RunManager::StartReconstructionRun()
 
   primaryGeneratorAction->SetRandomOrigin(randOriginValue);  
   primaryGeneratorAction->SetRandomDirection(randDirectionValue);  
+}
+
+void RES_RunManager::StartReconstructionRunWithoutLayer(G4int layer)
+{
+  m_trackFitter->AddLayerToBeSkipped(layer);
+  StartReconstructionRun();
+  m_trackFitter->RemoveLayerToBeSkipped(layer);
 }
 
 void RES_RunManager::ScanChi2Function(G4int iPar, G4int jPar, G4String filename)

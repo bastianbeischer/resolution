@@ -1,4 +1,4 @@
-// $Id: RES_DataHandler.cc,v 1.9 2009/12/11 12:52:24 beischer Exp $
+// $Id: RES_DataHandler.cc,v 1.10 2009/12/14 08:52:52 beischer Exp $
 
 #include "RES_DataHandler.hh"
 
@@ -62,7 +62,9 @@ void RES_DataHandler::Initialize()
     else {
       m_recTree->SetBranchAddress("event", &m_event);
     }
+
   }
+
   m_initialized = true;
 }
 

@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitter.cc,v 1.41 2009/12/11 12:52:25 beischer Exp $
+// $Id: RES_TrackFitter.cc,v 1.42 2009/12/14 08:52:53 beischer Exp $
 
 #include <cmath>
 #include <fstream>
@@ -65,26 +65,34 @@ RES_TrackFitter* RES_TrackFitter::GetInstance()
 RES_Event RES_TrackFitter::Fit()
 {
   // this has to be redone (use efficiencies, don't require all hits, remove the hardcoded 8)...
+  G4int nMinimumHits = 8;
+  if (m_fitMethod == oneline) nMinimumHits = 4;
+
   G4int nHits = m_currentGenEvent.GetNbOfHits();
-  if (nHits < 8) return m_currentRecEvent;
+  if (nHits < nMinimumHits) return m_currentRecEvent;
 
   G4RunManager* runManager = G4RunManager::GetRunManager();
   const RES_PrimaryGeneratorAction* genAction = (RES_PrimaryGeneratorAction*) runManager->GetUserPrimaryGeneratorAction();
   G4ParticleGun* gun = genAction->GetParticleGun();
   m_initialCharge = gun->GetParticleCharge();
 
-  // straight line fit is done here...
-  CalculateStartParameters();
   //SetStartParametesToGeneratedParticle();
 
   switch (m_fitMethod) {
+  case oneline:
+    double x0,y0,lambda_x,lambda_y;
+    FitStraightLine(0,nHits,x0,y0,lambda_x,lambda_y);
+    break;
   case blobel:
+    CalculateStartParameters();
     DoBlobelFit(5);
     break;
   case minuit:
+    CalculateStartParameters();
     DoMinuitFit(5);
     break;
   case transverse:
+    CalculateStartParameters();
     DoBlobelFit(3);
     break;
   default:
@@ -143,8 +151,10 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
   // this parameter is arbitrary. z0 = 0 should minimize correlations...
   float z0 = 0.0;
 
+  unsigned int numberOfLayersToBeSkipped = m_layersToBeSkipped.size();
+
   // basic dimensions of matrices
-  unsigned int nRow = nHits;
+  unsigned int nRow = nHits - numberOfLayersToBeSkipped;
   unsigned int nCol = 4;
 
   // declare matrices for the calculation
@@ -152,9 +162,14 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
   TVectorD b(nRow);
   TMatrixD U(nRow,nRow);
   TMatrixD CombineXandY(1,2);
-  TMatrixD SolutionToPositions(2*nRow,nCol);
+  TMatrixD SolutionToPositions(2*nHits,nCol);
 
+  unsigned int counter = 0;
   for (unsigned int i = 0; i < nHits; i++) {
+
+    std::vector<int>::iterator it = std::find(m_layersToBeSkipped.begin(), m_layersToBeSkipped.end(), i);
+    if (it != m_layersToBeSkipped.end())
+      continue;
 
     // get information from detector...
     G4ThreeVector pos = m_smearedHits[i+n0];
@@ -170,29 +185,25 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
       float tangens     = sin(angle)/cos(angle);
       CombineXandY(0,0) = -tangens;
       CombineXandY(0,1) = 1.;
-      A(i,0)            = -tangens;
-      A(i,1)            = 1.;
-      A(i,2)            = -k*tangens;
-      A(i,3)            = k;
-      b(i)              = -tangens*pos.x() + pos.y();
+      A(counter,0)      = -tangens;
+      A(counter,1)      = 1.;
+      A(counter,2)      = -k*tangens;
+      A(counter,3)      = k;
+      b(counter)        = -tangens*pos.x() + pos.y();
     }
     else {
       float cotangens   = cos(angle)/sin(angle);
       CombineXandY(0,0) = 1.;
       CombineXandY(0,1) = -cotangens;
-      A(i,0)            = 1.;
-      A(i,1)            = -cotangens;
-      A(i,2)            = k;
-      A(i,3)            = -k*cotangens;
-      b(i)              = pos.x() - cotangens*pos.y();
+      A(counter,0)      = 1.;
+      A(counter,1)      = -cotangens;
+      A(counter,2)      = k;
+      A(counter,3)      = -k*cotangens;
+      b(counter)        = pos.x() - cotangens*pos.y();
     }
 
     // calculate covariance matrix
-    G4double sigmaV;
-    if (iLayer == 0)
-      sigmaV = det->GetModuleUpperSigmaV(iModule);
-    else
-      sigmaV = det->GetModuleLowerSigmaV(iModule);
+    G4double sigmaV = iLayer==0? det->GetModuleUpperSigmaV(iModule) : det->GetModuleLowerSigmaV(iModule);
 
     // Rot is the matrix that maps u,v, to x,y (i.e. the backward rotation)
     TMatrixD Rot(2,2); 
@@ -213,7 +224,8 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
     CombineXandYTrans.Transpose(CombineXandY);
     TMatrixD V3 = TMatrixD(1,1);
     V3 = CombineXandY * V2 * CombineXandYTrans;
-    U(i,i) = V3(0,0); // this is the sigma for the i'th measurement
+    U(counter,counter) = V3(0,0); // this is the sigma for the i'th measurement
+    counter++;
   }
   
   // calculate solution
@@ -237,13 +249,13 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
   G4double chi2 = (vecTrans * Uinv * vec)(0,0);
 
   // SolutionToPositions is the linear transformation that maps the solution to positions
-  for (unsigned int i = 0; i < 2*nRow; i++){
+  for (unsigned int i = 0; i < 2*nHits; i++){
     SolutionToPositions(i,i%2)     = 1.;
     SolutionToPositions(i,(i%2)+2) = m_smearedHits[i/2].z() - z0;
   }
   TVectorD positions = SolutionToPositions*solution;
 
-  // Fill information in m_currentRecEvent (usually done in RES_EventActionReconstruction)
+  // Fill information in m_currentRecEvent (usually done in RES_EventActionReconstruction for other fit methods)
   m_currentRecEvent = RES_Event();
   for (unsigned int i = 0; i < nHits; i++) {
     G4int iModule = m_currentGenEvent.GetModuleID(i);
@@ -251,16 +263,16 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
     m_currentRecEvent.AddHit(iModule, iLayer, positions(2*i), positions(2*i+1), m_smearedHits[i].z());
   }
   m_currentRecEvent.SetChi2(chi2);
-  m_currentRecEvent.SetDof(nHits - 4);
+  m_currentRecEvent.SetDof(nRow - nCol);
   m_currentRecEvent.SetEventType(reconstructed);
   m_currentRecEvent.SetMomentum(DBL_MAX);
   m_currentRecEvent.SetTransverseMomentum(DBL_MAX);
 
   // print covariance matrix if the user wants to
   if (m_verbose > 1) {
-    TMatrixD SolutionToPositionsTrans(nCol, 2*nRow);
+    TMatrixD SolutionToPositionsTrans(nCol, 2*nHits);
     SolutionToPositionsTrans.Transpose(SolutionToPositions);
-    TMatrixD Cov(2*nRow, 2*nRow);
+    TMatrixD Cov(2*nHits, 2*nHits);
     Cov = SolutionToPositions * Minv * SolutionToPositionsTrans;
 
     for (unsigned int i = 0; i < nHits; i++)
@@ -317,38 +329,21 @@ void RES_TrackFitter::CalculateStartParameters()
     for (int i = 0; i < nHits; i++)
       k[i] = m_smearedHits[i].z() - z0;
 
+    G4double x0_top,y0_top;
+    FitStraightLine(0, nHits/2, x0_top, y0_top, dx_over_dz_top, dy_over_dz_top);
+    G4double x0_bottom,y0_bottom;
+    FitStraightLine(nHits/2, nHits, x0_bottom, y0_bottom, dx_over_dz_bottom, dy_over_dz_bottom);
 
-    if (m_fitMethod == oneline) {
-      G4double x0,y0,dx_over_dz,dy_over_dz;
-      FitStraightLine(0, nHits, x0, y0, dx_over_dz, dy_over_dz);
-
-      for (int i = 0; i < nHits; i++) {
-        x[i] = x0 + k[i] * dx_over_dz;
-        y[i] = y0 + k[i] * dy_over_dz;
+    for (int i = 0; i < nHits; i++) {
+      if (i < nHits/2) {
+        x[i] = x0_top + k[i] * dx_over_dz_top;
+        y[i] = y0_top + k[i] * dy_over_dz_top;
         z[i] = z0 + k[i];
       }
-      dx_over_dz_top = dx_over_dz;
-      dx_over_dz_bottom = dx_over_dz;
-      dy_over_dz_top = dy_over_dz;
-      dy_over_dz_bottom = dy_over_dz;
-    }
-    else {
-      G4double x0_top,y0_top;
-      FitStraightLine(0, nHits/2, x0_top, y0_top, dx_over_dz_top, dy_over_dz_top);
-      G4double x0_bottom,y0_bottom;
-      FitStraightLine(nHits/2, nHits, x0_bottom, y0_bottom, dx_over_dz_bottom, dy_over_dz_bottom);
-
-      for (int i = 0; i < nHits; i++) {
-        if (i < nHits/2) {
-          x[i] = x0_top + k[i] * dx_over_dz_top;
-          y[i] = y0_top + k[i] * dy_over_dz_top;
-          z[i] = z0 + k[i];
-        }
-        else {
-          x[i] = x0_bottom + k[i] * dx_over_dz_bottom;
-          y[i] = y0_bottom + k[i] * dy_over_dz_bottom;
-          z[i] = z0 + k[i];
-        }
+      else {
+        x[i] = x0_bottom + k[i] * dx_over_dz_bottom;
+        y[i] = y0_bottom + k[i] * dy_over_dz_bottom;
+        z[i] = z0 + k[i];
       }
     }
 
@@ -671,4 +666,18 @@ void RES_TrackFitter::ScanChi2Function(G4int i, G4int j, G4String filename)
   }
 
   file.close();
+}
+
+void RES_TrackFitter::AddLayerToBeSkipped(G4int layer)
+{
+  std::vector<G4int>::iterator it = std::find(m_layersToBeSkipped.begin(), m_layersToBeSkipped.end(), layer);
+  if (it == m_layersToBeSkipped.end())
+    m_layersToBeSkipped.push_back(layer);
+}
+
+void RES_TrackFitter::RemoveLayerToBeSkipped(G4int layer)
+{
+  std::vector<G4int>::iterator it = std::find(m_layersToBeSkipped.begin(), m_layersToBeSkipped.end(), layer);
+  if (it != m_layersToBeSkipped.end())
+    m_layersToBeSkipped.erase(it);
 }

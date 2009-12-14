@@ -1,4 +1,4 @@
-// $Id: single_run.cc,v 1.9 2009/12/11 14:46:31 beischer Exp $
+// $Id: single_run.cc,v 1.10 2009/12/14 08:52:51 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -176,27 +176,27 @@ int main(int argc, char** argv)
 
 
   gStyle->SetOptFit(11);
-  TCanvas canvas("canvas", "canvas", 1024, 768);
+  TCanvas canvas("canvas", "Momentum resolution", 1024, 768);
   canvas.Draw();
   canvas.Divide(1,2);
   canvas.cd(1);
   resHist.Draw();
   resHist.Fit("gaus", "EQR", "", 0.1, 1.+5*momRes);
-  resHist.GetXaxis()->SetTitle("p_{sim}/p_{rec}");
+  resHist.GetXaxis()->SetTitle("p_{gen}/p_{rec}");
   resHist.GetYaxis()->SetTitle("N");
   canvas.cd(2);
   ptHist.Draw();
   ptHist.Fit("gaus", "EQR", "", 0.1, 1.+5*momRes);
-  ptHist.GetXaxis()->SetTitle("pt_{sim}/pt_{rec}");
+  ptHist.GetXaxis()->SetTitle("pt_{gen}/pt_{rec}");
   ptHist.GetYaxis()->SetTitle("N");
 
-  TCanvas canvas2("canvas2", "canvas2", 1024, 768);
+  TCanvas canvas2("canvas2", "x: Reconstructed vs generated position", 1024, 768);
   canvas2.Divide(nHits/2,2);
   canvas2.Draw();
 
   for (int i = 0; i < nHits; i++) {
     char xtitle[256];
-    sprintf(xtitle, "(x_{%d,sim} - x_{%d,rec}) / mm", i, i);
+    sprintf(xtitle, "(x_{%d,gen} - x_{%d,rec}) / mm", i, i);
     canvas2.cd(i+1);
     xDeltaGenHist[i]->Draw();
     xDeltaGenHist[i]->GetXaxis()->SetTitle(xtitle);
@@ -206,12 +206,12 @@ int main(int argc, char** argv)
     std::cout << "x" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
   }
 
-  TCanvas canvas3("canvas3", "canvas3", 1024, 768);
+  TCanvas canvas3("canvas3", "y: Reconstructed vs generated position", 1024, 768);
   canvas3.Divide(nHits/2,2);
   canvas3.Draw();
   for (int i = 0; i < nHits; i++) {
     char ytitle[256];
-    sprintf(ytitle, "(y_{%d,sim} - y_{%d,rec}) / mm", i, i);
+    sprintf(ytitle, "(y_{%d,gen} - y_{%d,rec}) / mm", i, i);
     canvas3.cd(i+1);
     yDeltaGenHist[i]->Draw();
     yDeltaGenHist[i]->GetXaxis()->SetTitle(ytitle);
@@ -221,13 +221,13 @@ int main(int argc, char** argv)
     std::cout << "y" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
   }
 
-  TCanvas canvas4("canvas4", "canvas4", 1024, 768);
+  TCanvas canvas4("canvas4", "x: Reconstructed vs measured position", 1024, 768);
   canvas4.Divide(nHits/2,2);
   canvas4.Draw();
 
   for (int i = 0; i < nHits; i++) {
     char xtitle[256];
-    sprintf(xtitle, "(x_{%d,sim} - x_{%d,rec}) / mm", i, i);
+    sprintf(xtitle, "(x_{%d,meas} - x_{%d,rec}) / mm", i, i);
     canvas4.cd(i+1);
     xDeltaSmearedHist[i]->Draw();
     xDeltaSmearedHist[i]->GetXaxis()->SetTitle(xtitle);
@@ -237,12 +237,12 @@ int main(int argc, char** argv)
     std::cout << "x" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
   }
 
-  TCanvas canvas5("canvas5", "canvas5", 1024, 768);
+  TCanvas canvas5("canvas5", "y: Reconstructed vs measured Position", 1024, 768);
   canvas5.Divide(nHits/2,2);
   canvas5.Draw();
   for (int i = 0; i < nHits; i++) {
     char ytitle[256];
-    sprintf(ytitle, "(y_{%d,sim} - y_{%d,rec}) / mm", i, i);
+    sprintf(ytitle, "(y_{%d,meas} - y_{%d,rec}) / mm", i, i);
     canvas5.cd(i+1);
     yDeltaSmearedHist[i]->Draw();
     yDeltaSmearedHist[i]->GetXaxis()->SetTitle(ytitle);
@@ -252,7 +252,7 @@ int main(int argc, char** argv)
     std::cout << "y" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
   }
 
-  TCanvas canvas6("canvas6", "canvas6", 1024, 768);
+  TCanvas canvas6("canvas6", "Sum of reconstructed vs generated position histograms", 1024, 768);
   canvas6.Draw();
   canvas6.Divide(1,2);
   canvas6.cd(1);
@@ -269,7 +269,7 @@ int main(int argc, char** argv)
   
   chi2Dist.FixParameter(0, 1);
   chi2Dist.FixParameter(1, recEvent->GetDof());
-  TCanvas canvas7("canvas7", "canvas7", 1024, 768);
+  TCanvas canvas7("canvas7", "Chi2 distribution", 1024, 768);
   canvas7.Draw();
   chi2Hist.Draw();
   chi2Hist.Scale(1./(chi2Hist.Integral("WIDTH")));
@@ -279,18 +279,17 @@ int main(int argc, char** argv)
   chi2Dist.Draw("SAME");
   chi2Dist.SetLineColor(kRed);
 
-  TCanvas canvas8("canvas8", "canvas8", 1024, 768);
+  TCanvas canvas8("canvas8", "Deflection angle distribution", 1024, 768);
   canvas8.Draw();
   angleHist.Draw();
   angleHist.GetXaxis()->SetTitle("#Delta #theta [rad]");
   angleHist.GetYaxis()->SetTitle("N");
 
-
   app.Run();
 
+  file.Close();
   delete genEvent;
   delete recEvent;
-  file.Close();
 
   for (int i = 0; i < nHits; i++)
     delete xDeltaGenHist[i];

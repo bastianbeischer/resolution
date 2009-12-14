@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitter.hh,v 1.18 2009/10/24 16:29:35 beischer Exp $
+// $Id: RES_TrackFitter.hh,v 1.19 2009/12/14 08:52:52 beischer Exp $
 
 #ifndef RES_TrackFitter_hh
 #define RES_TrackFitter_hh
@@ -7,6 +7,8 @@
 
 #include "globals.hh"
 #include "G4ThreeVector.hh"
+
+#include <vector>
 
 enum FitMethod
 {
@@ -37,9 +39,12 @@ public:
   void     CopyHits();
   void     FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double &y0, G4double &dxdz, G4double &dydz);
 
+  void ClearLayersToBeSkipped() {m_layersToBeSkipped.clear();}
+  void AddLayerToBeSkipped(G4int layer);
+  void RemoveLayerToBeSkipped(G4int layer);
+
 private:
   RES_TrackFitter();
-
 
   void     SetStartParametesToGeneratedParticle();
   void     CalculateStartParameters();
@@ -51,20 +56,22 @@ private:
 private:
   static RES_TrackFitter* m_instance;
 
-  RES_TrackFitMessenger* m_messenger;
+  RES_TrackFitMessenger*  m_messenger;
 
-  RES_Event              m_currentGenEvent;
-  RES_Event              m_currentRecEvent;
-  G4int                  m_verbose;
+  RES_Event               m_currentGenEvent;
+  RES_Event               m_currentRecEvent;
+  G4int                   m_verbose;
 
-  G4ThreeVector*         m_smearedHits;
-  G4double*              m_parameter;
-  G4double*              m_step;
-  G4double*              m_lowerBound;
-  G4double*              m_upperBound;
-  FitMethod              m_fitMethod;
+  G4ThreeVector*          m_smearedHits;
+  G4double*               m_parameter;
+  G4double*               m_step;
+  G4double*               m_lowerBound;
+  G4double*               m_upperBound;
+  FitMethod               m_fitMethod;
 
-  G4double               m_initialCharge;
+  G4double                m_initialCharge;
+
+  std::vector<int>        m_layersToBeSkipped;
 
   friend void MinuitChi2Wrapper(int& npar, double* /*gin*/, double& f, double* par, int /*iflag*/);
 

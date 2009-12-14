@@ -1,4 +1,4 @@
-// $Id: RES_EventActionGeneration.cc,v 1.17 2009/12/11 12:52:24 beischer Exp $
+// $Id: RES_EventActionGeneration.cc,v 1.18 2009/12/14 08:52:52 beischer Exp $
 
 #include "RES_EventActionGeneration.hh"
 
@@ -100,7 +100,10 @@ void RES_EventActionGeneration::SmearHits(RES_Event* event)
       sigmaZ = det->GetModuleLowerSigmaZ(iModule);
     }
 
+    // if (iModule == 0 || iModule == 5)
+    //   sigmaV += 10*um;
 
+    //    sigmaV += 10*um;
 
     hit = forwardRotation*hit;
     //    hit.setX(CLHEP::RandFlat::shoot());

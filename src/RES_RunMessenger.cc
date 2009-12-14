@@ -1,4 +1,4 @@
-// $Id: RES_RunMessenger.cc,v 1.5 2009/10/14 09:24:23 beischer Exp $
+// $Id: RES_RunMessenger.cc,v 1.6 2009/12/14 08:52:53 beischer Exp $
 
 #include "RES_RunMessenger.hh"
 
@@ -33,6 +33,11 @@ RES_RunMessenger::RES_RunMessenger(RES_RunManager* manager)
   m_reconstructCmd->SetGuidance("Reconstruct the events which are stored in the DataHandler");
   m_reconstructCmd->AvailableForStates(G4State_Idle);
 
+  m_reconstructWithoutLayerCmd = new G4UIcmdWithAnInteger("/RES/Run/ReconstructWithoutLayer", this);
+  m_reconstructWithoutLayerCmd->SetParameterName("layer", false);
+  m_reconstructWithoutLayerCmd->SetGuidance("Reconstruct the events which are stored in the DataHandler without the given layer");
+  m_reconstructWithoutLayerCmd->AvailableForStates(G4State_Idle);
+
   m_scanChi2FuncCmd = new G4UIcmdWithAString("/RES/Run/ScanChi2", this);
   m_scanChi2FuncCmd->SetGuidance("Scan the chi2 function and write the output to the given file")
 ;
@@ -46,6 +51,7 @@ RES_RunMessenger::~RES_RunMessenger()
   delete m_setStoreResultsCmd;
   delete m_generateCmd;
   delete m_reconstructCmd;
+  delete m_reconstructWithoutLayerCmd;
   delete m_scanChi2FuncCmd;
 }
 
@@ -59,6 +65,10 @@ void RES_RunMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
   }
   if (command == m_reconstructCmd) {
     m_manager->StartReconstructionRun();
+  }
+  if (command == m_reconstructWithoutLayerCmd) {
+    G4int layer = m_reconstructWithoutLayerCmd->GetNewIntValue(newValue);
+    m_manager->StartReconstructionRunWithoutLayer(layer);
   }
   if (command == m_scanChi2FuncCmd) {
     G4int iPar = m_scanChi2FuncCmd->ConvertToInt(newValue.substr(0,1).c_str());
