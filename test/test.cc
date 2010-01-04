@@ -1,4 +1,4 @@
-// $Id: test.cc,v 1.8 2009/12/10 15:51:57 beischer Exp $
+// $Id: test.cc,v 1.9 2010/01/04 22:21:45 beischer Exp $
 
 #include "RES_Event.hh"
 
@@ -29,7 +29,7 @@ int main(int argc, char** argv)
               << " p: " << genEvent->GetMomentum()
               << " -----> chi2: " <<  genEvent->GetChi2() << std::endl;
     for (unsigned int j = 0; j < genEvent->GetNbOfHits(); j++) {
-      std::cout << " (i,j): (" << genEvent->GetModuleID(j) << ", " << genEvent->GetFiberID(j) << ")"
+      std::cout << " (i,j): (" << genEvent->GetModuleID(j) << ", " << genEvent->GetLayerID(j) << ")"
                 << " x: " << genEvent->GetHitPosition(j).x() 
                 << " y: " << genEvent->GetHitPosition(j).y()
                 << " z: " << genEvent->GetHitPosition(j).z() << std::endl;
@@ -44,7 +44,7 @@ int main(int argc, char** argv)
               << " -----> chi2: " <<  recEvent->GetChi2() << std::endl;
     for (unsigned int j = 0; j < recEvent->GetNbOfHits(); j++) {
       std::cout << " nHits: " << recEvent->GetNbOfHits();
-      std::cout << " (i,j): (" << recEvent->GetModuleID(j) << ", " << recEvent->GetFiberID(j) << ")"
+      std::cout << " (i,j): (" << recEvent->GetModuleID(j) << ", " << recEvent->GetLayerID(j) << ")"
                 << " x: " << recEvent->GetHitPosition(j).x() 
                 << " y: " << recEvent->GetHitPosition(j).y()
                 << " z: " << recEvent->GetHitPosition(j).z() << std::endl;

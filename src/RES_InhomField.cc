@@ -1,4 +1,4 @@
-// $Id: RES_InhomField.cc,v 1.9 2010/01/04 15:06:20 beischer Exp $
+// $Id: RES_InhomField.cc,v 1.10 2010/01/04 22:21:45 beischer Exp $
 
 #include "RES_InhomField.hh"
 
@@ -98,6 +98,13 @@ void RES_InhomField::ReadData()
   G4int nBins_x, nBins_y, nBins_z;
   file >> x0 >> x1 >> y0 >> y1 >> z0 >> z1 >> nBins_x >> nBins_y >> nBins_z;
 
+  x0 /= 10.;
+  x1 /= 10.;
+  y0 /= 10.;
+  y1 /= 10.;
+  z0 /= 10.;
+  z1 /= 10.;
+
   m_axis_x = new RES_Axis(x0,x1,nBins_x);
   m_axis_y = new RES_Axis(y0,y1,nBins_y);
   m_axis_z = new RES_Axis(z0,z1,nBins_z);
@@ -127,10 +134,10 @@ void RES_InhomField::ReadData()
   }
 
   // read the data (only contains all x, y >= 0, z >= 0)
-  G4double x, y, z, f_x, f_y, f_z;
+  G4double x, y, z, f_x, f_y, f_z, dummy;
   G4int nX, nY, nZ;
   while (!file.eof()) {
-    file >> x >> y >> z >> f_x >> f_y >> f_z;
+    file >> x >> y >> z >> dummy >> f_x >> f_y >> f_z >> dummy;
 
     x/=10.;
     y/=10.;

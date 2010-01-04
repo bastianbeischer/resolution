@@ -1,4 +1,4 @@
-// $Id: RES_DetectorConstruction.cc,v 1.20 2010/01/04 15:06:20 beischer Exp $
+// $Id: RES_DetectorConstruction.cc,v 1.21 2010/01/04 22:21:45 beischer Exp $
 
 #include "RES_DetectorConstruction.hh"
 
@@ -51,9 +51,9 @@ RES_DetectorConstruction::RES_DetectorConstruction() :
   m_moduleKaptonMaterial = G4NistManager::Instance()->FindOrBuildMaterial( "G4_KAPTON" );
 
   // define world dimensions
-  m_worldX = 3.0*m;
-  m_worldY = 3.0*m;
-  m_worldZ = 3.0*m;
+  m_worldX = 1.6*m;
+  m_worldY = 1.6*m;
+  m_worldZ = 2.5*m;
 
 
   // define default module parameters
