@@ -1,4 +1,4 @@
-// $Id: single_run.cc,v 1.10 2009/12/14 08:52:51 beischer Exp $
+// $Id: single_run.cc,v 1.11 2010/01/04 09:47:00 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -153,13 +153,14 @@ int main(int argc, char** argv)
     int nHitsGen = genEvent->GetNbOfHits();
     int nHitsRec = recEvent->GetNbOfHits();
     if (nHits == 0 || (nHitsGen != nHitsRec)) continue;
-    resHist.Fill(genEvent->GetMomentum()/recEvent->GetMomentum());
+    if (recEvent->GetChi2() / recEvent->GetDof() < 5)
+      resHist.Fill(genEvent->GetMomentum()/recEvent->GetMomentum());
     ptHist.Fill(genEvent->GetTransverseMomentum()/recEvent->GetTransverseMomentum());
     for (int i = 0; i < nHitsRec; i++) {
       xDeltaGenHist[i]->Fill(genEvent->GetHitPosition(i).x() - recEvent->GetHitPosition(i).x());
       yDeltaGenHist[i]->Fill(genEvent->GetHitPosition(i).y() - recEvent->GetHitPosition(i).y());
-      xDeltaSmearedHist[i]->Fill(genEvent->GetSmearedHitPosition(i).x() - recEvent->GetHitPosition(i).x());
-      yDeltaSmearedHist[i]->Fill(genEvent->GetSmearedHitPosition(i).y() - recEvent->GetHitPosition(i).y());
+      // xDeltaSmearedHist[i]->Fill(genEvent->GetSmearedHitPosition(i).x() - recEvent->GetHitPosition(i).x());
+      // yDeltaSmearedHist[i]->Fill(genEvent->GetSmearedHitPosition(i).y() - recEvent->GetHitPosition(i).y());
       totalXhist.Fill(genEvent->GetHitPosition(i).x() - recEvent->GetHitPosition(i).x());
       totalYhist.Fill(genEvent->GetHitPosition(i).y() - recEvent->GetHitPosition(i).y());
     }
@@ -232,9 +233,9 @@ int main(int argc, char** argv)
     xDeltaSmearedHist[i]->Draw();
     xDeltaSmearedHist[i]->GetXaxis()->SetTitle(xtitle);
     xDeltaSmearedHist[i]->GetYaxis()->SetTitle("N");
-    xDeltaSmearedHist[i]->Fit("gaus", "Q");
-    TF1* fitFunc = xDeltaSmearedHist[i]->GetFunction("gaus");
-    std::cout << "x" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
+    //    xDeltaSmearedHist[i]->Fit("gaus", "Q");
+    // TF1* fitFunc = xDeltaSmearedHist[i]->GetFunction("gaus");
+    // std::cout << "x" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
   }
 
   TCanvas canvas5("canvas5", "y: Reconstructed vs measured Position", 1024, 768);
@@ -247,9 +248,9 @@ int main(int argc, char** argv)
     yDeltaSmearedHist[i]->Draw();
     yDeltaSmearedHist[i]->GetXaxis()->SetTitle(ytitle);
     yDeltaSmearedHist[i]->GetYaxis()->SetTitle("N");
-    yDeltaSmearedHist[i]->Fit("gaus", "Q");
-    TF1* fitFunc = yDeltaSmearedHist[i]->GetFunction("gaus");
-    std::cout << "y" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
+    // yDeltaSmearedHist[i]->Fit("gaus", "Q");
+    // TF1* fitFunc = yDeltaSmearedHist[i]->GetFunction("gaus");
+    // std::cout << "y" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
   }
 
   TCanvas canvas6("canvas6", "Sum of reconstructed vs generated position histograms", 1024, 768);

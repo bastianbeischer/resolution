@@ -1,4 +1,4 @@
-// $Id: compare_msc.cc,v 1.7 2009/12/10 15:51:57 beischer Exp $
+// $Id: compare_msc.cc,v 1.8 2010/01/04 09:47:00 beischer Exp $
 
 #include <TApplication.h>
 #include <TFile.h>
@@ -9,16 +9,18 @@
 #include <RES_Event.hh>
 #include <MyROOTStyle.h>
 #include <iostream>
+#include <cstdlib>
 
 int main(int argc, char** argv)
 {
-  if (argc != 3) {
+  if (argc != 4) {
     std::cout << "please provide two root files to compare" << std::endl;
     return -1;
   }
 
   const char* filename1 = argv[1];
   const char* filename2 = argv[2];
+  int printLayer = atoi(argv[3]);
   
   TApplication app("app", &argc, argv);
   MyROOTStyle myStyle("myStyle");
@@ -112,17 +114,35 @@ int main(int argc, char** argv)
 
   TCanvas canvas("gengen_can", "msc_gen - no_msc_gen", 1024, 768);
   canvas.Divide(nHits/2,2);
+  //  canvas.Divide(2,2);
   canvas.Draw();
+
   for (int i = 0; i < nHits; i++) {
     char ytitle[256];
     sprintf(ytitle, "(y_{%d,sim} - y_{%d,rec}) / mm", i, i);
+    // switch(i) {
+    // case 0:
+    //   canvas.cd(1);
+    //   break;
+    // case 3:
+    //   canvas.cd(2);
+    //   break;
+    // case 6:
+    //   canvas.cd(3);
+    //   break;
+    // case 10:
+    //   canvas.cd(4);
+    //   break;
+    // default:
+    //   continue;
+    // }
     canvas.cd(i+1);
     yHist1[i]->Draw();
     yHist1[i]->GetXaxis()->SetTitle(ytitle);
     yHist1[i]->GetYaxis()->SetTitle("N");
     yHist1[i]->Fit("gaus", "Q");
     TF1* fitFunc = yHist1[i]->GetFunction("gaus");
-    std::cout << "y" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
+    //    std::cout << "y" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
   }
   TCanvas canvas2("recgen_can", "rec - no_msc_gen", 1024, 768);
   canvas2.Divide(nHits/2,2);
@@ -136,7 +156,7 @@ int main(int argc, char** argv)
     yHist2[i]->GetYaxis()->SetTitle("N");
     yHist2[i]->Fit("gaus", "Q");
     TF1* fitFunc = yHist2[i]->GetFunction("gaus");
-    std::cout << "y" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
+    //std::cout << "y" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
   }
   TCanvas canvas3("genrec_can", "rec - msc_gen_smeared (RESIDUALS)", 1024, 768);
   canvas3.Divide(nHits/2,2);
@@ -150,7 +170,7 @@ int main(int argc, char** argv)
     yHist3[i]->GetYaxis()->SetTitle("N");
     yHist3[i]->Fit("gaus", "Q");
     TF1* fitFunc = yHist3[i]->GetFunction("gaus");
-    std::cout << "y" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
+    //std::cout << "y" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
   }
   TCanvas canvas4("recrec_can", "rec - msc_gen (REAL ERROR OF TRACKFIT)", 1024, 768);
   canvas4.Divide(nHits/2,2);
@@ -164,7 +184,8 @@ int main(int argc, char** argv)
     yHist4[i]->GetYaxis()->SetTitle("N");
     yHist4[i]->Fit("gaus", "Q");
     TF1* fitFunc = yHist4[i]->GetFunction("gaus");
-    std::cout << "y" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
+    if (i==printLayer) std::cout << fitFunc->GetParameter(2) << std::endl;
+    //std::cout << "y" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
   }
 
   app.Run();

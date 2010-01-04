@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitter.cc,v 1.42 2009/12/14 08:52:53 beischer Exp $
+// $Id: RES_TrackFitter.cc,v 1.43 2010/01/04 09:47:01 beischer Exp $
 
 #include <cmath>
 #include <fstream>
@@ -303,6 +303,7 @@ void RES_TrackFitter::CalculateStartParameters()
 
     G4double deltaTheta = fabs(dy_over_dz_bottom - dy_over_dz_top);
 
+    // TODO: CHANGE HARDCODED VALUES HERE
     G4double B = 0.27;
     G4double L = sqrt(pow(m_smearedHits[4].y()-m_smearedHits[3].y(),2.) + pow(m_smearedHits[4].z()-m_smearedHits[3].z(),2.))/m;
     G4double p = 0.3*B*L/deltaTheta*GeV;
@@ -359,8 +360,12 @@ void RES_TrackFitter::CalculateStartParameters()
 
     G4double deltaTheta = dy_over_dz_bottom - dy_over_dz_top;
 
+    G4double y0_magnet = y0_bottom + (-4*cm)*dy_over_dz_bottom;
+    G4double y1_magnet = y0_top    +  (4*cm)*dy_over_dz_top;
+    G4double z0_magnet = -4*cm;
+    G4double z1_magnet =  4*cm;
     G4double B = 0.27;
-    G4double L = sqrt(pow(y[4]-y[3],2.) + pow(z[4]-z[3],2.))/m;
+    G4double L = sqrt(pow(y1_magnet - y0_magnet, 2.) + pow(z1_magnet - z0_magnet,2.))/m;
     G4double p = 0.3*B*L/deltaTheta*GeV;
     if (m_fitMethod == oneline)
       p = 100000000*GeV;
@@ -406,7 +411,7 @@ void RES_TrackFitter::CalculateStartParameters()
 
 G4int RES_TrackFitter::DoBlobelFit(G4int npar)
 {
-  G4int nflim = 3*abs(npar)*(abs(npar)+10); // dito
+  G4int nflim = 3*abs(npar)*(abs(npar)+10);
   if( m_verbose == 0 ) {
     npar = -npar;
     nflim = -nflim;
@@ -424,8 +429,13 @@ G4int RES_TrackFitter::DoBlobelFit(G4int npar)
   }
 
   G4int nHits = m_currentGenEvent.GetNbOfHits();
+
+  G4int dof = 0;
+  if (m_verbose == 0)
   // npar has been put to -npar before
-  G4int dof = nHits - (-npar);
+    dof = nHits - (-npar);
+  else
+    dof = nHits - npar;
   m_currentRecEvent.SetChi2(chi2);
   m_currentRecEvent.SetDof(dof);
 
@@ -624,10 +634,10 @@ void RES_TrackFitter::ScanChi2Function(G4int i, G4int j, G4String filename)
   SetStartParametesToGeneratedParticle();
   
   // hardcoded at the moment
-  m_lowerBound[0] = 0.2*GeV;        m_upperBound[0] = 1.8*GeV;
-  m_lowerBound[1] = 1.5*cm;         m_upperBound[1] = 2.5*cm;
+  m_lowerBound[0] = 1./(0.2*GeV);        m_upperBound[0] = 1./(1.8*GeV);
+  m_lowerBound[1] = -0.5*cm;         m_upperBound[1] = 0.5*cm;
   m_lowerBound[2] = -1.*M_PI/180.;  m_upperBound[2] = 1.*M_PI/180.;
-  m_lowerBound[3] = 0.0*cm;         m_upperBound[3] = 4.0*cm;
+  m_lowerBound[3] = -0.5*cm;         m_upperBound[3] = 0.5*cm;
   m_lowerBound[4] = -10.*M_PI/180.; m_upperBound[4] = 10.*M_PI/180.;
 
   G4double nSteps = 200.;
