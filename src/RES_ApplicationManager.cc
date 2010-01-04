@@ -62,6 +62,8 @@ int RES_ApplicationManager::RunBatchScript(G4String scriptName)
   UI->ApplyCommand(command+fileName);
 
   delete runManager;
+
+  return 1;
 }
 
 void RES_ApplicationManager::CreateSession()
