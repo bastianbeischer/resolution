@@ -1,4 +1,4 @@
-e// $Id: RES_InhomField.cc,v 1.7 2010/01/04 09:47:01 beischer Exp $
+// $Id: RES_InhomField.cc,v 1.8 2010/01/04 10:48:25 beischer Exp $
 
 #include "RES_InhomField.hh"
 
