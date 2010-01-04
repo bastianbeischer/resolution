@@ -1,4 +1,4 @@
-// $Id: RES_DetectorConstruction.cc,v 1.19 2009/12/11 12:52:24 beischer Exp $
+// $Id: RES_DetectorConstruction.cc,v 1.20 2010/01/04 15:06:20 beischer Exp $
 
 #include "RES_DetectorConstruction.hh"
 
@@ -51,9 +51,9 @@ RES_DetectorConstruction::RES_DetectorConstruction() :
   m_moduleKaptonMaterial = G4NistManager::Instance()->FindOrBuildMaterial( "G4_KAPTON" );
 
   // define world dimensions
-  m_worldX = 1.0*m;
-  m_worldY = 1.0*m;
-  m_worldZ = 1.0*m;
+  m_worldX = 3.0*m;
+  m_worldY = 3.0*m;
+  m_worldZ = 3.0*m;
 
 
   // define default module parameters
@@ -130,7 +130,7 @@ G4VPhysicalVolume* RES_DetectorConstruction::Construct()
       G4LogicalVolume* currentPlasticLogic = new G4LogicalVolume(currentPlasticSolid, m_modulePlasticMaterial, "modulePlastic", 0, 0, 0);
       G4PVPlacement* currentUpperPlasticPlacement = new G4PVPlacement(0, G4ThreeVector(0,0,m_moduleFoamThickness + 0.5*m_modulePlasticThickness),
                                                                       currentPlasticLogic, "modulePlastic", currentModuleLogic, false, 0);
-      G4PVPlacement* currentLowerPlasticPlacement = new G4PVPlacement(0, G4ThreeVector(0,0,m_moduleFoamThickness - 0.5*m_modulePlasticThickness),
+      G4PVPlacement* currentLowerPlasticPlacement = new G4PVPlacement(0, G4ThreeVector(0,0,-m_moduleFoamThickness - 0.5*m_modulePlasticThickness),
                                                                       currentPlasticLogic, "modulePlastic", currentModuleLogic, false, 1);
       m_moduleUpperPlastic.push_back(currentUpperPlasticPlacement);
       m_moduleLowerPlastic.push_back(currentLowerPlasticPlacement);

@@ -1,4 +1,4 @@
-// $Id: RES_PrimaryGeneratorAction.hh,v 1.5 2009/10/14 09:24:30 beischer Exp $
+// $Id: RES_PrimaryGeneratorAction.hh,v 1.6 2010/01/04 15:06:25 beischer Exp $
 
 #ifndef RES_PrimaryGeneratorAction_hh
 #define RES_PrimaryGeneratorAction_hh
@@ -22,10 +22,12 @@ public:
   G4ParticleGun* GetParticleGun() const {return m_particleGun;}
   
 public:
-  inline G4bool GetRandomOrigin() {return m_randomOrigin;}
-  inline G4bool GetRandomDirection() {return m_randomDirection;}
+  inline G4bool   GetRandomOrigin()    {return m_randomOrigin;}
+  inline G4bool   GetRandomDirection() {return m_randomDirection;}
+  inline G4double GetStartZ()          {return m_z_start;}
   inline void SetRandomOrigin(G4bool value) {m_randomOrigin = value;}
   inline void SetRandomDirection(G4bool value) {m_randomDirection = value;}
+  inline void SetStartZ(G4double z) {m_z_start = z;}
 
 private:
   RES_PrimaryGeneratorMessenger* m_messenger;

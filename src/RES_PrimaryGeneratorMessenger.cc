@@ -1,4 +1,4 @@
-// $Id: RES_PrimaryGeneratorMessenger.cc,v 1.5 2009/10/14 09:24:24 beischer Exp $
+// $Id: RES_PrimaryGeneratorMessenger.cc,v 1.6 2010/01/04 15:06:20 beischer Exp $
 
 #include "RES_PrimaryGeneratorMessenger.hh"
 
@@ -27,6 +27,11 @@ RES_PrimaryGeneratorMessenger::RES_PrimaryGeneratorMessenger(RES_PrimaryGenerato
   m_randomDirectionCmd->SetParameterName("randDirection", true);
   m_randomDirectionCmd->SetDefaultValue(true);
   m_randomDirectionCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
+
+  m_setStartZCmd = new G4UIcmdWithADoubleAndUnit("/RES/Gun/StartZ", this);
+  m_setStartZCmd->SetGuidance("Set the height for the particle gun.");
+  m_setStartZCmd->SetParameterName("z", false);
+  m_setStartZCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
 }
 
 RES_PrimaryGeneratorMessenger::~RES_PrimaryGeneratorMessenger()
@@ -34,6 +39,7 @@ RES_PrimaryGeneratorMessenger::~RES_PrimaryGeneratorMessenger()
   delete m_directory;
   delete m_randomOriginCmd;
   delete m_randomDirectionCmd;
+  delete m_setStartZCmd;
 }
 
 void RES_PrimaryGeneratorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
@@ -43,5 +49,8 @@ void RES_PrimaryGeneratorMessenger::SetNewValue(G4UIcommand* command, G4String n
   }
   if (command == m_randomDirectionCmd) {
     m_generator->SetRandomDirection(m_randomDirectionCmd->GetNewBoolValue(newValue));
+  }
+  if (command == m_setStartZCmd) {
+    m_generator->SetStartZ(m_setStartZCmd->GetNewDoubleValue(newValue));
   }
 }

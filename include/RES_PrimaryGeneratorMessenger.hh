@@ -1,4 +1,4 @@
-// $Id: RES_PrimaryGeneratorMessenger.hh,v 1.3 2009/10/14 09:24:30 beischer Exp $
+// $Id: RES_PrimaryGeneratorMessenger.hh,v 1.4 2010/01/04 15:06:24 beischer Exp $
 
 #ifndef RES_PrimaryGeneratorMessenger_hh
 #define RES_PrimaryGeneratorMessenger_hh
@@ -10,6 +10,7 @@ class RES_PrimaryGeneratorAction;
 class G4UIdirectory;
 class G4UIcommand;
 class G4UIcmdWithABool;
+class G4UIcmdWithADoubleAndUnit;
 
 class RES_PrimaryGeneratorMessenger : public G4UImessenger
 {
@@ -28,6 +29,7 @@ private:
 
   G4UIcmdWithABool*           m_randomOriginCmd;
   G4UIcmdWithABool*           m_randomDirectionCmd;
+  G4UIcmdWithADoubleAndUnit*  m_setStartZCmd;
   
 };
 
