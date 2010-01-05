@@ -1,4 +1,4 @@
-// $Id: single_run.cc,v 1.11 2010/01/04 09:47:00 beischer Exp $
+// $Id: single_run.cc,v 1.12 2010/01/05 13:47:38 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -137,9 +137,7 @@ int main(int argc, char** argv)
 
   TH1D totalXhist("totalXhist", "totalXhist", 500, -20, 20);
   TH1D totalYhist("totalYhist", "totalYhist", 500, -0.3, 0.3);
-
   TH1D chi2Hist("chi2Hist", "chi2Hist", 500, 0.0, 100.0);
-
   TH1D angleHist("angleHist", "angleHist", 500, -5e-3, 5e-3);
 
   char title[128];
@@ -153,14 +151,13 @@ int main(int argc, char** argv)
     int nHitsGen = genEvent->GetNbOfHits();
     int nHitsRec = recEvent->GetNbOfHits();
     if (nHits == 0 || (nHitsGen != nHitsRec)) continue;
-    if (recEvent->GetChi2() / recEvent->GetDof() < 5)
-      resHist.Fill(genEvent->GetMomentum()/recEvent->GetMomentum());
+    resHist.Fill(genEvent->GetMomentum()/recEvent->GetMomentum());
     ptHist.Fill(genEvent->GetTransverseMomentum()/recEvent->GetTransverseMomentum());
     for (int i = 0; i < nHitsRec; i++) {
       xDeltaGenHist[i]->Fill(genEvent->GetHitPosition(i).x() - recEvent->GetHitPosition(i).x());
       yDeltaGenHist[i]->Fill(genEvent->GetHitPosition(i).y() - recEvent->GetHitPosition(i).y());
-      // xDeltaSmearedHist[i]->Fill(genEvent->GetSmearedHitPosition(i).x() - recEvent->GetHitPosition(i).x());
-      // yDeltaSmearedHist[i]->Fill(genEvent->GetSmearedHitPosition(i).y() - recEvent->GetHitPosition(i).y());
+      xDeltaSmearedHist[i]->Fill(genEvent->GetSmearedHitPosition(i).x() - recEvent->GetHitPosition(i).x());
+      yDeltaSmearedHist[i]->Fill(genEvent->GetSmearedHitPosition(i).y() - recEvent->GetHitPosition(i).y());
       totalXhist.Fill(genEvent->GetHitPosition(i).x() - recEvent->GetHitPosition(i).x());
       totalYhist.Fill(genEvent->GetHitPosition(i).y() - recEvent->GetHitPosition(i).y());
     }

@@ -1,4 +1,4 @@
-// $Id: test.cc,v 1.9 2010/01/04 22:21:45 beischer Exp $
+// $Id: test.cc,v 1.10 2010/01/05 13:47:38 beischer Exp $
 
 #include "RES_Event.hh"
 
@@ -38,6 +38,7 @@ int main(int argc, char** argv)
 
   std::cout << "Reconstructed events:" << std::endl;
   for (unsigned int i = 0; i < recTree->GetEntries(); i++) {
+    recTree->GetEntry(i);
     std::cout << "--------------------------------------------------" << std::endl;
     std::cout << "ID: " << recEvent->GetID() << " --> "
               << " p: " << recEvent->GetMomentum()
