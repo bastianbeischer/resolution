@@ -1,4 +1,4 @@
-// $Id: RES_AlignmentManager.cc,v 1.10 2009/12/11 12:52:24 beischer Exp $
+// $Id: RES_AlignmentManager.cc,v 1.11 2010/01/09 13:44:57 beischer Exp $
 
 #include "RES_AlignmentManager.hh"
 
@@ -112,8 +112,10 @@ void RES_AlignmentManager::StartAlignment()
         RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
         G4int iModule = event.GetModuleID(iHit);
         G4int iLayer  = event.GetLayerID(iHit);
-        G4double angle = det->GetModuleAngle(iModule);
-        if (iLayer > 0) angle += det->GetModuleInternalAngle(iModule);
+        RES_Module* module = det->GetModule(iModule);
+
+        G4double angle = module->GetAngle();
+        if (iLayer > 0) angle += module->GetInternalAngle();
 
         G4ThreeVector smearedHit(event.GetSmearedHitPosition(iHit).x(), event.GetSmearedHitPosition(iHit).y(), event.GetSmearedHitPosition(iHit).z());
         G4float z0 = 0.;
@@ -126,9 +128,9 @@ void RES_AlignmentManager::StartAlignment()
 
         G4double sigmaV = 0.;
         if (iLayer == 0)
-          sigmaV = det->GetModuleUpperSigmaV(iModule);
+          sigmaV = module->GetUpperSigmaV();
         else
-          sigmaV = det->GetModuleUpperSigmaV(iModule);
+          sigmaV = module->GetLowerSigmaV();
         // Rot is the matrix that maps u,v, to x,y (i.e. the backward rotation)
         TMatrixD Rot(2,2); 
         Rot(0,0) = cos(angle);
@@ -153,15 +155,13 @@ void RES_AlignmentManager::StartAlignment()
         V3 = Lin * V2 * LinTrans;
         G4float sigma = sqrt(V3(0,0));
 
-        int module = iHit/2;
-      
-        dergb[module           ] = 1.;
-        dergb[nModules+module  ] = -(cotan + m_parameters[2*nModules+module]);
-        dergb[2*nModules+module] = m_parameters[nModules+module] + fy + y0 - k*lambda_y;
-        derlc[0]                 = 1.;
-        derlc[1]                 = -(cotan + m_parameters[2*nModules+module]);
-        derlc[2]                 = k;
-        derlc[3]                 = -k*(cotan + m_parameters[2*nModules+module]);
+        dergb[iModule           ] = 1.;
+        dergb[nModules+iModule  ] = -(cotan + m_parameters[2*nModules+iModule]);
+        dergb[2*nModules+iModule] = m_parameters[nModules+iModule] + fy + y0 - k*lambda_y;
+        derlc[0]                  = 1.;
+        derlc[1]                  = -(cotan + m_parameters[2*nModules+iModule]);
+        derlc[2]                  = k;
+        derlc[3]                  = -k*(cotan + m_parameters[2*nModules+iModule]);
 
 
         EQULOC(dergb, derlc, y, sigma);

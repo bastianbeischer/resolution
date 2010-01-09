@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitter.cc,v 1.43 2010/01/04 09:47:01 beischer Exp $
+// $Id: RES_TrackFitter.cc,v 1.44 2010/01/09 13:44:57 beischer Exp $
 
 #include <cmath>
 #include <fstream>
@@ -304,11 +304,11 @@ void RES_TrackFitter::CalculateStartParameters()
     G4double deltaTheta = fabs(dy_over_dz_bottom - dy_over_dz_top);
 
     // TODO: CHANGE HARDCODED VALUES HERE
-    G4double B = 0.27;
-    G4double L = sqrt(pow(m_smearedHits[4].y()-m_smearedHits[3].y(),2.) + pow(m_smearedHits[4].z()-m_smearedHits[3].z(),2.))/m;
-    G4double p = 0.3*B*L/deltaTheta*GeV;
+    G4double B  = 0.27;
+    G4double L  = sqrt(pow(m_smearedHits[4].y()-m_smearedHits[3].y(),2.) + pow(m_smearedHits[4].z()-m_smearedHits[3].z(),2.))/m;
+    G4double pt = 0.3*B*L/deltaTheta*GeV;
 
-    m_parameter[0] = 1./p;
+    m_parameter[0] = 1./pt;
     m_parameter[1] = m_smearedHits[0].y();
     m_parameter[2] = atan(dy_over_dz_top);
     m_parameter[3] = 0.;
@@ -358,19 +358,21 @@ void RES_TrackFitter::CalculateStartParameters()
       }
     }
 
-    G4double deltaTheta = dy_over_dz_bottom - dy_over_dz_top;
+    G4double deltaTheta = fabs(dy_over_dz_bottom - dy_over_dz_top);
 
-    G4double y0_magnet = y0_bottom + (-4*cm)*dy_over_dz_bottom;
-    G4double y1_magnet = y0_top    +  (4*cm)*dy_over_dz_top;
-    G4double z0_magnet = -4*cm;
-    G4double z1_magnet =  4*cm;
-    G4double B = 0.27;
-    G4double L = sqrt(pow(y1_magnet - y0_magnet, 2.) + pow(z1_magnet - z0_magnet,2.))/m;
-    G4double p = 0.3*B*L/deltaTheta*GeV;
-    if (m_fitMethod == oneline)
-      p = 100000000*GeV;
+    // TODO: CHANGED HARDCODED VALUES HERE
+    G4double magnetHeight = 50*cm; // PEBS MAGNET HERE
+    G4double y0_magnet = y0_bottom + (-magnetHeight/2.)*dy_over_dz_bottom;
+    G4double y1_magnet = y0_top    +  (magnetHeight/2.)*dy_over_dz_top;
+    G4double z0_magnet = -magnetHeight/2.;
+    G4double z1_magnet =  magnetHeight/2.;
+    G4double B  = 0.50;
+    G4double L  = sqrt(pow(y1_magnet - y0_magnet, 2.) + pow(z1_magnet - z0_magnet,2.))/m;
+    G4double pt = 0.3*B*L/deltaTheta*GeV;
 
-    m_parameter[0] = 1./p;
+    //    std::cout << m_currentGenEvent.GetMomentum() / GeV / (0.3*L/deltaTheta) << std::endl;
+
+    m_parameter[0] = 1./pt;
     m_parameter[1] = y[0];
     m_parameter[2] = phi;
     m_parameter[3] = x[0];

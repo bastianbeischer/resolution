@@ -1,4 +1,4 @@
-// $Id: single_run.cc,v 1.12 2010/01/05 13:47:38 beischer Exp $
+// $Id: single_run.cc,v 1.13 2010/01/09 13:44:57 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -106,7 +106,8 @@ int main(int argc, char** argv)
   TH1D resHist("resHist", "resHist", 100, 1. - 5.*momRes, 1. + 5.*momRes);
   //  TH1D resHist("resHist", "resHist", 100, 0.5, 1.5);
   TH1D ptHist("ptHist", "ptHist", 100, 1. - 5.*momRes, 1. + 5.*momRes);
-  int nHits = genEvent->GetNbOfHits();
+  //int nHits = genEvent->GetNbOfHits();
+  int nHits = 8;
   int nBins = 100;
   TH1D** xDeltaGenHist = new TH1D*[nHits];
   for (int i = 0;i < nHits; i++) {
@@ -144,15 +145,17 @@ int main(int argc, char** argv)
   sprintf(title, "#chi^{2} Distribution (dof = %d)", recEvent->GetDof());
   chi2Hist.SetTitle(title);
 
-  for(int i = 0; i < genTree->GetEntries(); i++) {
+  for(int iEvent = 0; iEvent < genTree->GetEntries(); iEvent++) {
     //  for(int i = 0; i < 90; i++) {
-    genTree->GetEntry(i);
-    recTree->GetEntry(i);
+    genTree->GetEntry(iEvent);
+    recTree->GetEntry(iEvent);
     int nHitsGen = genEvent->GetNbOfHits();
     int nHitsRec = recEvent->GetNbOfHits();
+
     if (nHits == 0 || (nHitsGen != nHitsRec)) continue;
     resHist.Fill(genEvent->GetMomentum()/recEvent->GetMomentum());
     ptHist.Fill(genEvent->GetTransverseMomentum()/recEvent->GetTransverseMomentum());
+
     for (int i = 0; i < nHitsRec; i++) {
       xDeltaGenHist[i]->Fill(genEvent->GetHitPosition(i).x() - recEvent->GetHitPosition(i).x());
       yDeltaGenHist[i]->Fill(genEvent->GetHitPosition(i).y() - recEvent->GetHitPosition(i).y());

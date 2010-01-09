@@ -1,4 +1,4 @@
-// $Id: RES_DetectorMessenger.cc,v 1.11 2009/12/11 12:52:24 beischer Exp $
+// $Id: RES_DetectorMessenger.cc,v 1.12 2010/01/09 13:44:57 beischer Exp $
 
 #include "RES_DetectorMessenger.hh"
 
@@ -123,47 +123,61 @@ void RES_DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
   if (command == m_addModulePlacementCmd) {
     m_detector->AddModulePlacement(m_addModulePlacementCmd->GetNew3VectorValue(newValue));
   }
+
   if (command == m_setModuleRotationCmd) {
     G4int iModule = m_setModuleRotationCmd->ConvertToInt(newValue.substr(0,1).c_str());
     G4double angle = m_setModuleRotationCmd->ConvertToDouble(newValue.substr(2,newValue.length()).c_str()) * M_PI/180.;
-    m_detector->SetModuleAngle(iModule, angle);
+    RES_Module* module = m_detector->GetModule(iModule);
+    module->SetAngle(angle);
   }
+
   if (command == m_setModuleTypeCmd) {
     G4int iModule = m_setModuleTypeCmd->ConvertToInt(newValue.substr(0,1).c_str());
     G4String value = newValue.substr(2,newValue.length());
     value.toLower();
-    ModuleType type;
+    RES_Module::ModuleType type;
     if (value == "silicon")
-      type = silicon;
+      type = RES_Module::silicon;
     if (value == "fiber")
-      type = fiber;
-    m_detector->SetModuleType(iModule, type);
+      type = RES_Module::fiber;
+    RES_Module* module = m_detector->GetModule(iModule);
+    module->SetType(type);
   }
+
   if (command == m_setModuleInternalRotationCmd) {
     G4int iModule = m_setModuleInternalRotationCmd->ConvertToInt(newValue.substr(0,1).c_str());
     G4double angle = m_setModuleInternalRotationCmd->ConvertToDouble(newValue.substr(2,newValue.length()).c_str()) * M_PI/180.;
-    m_detector->SetModuleInternalAngle(iModule, angle);
+    RES_Module* module = m_detector->GetModule(iModule);
+    module->SetInternalAngle(angle);
   }
+
   if (command == m_setModuleWidthCmd) {
     G4int iModule = m_setModuleWidthCmd->ConvertToInt(newValue.substr(0,1).c_str());
     G4double width = m_setModuleWidthCmd->ConvertToDouble(newValue.substr(2,newValue.length()).c_str()) * cm;
-    m_detector->SetModuleWidth(iModule, width);
+    RES_Module* module = m_detector->GetModule(iModule);
+    module->SetWidth(width);
   }
+
   if (command == m_setModuleLengthCmd) {
     G4int iModule = m_setModuleLengthCmd->ConvertToInt(newValue.substr(0,1).c_str());
     G4double length = m_setModuleLengthCmd->ConvertToDouble(newValue.substr(2,newValue.length()).c_str()) * cm;
-    m_detector->SetModuleLength(iModule, length);
+    RES_Module* module = m_detector->GetModule(iModule);
+    module->SetLength(length);
   }
+
   if (command == m_setModuleFiberThicknessCmd) {
     m_detector->SetModuleFiberThickness(m_setModuleFiberThicknessCmd->GetNewDoubleValue(newValue));
   }
+
   if (command == m_setModuleGapFiberCmd) {
     m_detector->SetModuleGapFiber(m_setModuleGapFiberCmd->GetNewDoubleValue(newValue));
   }
+
   if (command == m_setModuleUpperSigmaUCmd) {
     G4int iModule = m_setModuleUpperSigmaUCmd->ConvertToInt(newValue.substr(0,1).c_str());
     G4double sigmaU = m_setModuleUpperSigmaUCmd->ConvertToDouble(newValue.substr(2,newValue.length()).c_str()) * um;
-    m_detector->SetModuleUpperSigmaU(iModule, sigmaU);
+    RES_Module* module = m_detector->GetModule(iModule);
+    module->SetUpperSigmaU(sigmaU);
   }
   if (command == m_setModuleUpperSigmaVCmd) {
     G4int iModule = m_setModuleUpperSigmaVCmd->ConvertToInt(newValue.substr(0,1).c_str());
