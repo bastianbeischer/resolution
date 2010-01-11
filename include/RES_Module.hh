@@ -31,7 +31,8 @@ public:
   void SetLowerSigmaU(G4double lowerSigmaU)       {m_lowerSigmaU = lowerSigmaU;}
   void SetLowerSigmaV(G4double lowerSigmaV)       {m_lowerSigmaV = lowerSigmaV;}
   void SetLowerSigmaZ(G4double lowerSigmaZ)       {m_lowerSigmaZ = lowerSigmaZ;}
-  void SetEfficiency(G4double efficiency)         {m_efficiency = efficiency;}
+  void SetUpperEfficiency(G4double efficiency)    {m_upperEfficiency = efficiency;}
+  void SetLowerEfficiency(G4double efficiency)    {m_lowerEfficiency = efficiency;}
   void SetFoamThickness(G4double thickness)       {m_foamThickness = thickness;}
   void SetPlasticThickness(G4double thickness)    {m_plasticThickness = thickness;}
   void SetFiberThickness(G4double thickness)      {m_fiberThickness = thickness;}
@@ -39,20 +40,21 @@ public:
   void SetSiliconThickness(G4double thickness)    {m_siliconThickness = thickness;}
   void SetGapSiliconThickness(G4double thickness) {m_gapSiliconThickness = thickness;}
 
-  ModuleType    GetType()          {return m_type;}
-  G4ThreeVector GetPlacement()     {return m_placement;}
-  G4double      GetAngle()         {return m_angle;}
-  G4double      GetInternalAngle() {return m_internalAngle;}
-  G4double      GetLength()        {return m_length;}
-  G4double      GetWidth()         {return m_width;}
-  G4double      GetHeight()        {return m_height;}
-  G4double      GetUpperSigmaU()   {return m_upperSigmaU;}
-  G4double      GetUpperSigmaV()   {return m_upperSigmaV;}
-  G4double      GetUpperSigmaZ()   {return m_upperSigmaZ;}
-  G4double      GetLowerSigmaU()   {return m_lowerSigmaU;}
-  G4double      GetLowerSigmaV()   {return m_lowerSigmaV;}
-  G4double      GetLowerSigmaZ()   {return m_lowerSigmaZ;}
-  G4double      GetEfficiency()    {return m_efficiency;}
+  ModuleType    GetType()            {return m_type;}
+  G4ThreeVector GetPlacement()       {return m_placement;}
+  G4double      GetAngle()           {return m_angle;}
+  G4double      GetInternalAngle()   {return m_internalAngle;}
+  G4double      GetLength()          {return m_length;}
+  G4double      GetWidth()           {return m_width;}
+  G4double      GetHeight()          {return m_height;}
+  G4double      GetUpperSigmaU()     {return m_upperSigmaU;}
+  G4double      GetUpperSigmaV()     {return m_upperSigmaV;}
+  G4double      GetUpperSigmaZ()     {return m_upperSigmaZ;}
+  G4double      GetLowerSigmaU()     {return m_lowerSigmaU;}
+  G4double      GetLowerSigmaV()     {return m_lowerSigmaV;}
+  G4double      GetLowerSigmaZ()     {return m_lowerSigmaZ;}
+  G4double      GetUpperEfficiency() {return m_upperEfficiency;}
+  G4double      GetLowerEfficiency() {return m_lowerEfficiency;}
 
   G4PVPlacement* Construct(G4VPhysicalVolume* mother, G4int copyNumber);
   G4bool CheckIfTrackPassesThrough(G4ThreeVector position, G4ThreeVector direction);
@@ -82,7 +84,8 @@ private:
   G4double      m_lowerSigmaU;
   G4double      m_lowerSigmaV;
   G4double      m_lowerSigmaZ;
-  G4double      m_efficiency;
+  G4double      m_upperEfficiency;
+  G4double      m_lowerEfficiency;
 
   G4double      m_foamThickness;
   G4double      m_plasticThickness;

@@ -80,34 +80,36 @@ void RES_Module::ComputeParameters()
 
 void RES_Module::SetDefaultValuesForFiber()
 {
-  m_type          = fiber;
-  m_angle         = 0.;
-  m_internalAngle = 0.;
-  m_length        = 30.*cm;
-  m_width         = 6.912*cm;
-  m_upperSigmaU   = m_length/sqrt(12);
-  m_upperSigmaV   = 50.*um;
-  m_upperSigmaZ   = 0.*cm;
-  m_lowerSigmaU   = m_length/sqrt(12);
-  m_lowerSigmaV   = 50.*um;
-  m_lowerSigmaZ   = 0.*cm;
-  m_efficiency    = 1.;
+  m_type            = fiber;
+  m_angle           = 0.;
+  m_internalAngle   = 0.;
+  m_length          = 30.*cm;
+  m_width           = 6.912*cm;
+  m_upperSigmaU     = m_length/sqrt(12);
+  m_upperSigmaV     = 50.*um;
+  m_upperSigmaZ     = 0.*cm;
+  m_lowerSigmaU     = m_length/sqrt(12);
+  m_lowerSigmaV     = 50.*um;
+  m_lowerSigmaZ     = 0.*cm;
+  m_upperEfficiency = 1.;
+  m_lowerEfficiency = 1.;
 }
 
 void RES_Module::SetDefaultValuesForSilicon()
 {
-  m_type          = silicon;
-  m_angle         = 0.;
-  m_internalAngle = M_PI/2.;
-  m_length        = 30.*cm;
-  m_width         = 10.*cm;
-  m_upperSigmaU   = m_length/sqrt(12);
-  m_upperSigmaV   = 10.*um;
-  m_upperSigmaZ   = 0.*cm;
-  m_lowerSigmaU   = m_length/sqrt(12);
-  m_lowerSigmaV   = 30.*um;
-  m_lowerSigmaZ   = 0.*cm;
-  m_efficiency    = 1.;
+  m_type            = silicon;
+  m_angle           = 0.;
+  m_internalAngle   = M_PI/2.;
+  m_length          = 30.*cm;
+  m_width           = 10.*cm;
+  m_upperSigmaU     = m_length/sqrt(12);
+  m_upperSigmaV     = 10.*um;
+  m_upperSigmaZ     = 0.*cm;
+  m_lowerSigmaU     = m_length/sqrt(12);
+  m_lowerSigmaV     = 30.*um;
+  m_lowerSigmaZ     = 0.*cm;
+  m_upperEfficiency = 1.;
+  m_lowerEfficiency = 1.;
 }
 
 G4PVPlacement* RES_Module::Construct(G4VPhysicalVolume* mother, G4int copyNumber)

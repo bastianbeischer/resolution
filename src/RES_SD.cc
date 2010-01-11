@@ -1,4 +1,4 @@
-// $Id: RES_SD.cc,v 1.2 2010/01/11 14:47:39 beischer Exp $
+// $Id: RES_SD.cc,v 1.3 2010/01/11 15:25:50 beischer Exp $
 
 #include "RES_SD.hh"
 
@@ -42,7 +42,7 @@ G4bool RES_SD::ProcessHits(G4Step* aStep, G4TouchableHistory*)
 
   RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
   RES_Module* module = det->GetModule(motherCopyNb);
-  G4double eff = module->GetEfficiency();
+  G4double eff = ownCopyNb == 0 ? module->GetUpperEfficiency() : module->GetLowerEfficiency();
   G4double rand = CLHEP::RandFlat::shoot(0.,1.);
   
   if (rand < eff) {

@@ -1,4 +1,4 @@
-// $Id: RES_DetectorMessenger.cc,v 1.14 2010/01/11 14:47:39 beischer Exp $
+// $Id: RES_DetectorMessenger.cc,v 1.15 2010/01/11 15:25:50 beischer Exp $
 
 #include "RES_DetectorMessenger.hh"
 
@@ -83,10 +83,15 @@ RES_DetectorMessenger::RES_DetectorMessenger(RES_DetectorConstruction* detector)
   m_setModuleLowerSigmaZCmd->SetParameterName("sigmaZString", false);
   m_setModuleLowerSigmaZCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
 
-  m_setModuleEfficiencyCmd = new G4UIcmdWithAString("/RES/Det/SetModuleEfficiency", this);
-  m_setModuleEfficiencyCmd->SetGuidance("Specify the effiency for this module (number between 0 and 1).");
-  m_setModuleEfficiencyCmd->SetParameterName("efficiencyString", false);
-  m_setModuleEfficiencyCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
+  m_setModuleUpperEfficiencyCmd = new G4UIcmdWithAString("/RES/Det/SetModuleUpperEfficiency", this);
+  m_setModuleUpperEfficiencyCmd->SetGuidance("Specify the effiency for the upper layer of this module (number between 0 and 1).");
+  m_setModuleUpperEfficiencyCmd->SetParameterName("efficiencyString", false);
+  m_setModuleUpperEfficiencyCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
+
+  m_setModuleLowerEfficiencyCmd = new G4UIcmdWithAString("/RES/Det/SetModuleLowerEfficiency", this);
+  m_setModuleLowerEfficiencyCmd->SetGuidance("Specify the effiency for the lower layer of this module (number between 0 and 1).");
+  m_setModuleLowerEfficiencyCmd->SetParameterName("efficiencyString", false);
+  m_setModuleLowerEfficiencyCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
 }
 
 RES_DetectorMessenger::~RES_DetectorMessenger()
@@ -105,7 +110,8 @@ RES_DetectorMessenger::~RES_DetectorMessenger()
   delete m_setModuleLowerSigmaUCmd;
   delete m_setModuleLowerSigmaVCmd;
   delete m_setModuleLowerSigmaZCmd;
-  delete m_setModuleEfficiencyCmd;
+  delete m_setModuleUpperEfficiencyCmd;
+  delete m_setModuleLowerEfficiencyCmd;
 }
 
 void RES_DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
@@ -196,11 +202,18 @@ void RES_DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
     module->SetLowerSigmaZ(sigmaZ);
   }
 
-  if (command == m_setModuleEfficiencyCmd) {
-    G4int iModule = m_setModuleEfficiencyCmd->ConvertToInt(newValue.substr(0,1).c_str());
-    G4double eff = m_setModuleEfficiencyCmd->ConvertToDouble(newValue.substr(2,newValue.length()).c_str());
+  if (command == m_setModuleUpperEfficiencyCmd) {
+    G4int iModule = m_setModuleUpperEfficiencyCmd->ConvertToInt(newValue.substr(0,1).c_str());
+    G4double eff = m_setModuleUpperEfficiencyCmd->ConvertToDouble(newValue.substr(2,newValue.length()).c_str());
     RES_Module* module = m_detector->GetModule(iModule);
-    module->SetEfficiency(eff);
+    module->SetUpperEfficiency(eff);
+  }
+
+  if (command == m_setModuleLowerEfficiencyCmd) {
+    G4int iModule = m_setModuleLowerEfficiencyCmd->ConvertToInt(newValue.substr(0,1).c_str());
+    G4double eff = m_setModuleLowerEfficiencyCmd->ConvertToDouble(newValue.substr(2,newValue.length()).c_str());
+    RES_Module* module = m_detector->GetModule(iModule);
+    module->SetLowerEfficiency(eff);
   }
 }
 
