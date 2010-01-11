@@ -1,4 +1,4 @@
-// $Id: RES_EventActionGeneration.cc,v 1.18 2009/12/14 08:52:52 beischer Exp $
+// $Id: RES_EventActionGeneration.cc,v 1.19 2010/01/11 09:59:58 beischer Exp $
 
 #include "RES_EventActionGeneration.hh"
 
@@ -68,8 +68,9 @@ void RES_EventActionGeneration::SmearHits(RES_Event* event)
   for (int i = 0; i < nHits; i++) {
     G4int iModule = event->GetModuleID(i);
     G4int iLayer  = event->GetLayerID(i);
-    G4double angle = det->GetModuleAngle(iModule);
-    if (iLayer > 0) angle += det->GetModuleInternalAngle(iModule);
+    RES_Module* module = det->GetModule(iModule);
+    G4double angle = module->GetAngle();
+    if (iLayer > 0) angle += module->GetInternalAngle();
 
     RES_AlignmentManager* alignMgr = RES_AlignmentManager::GetInstance();
 
@@ -88,16 +89,18 @@ void RES_EventActionGeneration::SmearHits(RES_Event* event)
     // if (m_fitMethod == transverse)
     //   hit.setX(0.);
 
+    RES_Module* module = det->GetModule(iModule);
+
     G4double sigmaU, sigmaV, sigmaZ;
     if (iLayer == 0) {
-      sigmaU = det->GetModuleUpperSigmaU(iModule);
-      sigmaV = det->GetModuleUpperSigmaV(iModule);
-      sigmaZ = det->GetModuleUpperSigmaZ(iModule);
+      sigmaU = module->GetUpperSigmaU();
+      sigmaV = module->GetUpperSigmaV();
+      sigmaZ = module->GetUpperSigmaZ();
     }
     else {
-      sigmaU = det->GetModuleLowerSigmaU(iModule);
-      sigmaV = det->GetModuleLowerSigmaV(iModule);
-      sigmaZ = det->GetModuleLowerSigmaZ(iModule);
+      sigmaU = module->GetLowerSigmaU();
+      sigmaV = module->GetLowerSigmaV();
+      sigmaZ = module->GetLowerSigmaZ();
     }
 
     // if (iModule == 0 || iModule == 5)

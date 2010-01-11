@@ -1,4 +1,4 @@
-// $Id: RES_DetectorMessenger.hh,v 1.11 2009/12/11 12:52:23 beischer Exp $
+// $Id: RES_DetectorMessenger.hh,v 1.12 2010/01/11 09:59:57 beischer Exp $
 
 #ifndef RES_DetectorMessenger_hh
 #define RES_DetectorMessenger_hh
@@ -34,8 +34,6 @@ private:
   G4UIcmdWithAString*        m_setModuleInternalRotationCmd;
   G4UIcmdWithAString*        m_setModuleWidthCmd;
   G4UIcmdWithAString*        m_setModuleLengthCmd;
-  G4UIcmdWithADoubleAndUnit* m_setModuleFiberThicknessCmd;
-  G4UIcmdWithADoubleAndUnit* m_setModuleGapFiberCmd;
   G4UIcmdWithAString*        m_setModuleUpperSigmaUCmd;
   G4UIcmdWithAString*        m_setModuleUpperSigmaVCmd;
   G4UIcmdWithAString*        m_setModuleUpperSigmaZCmd;

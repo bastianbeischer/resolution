@@ -1,4 +1,4 @@
-// $Id: RES_DetectorMessenger.cc,v 1.12 2010/01/09 13:44:57 beischer Exp $
+// $Id: RES_DetectorMessenger.cc,v 1.13 2010/01/11 09:59:58 beischer Exp $
 
 #include "RES_DetectorMessenger.hh"
 
@@ -53,20 +53,6 @@ RES_DetectorMessenger::RES_DetectorMessenger(RES_DetectorConstruction* detector)
   m_setModuleLengthCmd->SetParameterName("lengthString", false);
   m_setModuleLengthCmd->AvailableForStates(G4State_PreInit);
 
-  m_setModuleFiberThicknessCmd = new G4UIcmdWithADoubleAndUnit("/RES/Det/SetModuleFiberThickness", this);
-  m_setModuleFiberThicknessCmd->SetGuidance("Set the module fiberThickness");
-  m_setModuleFiberThicknessCmd->SetParameterName("fiberThickness", false);
-  m_setModuleFiberThicknessCmd->SetDefaultUnit("cm");
-  m_setModuleFiberThicknessCmd->SetUnitCategory("Length");
-  m_setModuleFiberThicknessCmd->AvailableForStates(G4State_PreInit);
-
-  m_setModuleGapFiberCmd = new G4UIcmdWithADoubleAndUnit("/RES/Det/SetModuleGapFiber", this);
-  m_setModuleGapFiberCmd->SetGuidance("Set the module gap");
-  m_setModuleGapFiberCmd->SetParameterName("gapFiber", false);
-  m_setModuleGapFiberCmd->SetDefaultUnit("cm");
-  m_setModuleGapFiberCmd->SetUnitCategory("Length");
-  m_setModuleGapFiberCmd->AvailableForStates(G4State_PreInit);
-
   m_setModuleUpperSigmaUCmd = new G4UIcmdWithAString("/RES/Det/SetModuleUpperSigmaU", this);
   m_setModuleUpperSigmaUCmd->SetGuidance("Specify the resolution along the fiber (in um!).");
   m_setModuleUpperSigmaUCmd->SetParameterName("sigmaUString", false);
@@ -108,8 +94,6 @@ RES_DetectorMessenger::~RES_DetectorMessenger()
   delete m_setModuleInternalRotationCmd;
   delete m_setModuleWidthCmd;
   delete m_setModuleLengthCmd;
-  delete m_setModuleFiberThicknessCmd;
-  delete m_setModuleGapFiberCmd;
   delete m_setModuleUpperSigmaUCmd;
   delete m_setModuleUpperSigmaVCmd;
   delete m_setModuleUpperSigmaZCmd;
@@ -165,14 +149,6 @@ void RES_DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
     module->SetLength(length);
   }
 
-  if (command == m_setModuleFiberThicknessCmd) {
-    m_detector->SetModuleFiberThickness(m_setModuleFiberThicknessCmd->GetNewDoubleValue(newValue));
-  }
-
-  if (command == m_setModuleGapFiberCmd) {
-    m_detector->SetModuleGapFiber(m_setModuleGapFiberCmd->GetNewDoubleValue(newValue));
-  }
-
   if (command == m_setModuleUpperSigmaUCmd) {
     G4int iModule = m_setModuleUpperSigmaUCmd->ConvertToInt(newValue.substr(0,1).c_str());
     G4double sigmaU = m_setModuleUpperSigmaUCmd->ConvertToDouble(newValue.substr(2,newValue.length()).c_str()) * um;
@@ -182,27 +158,32 @@ void RES_DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
   if (command == m_setModuleUpperSigmaVCmd) {
     G4int iModule = m_setModuleUpperSigmaVCmd->ConvertToInt(newValue.substr(0,1).c_str());
     G4double sigmaV = m_setModuleUpperSigmaVCmd->ConvertToDouble(newValue.substr(2,newValue.length()).c_str()) * um;
-    m_detector->SetModuleUpperSigmaV(iModule, sigmaV);
+    RES_Module* module = m_detector->GetModule(iModule);
+    module->SetUpperSigmaV(sigmaV);
   }
   if (command == m_setModuleUpperSigmaZCmd) {
     G4int iModule = m_setModuleUpperSigmaZCmd->ConvertToInt(newValue.substr(0,1).c_str());
     G4double sigmaZ = m_setModuleUpperSigmaZCmd->ConvertToDouble(newValue.substr(2,newValue.length()).c_str()) * um;
-    m_detector->SetModuleUpperSigmaZ(iModule, sigmaZ);
+    RES_Module* module = m_detector->GetModule(iModule);
+    module->SetUpperSigmaZ(sigmaZ);
   }
   if (command == m_setModuleLowerSigmaUCmd) {
     G4int iModule = m_setModuleLowerSigmaUCmd->ConvertToInt(newValue.substr(0,1).c_str());
     G4double sigmaU = m_setModuleLowerSigmaUCmd->ConvertToDouble(newValue.substr(2,newValue.length()).c_str()) * um;
-    m_detector->SetModuleLowerSigmaU(iModule, sigmaU);
+    RES_Module* module = m_detector->GetModule(iModule);
+    module->SetLowerSigmaU(sigmaU);
   }
   if (command == m_setModuleLowerSigmaVCmd) {
     G4int iModule = m_setModuleLowerSigmaVCmd->ConvertToInt(newValue.substr(0,1).c_str());
     G4double sigmaV = m_setModuleLowerSigmaVCmd->ConvertToDouble(newValue.substr(2,newValue.length()).c_str()) * um;
-    m_detector->SetModuleLowerSigmaV(iModule, sigmaV);
+    RES_Module* module = m_detector->GetModule(iModule);
+    module->SetLowerSigmaV(sigmaV);
   }
   if (command == m_setModuleLowerSigmaZCmd) {
     G4int iModule = m_setModuleLowerSigmaZCmd->ConvertToInt(newValue.substr(0,1).c_str());
     G4double sigmaZ = m_setModuleLowerSigmaZCmd->ConvertToDouble(newValue.substr(2,newValue.length()).c_str()) * um;
-    m_detector->SetModuleLowerSigmaZ(iModule, sigmaZ);
+    RES_Module* module = m_detector->GetModule(iModule);
+    module->SetLowerSigmaZ(sigmaZ);
   }
 }
 

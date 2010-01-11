@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitter.cc,v 1.44 2010/01/09 13:44:57 beischer Exp $
+// $Id: RES_TrackFitter.cc,v 1.45 2010/01/11 10:00:00 beischer Exp $
 
 #include <cmath>
 #include <fstream>
@@ -175,8 +175,10 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
     G4ThreeVector pos = m_smearedHits[i+n0];
     G4int iModule = m_currentGenEvent.GetModuleID(i);
     G4int iLayer  = m_currentGenEvent.GetLayerID(i);
-    G4double angle = det->GetModuleAngle(iModule);
-    if (iLayer > 0) angle += det->GetModuleInternalAngle(iModule);
+
+    RES_Module* module = det->GetModule(iModule);
+    G4double angle = module->GetAngle();
+    if (iLayer > 0) angle += module->GetInternalAngle();
 
     // fill the matrices
     G4float k = pos.z() - z0;
@@ -203,7 +205,7 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
     }
 
     // calculate covariance matrix
-    G4double sigmaV = iLayer==0? det->GetModuleUpperSigmaV(iModule) : det->GetModuleLowerSigmaV(iModule);
+    G4double sigmaV = iLayer==0? module->GetUpperSigmaV() : det->GetLowerSigmaV();
 
     // Rot is the matrix that maps u,v, to x,y (i.e. the backward rotation)
     TMatrixD Rot(2,2); 
