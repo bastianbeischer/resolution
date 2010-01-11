@@ -120,7 +120,7 @@ struct module_less : std::binary_function<RES_Module*, RES_Module*, bool>
 {
   bool operator() (RES_Module* lhs, RES_Module* rhs )
   {
-    return lhs->GetPlacement().z() < rhs->GetPlacement().z();
+    return lhs->GetPlacement().z() > rhs->GetPlacement().z();
   }
 };
 
