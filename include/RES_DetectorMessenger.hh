@@ -1,4 +1,4 @@
-// $Id: RES_DetectorMessenger.hh,v 1.12 2010/01/11 09:59:57 beischer Exp $
+// $Id: RES_DetectorMessenger.hh,v 1.13 2010/01/11 14:47:40 beischer Exp $
 
 #ifndef RES_DetectorMessenger_hh
 #define RES_DetectorMessenger_hh
@@ -40,6 +40,7 @@ private:
   G4UIcmdWithAString*        m_setModuleLowerSigmaUCmd;
   G4UIcmdWithAString*        m_setModuleLowerSigmaVCmd;
   G4UIcmdWithAString*        m_setModuleLowerSigmaZCmd;
+  G4UIcmdWithAString*        m_setModuleEfficiencyCmd;
 };
 
 #endif /* RES_DetectorMessenger_hh */

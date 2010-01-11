@@ -1,6 +1,9 @@
-// $Id: RES_SD.cc,v 1.1 2009/12/11 12:52:25 beischer Exp $
+// $Id: RES_SD.cc,v 1.2 2010/01/11 14:47:39 beischer Exp $
 
 #include "RES_SD.hh"
+
+#include "RES_DetectorConstruction.hh"
+#include "RES_Module.hh"
 
 #include "G4HCofThisEvent.hh"
 #include "G4Step.hh"
@@ -8,6 +11,9 @@
 #include "G4ThreeVector.hh"
 #include "G4SDManager.hh"
 #include "G4HCofThisEvent.hh"
+#include "G4RunManager.hh"
+
+#include "CLHEP/Random/RandFlat.h"
 
 RES_SD::RES_SD(G4String name) :
   G4VSensitiveDetector(name)
@@ -30,17 +36,23 @@ void RES_SD::Initialize(G4HCofThisEvent* HCE)
 
 G4bool RES_SD::ProcessHits(G4Step* aStep, G4TouchableHistory*)
 {
-  RES_Hit* newHit = new RES_Hit();
-
   const G4VTouchable* touchable = aStep->GetPreStepPoint()->GetTouchable();
   G4int ownCopyNb = touchable->GetReplicaNumber(0);
   G4int motherCopyNb = touchable->GetReplicaNumber(1);
-  newHit->SetModuleID(motherCopyNb);
-  newHit->SetLayerID(ownCopyNb);
-  newHit->SetPosition(aStep->GetPreStepPoint()->GetPosition());
-  fiberHitsCollection->insert(newHit);
-  newHit->Draw();
 
+  RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
+  RES_Module* module = det->GetModule(motherCopyNb);
+  G4double eff = module->GetEfficiency();
+  G4double rand = CLHEP::RandFlat::shoot(0.,1.);
+  
+  if (rand < eff) {
+    RES_Hit* newHit = new RES_Hit();
+    newHit->SetModuleID(motherCopyNb);
+    newHit->SetLayerID(ownCopyNb);
+    newHit->SetPosition(aStep->GetPreStepPoint()->GetPosition());
+    fiberHitsCollection->insert(newHit);
+    newHit->Draw();
+  }
   return true;
 }
 

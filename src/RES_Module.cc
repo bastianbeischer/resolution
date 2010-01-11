@@ -3,6 +3,12 @@
 #include "G4Material.hh"
 #include "G4NistManager.hh"
 #include "G4VPhysicalVolume.hh"
+#include "G4PVPlacement.hh"
+#include "G4Box.hh"
+#include "G4LogicalVolume.hh"
+#include "G4SDManager.hh"
+#include "G4VisAttributes.hh"
+#include "G4VSensitiveDetector.hh"
 
 #include <cmath>
 
@@ -64,6 +70,14 @@ void RES_Module::InitializeCommonValues()
   m_kaptonMaterial = G4NistManager::Instance()->FindOrBuildMaterial( "G4_KAPTON" );
 }
 
+void RES_Module::ComputeParameters()
+{
+  if (m_type == fiber)
+    m_height = 2*(m_foamThickness + m_plasticThickness + m_fiberThickness);
+  else if (m_type == silicon)
+    m_height = 2*(m_kaptonThickness + m_siliconThickness + m_gapSiliconThickness);
+}
+
 void RES_Module::SetDefaultValuesForFiber()
 {
   m_type          = fiber;
@@ -96,65 +110,99 @@ void RES_Module::SetDefaultValuesForSilicon()
   m_efficiency    = 1.;
 }
 
-G4VPhysicalVolume* RES_Module::Construct(G4VPhysicalVolume* mother)
+G4PVPlacement* RES_Module::Construct(G4VPhysicalVolume* mother, G4int copyNumber)
 {
-  G4double height = m_type == fiber ? m_moduleHeightFiber : m_moduleHeightSilicon;
-  G4Box* currentModuleSolid = new G4Box("module", 0.5*m_moduleLength[i], 0.5*m_moduleWidth[i], 0.5*height);
-  G4LogicalVolume* currentModuleLogic = new G4LogicalVolume(currentModuleSolid, m_moduleMaterial, "module", 0, 0, 0); // CHANGE MATERIAL HERE
-  G4RotationMatrix* currentModuleRotation = new G4RotationMatrix(m_moduleAngles[i], 0., 0.);
-  G4PVPlacement* currentModulePlacement = new G4PVPlacement(currentModuleRotation, m_modulePlacements[i], currentModuleLogic, "module", worldLog, false, i);
-  m_modules.push_back(currentModulePlacement);
+  // Compute Module Parameters
+  ComputeParameters();
+
+  G4Box* moduleSolid = new G4Box("module", 0.5*m_length, 0.5*m_width, 0.5*m_height);
+  G4LogicalVolume* moduleLogic = new G4LogicalVolume(moduleSolid, m_moduleMaterial, "module", 0, 0, 0); // CHANGE MATERIAL HERE
+  G4RotationMatrix* moduleRotation = new G4RotationMatrix(m_angle, 0., 0.);
+  m_modulePlacement = new G4PVPlacement(moduleRotation, m_placement, moduleLogic, "module", mother->GetLogicalVolume(), false, copyNumber);
 
   // interior of modules
-  if (m_moduleType[i] == fiber) {
-    G4Box* currentFiberSolid = new G4Box("moduleFiber", 0.5*m_moduleLength[i], 0.5*m_moduleWidth[i], 0.5*m_moduleFiberThickness);
-    G4LogicalVolume* currentFiberLogic = new G4LogicalVolume(currentFiberSolid, m_moduleFiberMaterial, "moduleFiber", 0, 0, 0);
-    G4PVPlacement* currentUpperFiberPlacement = new G4PVPlacement(0, G4ThreeVector(0, 0, 0.5*m_moduleGapFiber + 0.5*m_moduleFiberThickness),
-                                                                  currentFiberLogic, "moduleFiber", currentModuleLogic, false, 0);
-    G4PVPlacement* currentLowerFiberPlacement = new G4PVPlacement(0, G4ThreeVector(0, 0, -0.5*m_moduleGapFiber - 0.5*m_moduleFiberThickness),
-                                                                  currentFiberLogic, "moduleFiber", currentModuleLogic, false, 1);
-    m_moduleUpperFiber.push_back(currentUpperFiberPlacement);
-    m_moduleLowerFiber.push_back(currentLowerFiberPlacement);
+  if (m_type == fiber) {
+    G4Box* fiberSolid = new G4Box("moduleFiber", 0.5*m_length, 0.5*m_width, 0.5*m_fiberThickness);
+    G4LogicalVolume* fiberLogic = new G4LogicalVolume(fiberSolid, m_fiberMaterial, "moduleFiber", 0, 0, 0);
+    m_upperFiberPlacement = new G4PVPlacement(0, G4ThreeVector(0, 0, m_foamThickness + m_plasticThickness + 0.5*m_fiberThickness),
+                                                                  fiberLogic, "moduleFiber", moduleLogic, false, 0);
+    m_lowerFiberPlacement = new G4PVPlacement(0, G4ThreeVector(0, 0, -m_foamThickness - m_plasticThickness - 0.5*m_fiberThickness),
+                                                                  fiberLogic, "moduleFiber", moduleLogic, false, 1);
 
-    G4Box* currentPlasticSolid = new G4Box("modulePlastic", 0.5*m_moduleLength[i], 0.5*m_moduleWidth[i], 0.5*m_modulePlasticThickness);
-    G4LogicalVolume* currentPlasticLogic = new G4LogicalVolume(currentPlasticSolid, m_modulePlasticMaterial, "modulePlastic", 0, 0, 0);
-    G4PVPlacement* currentUpperPlasticPlacement = new G4PVPlacement(0, G4ThreeVector(0,0,m_moduleFoamThickness + 0.5*m_modulePlasticThickness),
-                                                                    currentPlasticLogic, "modulePlastic", currentModuleLogic, false, 0);
-    G4PVPlacement* currentLowerPlasticPlacement = new G4PVPlacement(0, G4ThreeVector(0,0,-m_moduleFoamThickness - 0.5*m_modulePlasticThickness),
-                                                                    currentPlasticLogic, "modulePlastic", currentModuleLogic, false, 1);
-    m_moduleUpperPlastic.push_back(currentUpperPlasticPlacement);
-    m_moduleLowerPlastic.push_back(currentLowerPlasticPlacement);
+    G4Box* plasticSolid = new G4Box("modulePlastic", 0.5*m_length, 0.5*m_width, 0.5*m_plasticThickness);
+    G4LogicalVolume* plasticLogic = new G4LogicalVolume(plasticSolid, m_plasticMaterial, "modulePlastic", 0, 0, 0);
+    m_upperPlasticPlacement = new G4PVPlacement(0, G4ThreeVector(0,0,m_foamThickness + 0.5*m_plasticThickness),
+                                                                    plasticLogic, "modulePlastic", moduleLogic, false, 0);
+    m_lowerPlasticPlacement = new G4PVPlacement(0, G4ThreeVector(0,0,-m_foamThickness - 0.5*m_plasticThickness),
+                                                                    plasticLogic, "modulePlastic", moduleLogic, false, 1);
 
-    G4Box* currentFoamSolid = new G4Box("moduleFoam", 0.5*m_moduleLength[i], 0.5*m_moduleWidth[i], 0.5*m_moduleFoamThickness);
-    G4LogicalVolume* currentFoamLogic = new G4LogicalVolume(currentFoamSolid, m_moduleFoamMaterial, "moduleFoam", 0, 0, 0);
-    G4PVPlacement* currentUpperFoamPlacement = new G4PVPlacement(0, G4ThreeVector(0,0,0.5*m_moduleFoamThickness), currentFoamLogic, "moduleFoam", currentModuleLogic, false, 0);
-    G4PVPlacement* currentLowerFoamPlacement = new G4PVPlacement(0, G4ThreeVector(0,0,-0.5*m_moduleFoamThickness),currentFoamLogic, "moduleFoam", currentModuleLogic, false, 1);
-    m_moduleUpperFoam.push_back(currentUpperFoamPlacement); 
-    m_moduleLowerFoam.push_back(currentLowerFoamPlacement); 
-
-    // SENSTIVE DETECTOR FOR THESE FIBERS
-    currentFiberLogic->SetSensitiveDetector(aSD);  
+    G4Box* foamSolid = new G4Box("moduleFoam", 0.5*m_length, 0.5*m_width, 0.5*m_foamThickness);
+    G4LogicalVolume* foamLogic = new G4LogicalVolume(foamSolid, m_foamMaterial, "moduleFoam", 0, 0, 0);
+    m_upperFoamPlacement = new G4PVPlacement(0, G4ThreeVector(0,0,0.5*m_foamThickness), foamLogic, "moduleFoam", moduleLogic, false, 0);
+    m_lowerFoamPlacement = new G4PVPlacement(0, G4ThreeVector(0,0,-0.5*m_foamThickness),foamLogic, "moduleFoam", moduleLogic, false, 1);
   }
-  else if (m_moduleType[i] == silicon) {
-    G4Box* currentSiliconSolid = new G4Box("moduleSilicon", 0.5*m_moduleLength[i], 0.5*m_moduleWidth[i], 0.5*m_moduleSiliconThickness);
-    G4LogicalVolume* currentSiliconLogic = new G4LogicalVolume(currentSiliconSolid, m_moduleSiliconMaterial, "moduleSilicon", 0, 0, 0);
-    G4PVPlacement* currentUpperSiliconPlacement = new G4PVPlacement(0, G4ThreeVector(0, 0, 0.5*m_moduleSiliconThickness),
-                                                                    currentSiliconLogic, "moduleSilicon", currentModuleLogic, false, 0);
-    G4PVPlacement* currentLowerSiliconPlacement = new G4PVPlacement(0, G4ThreeVector(0, 0, -0.5*m_moduleSiliconThickness),
-                                                                    currentSiliconLogic, "moduleSilicon", currentModuleLogic, false, 1);
-    m_moduleUpperSilicon.push_back(currentUpperSiliconPlacement);
-    m_moduleLowerSilicon.push_back(currentLowerSiliconPlacement);
+  else if (m_type == silicon) {
+    G4Box* siliconSolid = new G4Box("moduleSilicon", 0.5*m_length, 0.5*m_width, 0.5*m_siliconThickness);
+    G4LogicalVolume* siliconLogic = new G4LogicalVolume(siliconSolid, m_siliconMaterial, "moduleSilicon", 0, 0, 0);
+    m_upperSiliconPlacement = new G4PVPlacement(0, G4ThreeVector(0, 0, 0.5*m_siliconThickness),
+                                                                    siliconLogic, "moduleSilicon", moduleLogic, false, 0);
+    m_lowerSiliconPlacement = new G4PVPlacement(0, G4ThreeVector(0, 0, -0.5*m_siliconThickness),
+                                                                    siliconLogic, "moduleSilicon", moduleLogic, false, 1);
 
-    G4Box* currentKaptonSolid = new G4Box("moduleKapton", 0.5*m_moduleLength[i], 0.5*m_moduleWidth[i], 0.5*m_moduleKaptonThickness);
-    G4LogicalVolume* currentKaptonLogic = new G4LogicalVolume(currentKaptonSolid, m_moduleKaptonMaterial, "moduleKapton", 0, 0, 0);
-    G4PVPlacement* currentUpperKaptonPlacement = new G4PVPlacement(0, G4ThreeVector(0,0,m_moduleSiliconThickness + m_moduleGapSilicon + 0.5*m_moduleKaptonThickness),
-                                                                   currentKaptonLogic, "moduleKapton", currentModuleLogic, false, 0);
-    G4PVPlacement* currentLowerKaptonPlacement = new G4PVPlacement(0, G4ThreeVector(0,0,-m_moduleSiliconThickness - m_moduleGapSilicon - 0.5*m_moduleKaptonThickness),
-                                                                   currentKaptonLogic, "moduleKapton", currentModuleLogic, false, 1);
-    m_moduleUpperKapton.push_back(currentUpperKaptonPlacement);
-    m_moduleLowerKapton.push_back(currentLowerKaptonPlacement);
+    G4Box* kaptonSolid = new G4Box("moduleKapton", 0.5*m_length, 0.5*m_width, 0.5*m_kaptonThickness);
+    G4LogicalVolume* kaptonLogic = new G4LogicalVolume(kaptonSolid, m_kaptonMaterial, "moduleKapton", 0, 0, 0);
+    m_upperKaptonPlacement = new G4PVPlacement(0, G4ThreeVector(0,0,m_siliconThickness + m_gapSiliconThickness + 0.5*m_kaptonThickness),
+                                                                   kaptonLogic, "moduleKapton", moduleLogic, false, 0);
+    m_lowerKaptonPlacement = new G4PVPlacement(0, G4ThreeVector(0,0,-m_siliconThickness - m_gapSiliconThickness - 0.5*m_kaptonThickness),
+                                                                   kaptonLogic, "moduleKapton", moduleLogic, false, 1);
+  }
 
-    // SENSTIVE DETECTOR FOR THESE SILICON LADDERS
-    currentSiliconLogic->SetSensitiveDetector(aSD);  
+  return m_modulePlacement;
+}
+
+G4bool RES_Module::CheckIfTrackPassesThrough(G4ThreeVector position, G4ThreeVector direction)
+{
+  G4bool retVal = true;
+
+  G4double dz = m_placement.z() - position.z();
+  G4double l = dz / direction.z();
+  G4ThreeVector currentPosition = position + l*direction;
+  if (fabs(currentPosition.x() - m_placement.x()) > 0.5*m_length)   {retVal = false;}
+  if (fabs(currentPosition.y() - m_placement.y()) > 0.5*m_width) {retVal = false;}
+
+  return retVal;
+}
+
+void RES_Module::SetSD(G4VSensitiveDetector* aSD)
+{
+  // UPPER AND LOWER HAVE THE SAME POINTER TO THEIR LOGICAL VOLUME!
+  if(m_type == fiber)
+    m_upperFiberPlacement->GetLogicalVolume()->SetSensitiveDetector(aSD);
+  else if(m_type == silicon)
+    m_upperSiliconPlacement->GetLogicalVolume()->SetSensitiveDetector(aSD);
+}
+
+void RES_Module::SetVisibility()
+{
+  m_modulePlacement->GetLogicalVolume()->SetVisAttributes(G4VisAttributes::Invisible);
+
+  G4VisAttributes* visAtt;
+  // UPPER AND LOWER HAVE THE SAME POINTER TO THEIR LOGICAL VOLUME!
+  if (m_type == fiber) {
+    visAtt = new G4VisAttributes(G4Colour(1.0, 0.0, 0.0)); // red
+    m_upperFiberPlacement->GetLogicalVolume()->SetVisAttributes(visAtt);
+
+    visAtt = new G4VisAttributes(G4Colour(0.0, 1.0, 0.0)); // green
+    m_upperFoamPlacement->GetLogicalVolume()->SetVisAttributes(visAtt);
+
+    visAtt = new G4VisAttributes(G4Colour(0.0, 1.0, 0.0)); // green
+    m_upperPlasticPlacement->GetLogicalVolume()->SetVisAttributes(visAtt);
+  }
+  else if (m_type == silicon) {
+    visAtt = new G4VisAttributes(G4Colour(0.0, 0.0, 1.0)); // blue
+    m_upperSiliconPlacement->GetLogicalVolume()->SetVisAttributes(visAtt);
+
+    visAtt = new G4VisAttributes(G4Colour(0.0, 1.0, 0.0)); // green
+    m_upperKaptonPlacement->GetLogicalVolume()->SetVisAttributes(visAtt);
   }
 }

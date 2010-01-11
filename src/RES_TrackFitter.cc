@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitter.cc,v 1.45 2010/01/11 10:00:00 beischer Exp $
+// $Id: RES_TrackFitter.cc,v 1.46 2010/01/11 14:47:38 beischer Exp $
 
 #include <cmath>
 #include <fstream>
@@ -205,7 +205,7 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
     }
 
     // calculate covariance matrix
-    G4double sigmaV = iLayer==0? module->GetUpperSigmaV() : det->GetLowerSigmaV();
+    G4double sigmaV = iLayer==0? module->GetUpperSigmaV() : module->GetLowerSigmaV();
 
     // Rot is the matrix that maps u,v, to x,y (i.e. the backward rotation)
     TMatrixD Rot(2,2); 
@@ -381,7 +381,8 @@ void RES_TrackFitter::CalculateStartParameters()
     m_parameter[4] = theta;
 
     RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
-    G4double sigmaV = det->GetModuleUpperSigmaV(0);
+    RES_Module* firstModule = det->GetModule(0);
+    G4double sigmaV = firstModule->GetUpperSigmaV();
 
     G4double sigmaEllipsis = 1.*mm;
     G4double sigmaPhi   = sqrt(2) * sigmaV      / ((z[1]-z[0])*(1 + pow((y[1]-y[0])/(z[1]-z[0]),2.0)));
@@ -529,18 +530,19 @@ G4double RES_TrackFitter::Chi2InDetFrame()
   for( G4int i = 0 ; i < nHits ; i++ ) {
     G4int iModule = m_currentGenEvent.GetModuleID(i);
     G4int iLayer  = m_currentGenEvent.GetLayerID(i);
-    G4double angle = det->GetModuleAngle(iModule);
-    if (iLayer > 0) angle += det->GetModuleInternalAngle(iModule);
+    RES_Module* module = det->GetModule(iModule);
+    G4double angle = module->GetAngle();
+    if (iLayer > 0) angle += module->GetInternalAngle();
 
     G4double sigmaU, sigmaV;
 
     if (iLayer == 0) {
-      sigmaU = det->GetModuleUpperSigmaU(iModule);
-      sigmaV = det->GetModuleUpperSigmaV(iModule);
+      sigmaU = module->GetUpperSigmaU();
+      sigmaV = module->GetUpperSigmaV();
     }
     else {
-      sigmaU = det->GetModuleLowerSigmaU(iModule);
-      sigmaV = det->GetModuleLowerSigmaV(iModule);
+      sigmaU = module->GetLowerSigmaU();
+      sigmaV = module->GetLowerSigmaV();
     }
    
     G4double s = sin(angle);
@@ -601,8 +603,9 @@ G4double RES_TrackFitter::Chi2InModuleFrame()
   for( G4int i = 0 ; i < nHits ; i++ ) {
     G4int iModule = m_currentGenEvent.GetModuleID(i);
     G4int iLayer  = m_currentGenEvent.GetLayerID(i);
-    G4double angle = det->GetModuleAngle(iModule);
-    if (iLayer > 0) angle += det->GetModuleInternalAngle(iModule);
+    RES_Module* module = det->GetModule(iModule);
+    G4double angle = module->GetAngle();
+    if (iLayer > 0) angle += module->GetInternalAngle();
     G4RotationMatrix forwardRotation(angle, 0, 0);
     G4RotationMatrix backwardRotation(-angle, 0, 0);
     G4ThreeVector hit(m_currentRecEvent.GetHitPosition(i).x(),m_currentRecEvent.GetHitPosition(i).y(),m_currentRecEvent.GetHitPosition(i).z());
@@ -612,12 +615,12 @@ G4double RES_TrackFitter::Chi2InModuleFrame()
     
     G4double sigmaU, sigmaV;
     if (iLayer == 0) {
-      sigmaU = det->GetModuleUpperSigmaU(iModule);
-      sigmaV = det->GetModuleUpperSigmaV(iModule);
+      sigmaU = module->GetUpperSigmaU();
+      sigmaV = module->GetUpperSigmaV();
     }
     else {
-      sigmaU = det->GetModuleLowerSigmaU(iModule);
-      sigmaV = det->GetModuleLowerSigmaV(iModule);
+      sigmaU = module->GetLowerSigmaU();
+      sigmaV = module->GetLowerSigmaV();
     }
 
     //G4double du = m_smearedHits[i].x() - hit.x();

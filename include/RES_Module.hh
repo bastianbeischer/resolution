@@ -5,7 +5,9 @@
 #include "globals.hh"
 
 class G4Material;
+class G4PVPlacement;
 class G4VPhysicalVolume;
+class G4VSensitiveDetector;
 
 class RES_Module
 {
@@ -52,13 +54,19 @@ public:
   G4double      GetLowerSigmaZ()   {return m_lowerSigmaZ;}
   G4double      GetEfficiency()    {return m_efficiency;}
 
-  G4VPhysicalVolume* Construct(G4VPhysicalVolume* mother);
+  G4PVPlacement* Construct(G4VPhysicalVolume* mother, G4int copyNumber);
+  G4bool CheckIfTrackPassesThrough(G4ThreeVector position, G4ThreeVector direction);
+
+  void SetSD(G4VSensitiveDetector* aSD);
+  void SetVisibility();
 
 private:
   void InitializeCommonValues();
 
   void SetDefaultValuesForFiber();
   void SetDefaultValuesForSilicon();
+
+  void ComputeParameters();
 
 private:
   ModuleType    m_type;
@@ -91,17 +99,27 @@ private:
   G4Material*   m_siliconMaterial;
   G4Material*   m_kaptonMaterial;
 
-  G4VPhysicalVolume* m_upperFiber;
-  G4VPhysicalVolume* m_lowerFiber;
-  G4VPhysicalVolume* m_upperFoam;
-  G4VPhysicalVolume* m_lowerFoam;
-  G4VPhysicalVolume* m_upperPlastic;
-  G4VPhysicalVolume* m_lowerPlastic;
-  G4VPhysicalVolume* m_upperSilicon;
-  G4VPhysicalVolume* m_lowerSilicon;
-  G4VPhysicalVolume* m_upperKapton;
-  G4VPhysicalVolume* m_lowerKapton;  
+  G4PVPlacement* m_modulePlacement;
+  G4PVPlacement* m_upperFiberPlacement;
+  G4PVPlacement* m_lowerFiberPlacement;
+  G4PVPlacement* m_upperFoamPlacement;
+  G4PVPlacement* m_lowerFoamPlacement;
+  G4PVPlacement* m_upperPlasticPlacement;
+  G4PVPlacement* m_lowerPlasticPlacement;
+  G4PVPlacement* m_upperSiliconPlacement;
+  G4PVPlacement* m_lowerSiliconPlacement;
+  G4PVPlacement* m_upperKaptonPlacement;
+  G4PVPlacement* m_lowerKaptonPlacement;  
 
 };
+
+struct module_less : std::binary_function<RES_Module*, RES_Module*, bool>
+{
+  bool operator() (RES_Module* lhs, RES_Module* rhs )
+  {
+    return lhs->GetPlacement().z() < rhs->GetPlacement().z();
+  }
+};
+
 
 #endif /* RES_Module_hh */

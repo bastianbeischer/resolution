@@ -1,4 +1,4 @@
-// $Id: RES_DetectorConstruction.hh,v 1.17 2010/01/11 09:59:56 beischer Exp $
+// $Id: RES_DetectorConstruction.hh,v 1.18 2010/01/11 14:47:40 beischer Exp $
 
 #ifndef RES_DetectorConstruction_hh
 #define RES_DetectorConstruction_hh
@@ -34,7 +34,9 @@ public:
   G4bool TrackInAcceptance(G4ThreeVector position, G4ThreeVector direction);
 
 private:
-  void ComputeParameters();
+  void SortModules();
+
+  void SetSensitiveDetectors();
   void SetVisibility();
 
 private:
@@ -48,7 +50,7 @@ private:
   std::vector<RES_Module*>        m_modules;
 
   G4VPhysicalVolume*              m_world;
-  std::vector<G4VPhysicalVolume*> m_modulesPhys;
+  std::vector<G4PVPlacement*>     m_modulePlacements;
 
 };
 

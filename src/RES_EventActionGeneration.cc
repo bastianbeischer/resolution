@@ -1,4 +1,4 @@
-// $Id: RES_EventActionGeneration.cc,v 1.19 2010/01/11 09:59:58 beischer Exp $
+// $Id: RES_EventActionGeneration.cc,v 1.20 2010/01/11 14:47:39 beischer Exp $
 
 #include "RES_EventActionGeneration.hh"
 
@@ -88,8 +88,6 @@ void RES_EventActionGeneration::SmearHits(RES_Event* event)
 
     // if (m_fitMethod == transverse)
     //   hit.setX(0.);
-
-    RES_Module* module = det->GetModule(iModule);
 
     G4double sigmaU, sigmaV, sigmaZ;
     if (iLayer == 0) {
