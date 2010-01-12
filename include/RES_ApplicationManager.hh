@@ -3,6 +3,7 @@
 
 class G4String;
 class RES_ApplicationMessenger;
+class RES_RunManager;
 
 class RES_ApplicationManager
 {
@@ -17,6 +18,7 @@ public:
 
 private:
   RES_ApplicationMessenger* m_messenger;
+  RES_RunManager*           m_runManager;
 
 };
 

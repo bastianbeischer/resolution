@@ -1,4 +1,4 @@
-// $Id: RES_RunManager.cc,v 1.14 2009/12/14 08:52:52 beischer Exp $
+// $Id: RES_RunManager.cc,v 1.15 2010/01/12 14:32:22 beischer Exp $
 
 #include "RES_RunManager.hh"
 
@@ -18,7 +18,8 @@ RES_RunManager::RES_RunManager() :
   m_trackFitter = RES_TrackFitter::GetInstance();
   m_eventActionGen = new RES_EventActionGeneration();
   m_eventActionRec = new RES_EventActionReconstruction(m_trackFitter);
-  
+  m_storeResults = false;
+
   SetActionsForGeneration();
 }
 

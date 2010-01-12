@@ -1,4 +1,4 @@
-// $Id: resolution.cc,v 1.12 2010/01/11 14:47:40 beischer Exp $
+// $Id: resolution.cc,v 1.13 2010/01/12 14:32:23 beischer Exp $
 
 #include "RES_ApplicationManager.hh"
 
@@ -7,15 +7,20 @@
 
 int main(int argc, char** argv)
 {
-  if (argc != 2) {
-    std::cout << "This program is meant for batch mode only. Please provide a script to run" << std::endl;
+  if (argc >= 3) {
+    std::cout << "Please run without command line arguments to create a session, or give the name of a macro file." << std::endl;
     return -1;
   } 
 
-  G4String string(argv[1]);
+  RES_ApplicationManager appManager;
 
-  RES_ApplicationManager wrapper;
-  wrapper.RunBatchScript(argv[1]);
+  if (argc == 1) {
+    appManager.CreateSession();
+  }
+  else if (argc == 2) {
+    G4String string(argv[1]);
+    appManager.RunBatchScript(argv[1]);
+  }
 
   return 0;
 }

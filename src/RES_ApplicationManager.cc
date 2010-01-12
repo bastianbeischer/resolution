@@ -24,27 +24,19 @@
 RES_ApplicationManager::RES_ApplicationManager()
 {
   m_messenger = new RES_ApplicationMessenger(this);
-}
 
-RES_ApplicationManager::~RES_ApplicationManager()
-{
-  delete m_messenger;
-}
-
-// run batch job from script name
-int RES_ApplicationManager::RunBatchScript(G4String scriptName)
-{
   // create a new RunManager
-  RES_RunManager* runManager = new RES_RunManager();
+  m_runManager = new RES_RunManager();
+
   RES_AlignmentManager::GetInstance();
 
   // set user initializations
   RES_DetectorConstruction* detectorConstruction = new RES_DetectorConstruction();
-  runManager->SetUserInitialization(detectorConstruction);
+  m_runManager->SetUserInitialization(detectorConstruction);
   RES_PhysicsList* physicsList = new RES_PhysicsList();
-  runManager->SetUserInitialization(physicsList);
+  m_runManager->SetUserInitialization(physicsList);
   RES_PrimaryGeneratorAction* generatorAction = new RES_PrimaryGeneratorAction();
-  runManager->SetUserAction(generatorAction);
+  m_runManager->SetUserAction(generatorAction);
 
   RES_FieldManager* fieldManager = new RES_FieldManager();
   G4TransportationManager::GetTransportationManager()->SetFieldManager(fieldManager);
@@ -54,14 +46,22 @@ int RES_ApplicationManager::RunBatchScript(G4String scriptName)
   G4VisManager* visManager = new G4VisExecutive;
   visManager->Initialize();
 #endif
+}
 
+RES_ApplicationManager::~RES_ApplicationManager()
+{
+  delete m_messenger;
+  delete m_runManager;
+}
+
+// run batch job from script name
+int RES_ApplicationManager::RunBatchScript(G4String scriptName)
+{
   G4String command = "/control/execute ";
   G4String fileName = scriptName;
     
   G4UImanager* UI = G4UImanager::GetUIpointer();
   UI->ApplyCommand(command+fileName);
-
-  delete runManager;
 
   return 1;
 }
