@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitter.cc,v 1.46 2010/01/11 14:47:38 beischer Exp $
+// $Id: RES_TrackFitter.cc,v 1.47 2010/01/12 15:07:28 beischer Exp $
 
 #include <cmath>
 #include <fstream>
@@ -151,7 +151,15 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
   // this parameter is arbitrary. z0 = 0 should minimize correlations...
   float z0 = 0.0;
 
-  unsigned int numberOfLayersToBeSkipped = m_layersToBeSkipped.size();
+  unsigned int numberOfLayersToBeSkipped = 0;
+  for (unsigned int i = 0 ; i < nHits; i++) {
+    G4int iModule = m_currentGenEvent.GetModuleID(i);
+    G4int iLayer  = m_currentGenEvent.GetLayerID(i);
+    G4int uniqueLayer = 2*iModule + iLayer;
+    std::vector<int>::iterator findIt = std::find(m_layersToBeSkipped.begin(), m_layersToBeSkipped.end(), uniqueLayer);
+    if (findIt != m_layersToBeSkipped.end())
+      numberOfLayersToBeSkipped++;
+  }
 
   // basic dimensions of matrices
   unsigned int nRow = nHits - numberOfLayersToBeSkipped;
@@ -167,18 +175,20 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
   unsigned int counter = 0;
   for (unsigned int i = 0; i < nHits; i++) {
 
-    std::vector<int>::iterator it = std::find(m_layersToBeSkipped.begin(), m_layersToBeSkipped.end(), i);
+    G4int iModule = m_currentGenEvent.GetModuleID(i);
+    G4int iLayer  = m_currentGenEvent.GetLayerID(i);
+    G4int uniqueLayer = 2*iModule + iLayer;
+
+    std::vector<int>::iterator it = std::find(m_layersToBeSkipped.begin(), m_layersToBeSkipped.end(), uniqueLayer);
     if (it != m_layersToBeSkipped.end())
       continue;
 
     // get information from detector...
-    G4ThreeVector pos = m_smearedHits[i+n0];
-    G4int iModule = m_currentGenEvent.GetModuleID(i);
-    G4int iLayer  = m_currentGenEvent.GetLayerID(i);
-
     RES_Module* module = det->GetModule(iModule);
     G4double angle = module->GetAngle();
     if (iLayer > 0) angle += module->GetInternalAngle();
+
+    G4ThreeVector pos = m_smearedHits[i+n0];
 
     // fill the matrices
     G4float k = pos.z() - z0;

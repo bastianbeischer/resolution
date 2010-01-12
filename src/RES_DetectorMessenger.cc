@@ -1,4 +1,4 @@
-// $Id: RES_DetectorMessenger.cc,v 1.15 2010/01/11 15:25:50 beischer Exp $
+// $Id: RES_DetectorMessenger.cc,v 1.16 2010/01/12 15:07:28 beischer Exp $
 
 #include "RES_DetectorMessenger.hh"
 
@@ -85,12 +85,12 @@ RES_DetectorMessenger::RES_DetectorMessenger(RES_DetectorConstruction* detector)
 
   m_setModuleUpperEfficiencyCmd = new G4UIcmdWithAString("/RES/Det/SetModuleUpperEfficiency", this);
   m_setModuleUpperEfficiencyCmd->SetGuidance("Specify the effiency for the upper layer of this module (number between 0 and 1).");
-  m_setModuleUpperEfficiencyCmd->SetParameterName("efficiencyString", false);
+  m_setModuleUpperEfficiencyCmd->SetParameterName("upperEfficiencyString", false);
   m_setModuleUpperEfficiencyCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
 
   m_setModuleLowerEfficiencyCmd = new G4UIcmdWithAString("/RES/Det/SetModuleLowerEfficiency", this);
   m_setModuleLowerEfficiencyCmd->SetGuidance("Specify the effiency for the lower layer of this module (number between 0 and 1).");
-  m_setModuleLowerEfficiencyCmd->SetParameterName("efficiencyString", false);
+  m_setModuleLowerEfficiencyCmd->SetParameterName("lowerEfficiencyString", false);
   m_setModuleLowerEfficiencyCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
 }
 
