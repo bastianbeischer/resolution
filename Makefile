@@ -3,12 +3,12 @@ G4TARGET := $(name)
 G4EXLIB := true
 
 #CPPVERBOSE := 1
-#CPPFLAGS += -Wno-unused-result
 
 CPPFLAGS += -I$(ROOTSYS)/include
 EXTRALIBS += $(shell root-config --libs) -lMinuit
 
 CPPFLAGS += -g
+CPPFLAGS += -Wno-unused-result
 
 RES_EventDir := ./RES_Event
 RES_EventLib := $(RES_EventDir)/libRES_Event.so
@@ -47,19 +47,13 @@ clean::
 	@rm -f TAGS;
 
 $(RES_EventLib): $(RES_EventDir)/*.hh $(RES_EventDir)/*.cc
-	@echo
-	@echo "Creating shared lib libRES_Event.so ..."
-	@$(MAKE) -C $(RES_EventDir)
-	@echo
+	@echo "Creating shared library $(RES_EventDir)/libRES_Event.so ..."
+	@$(MAKE) -s -C $(RES_EventDir)
 
 $(BlobelLib): $(BlobelDir)/*.h $(BlobelDir)/*.f 
-	@echo
-	@echo "Creating shared lib libBlobel.so ..."
-	@$(MAKE) -C $(BlobelDir)
-	@echo
+	@echo "Creating shared library $(BlobelDir)/libBlobel.so ..."
+	@$(MAKE) -s -C $(BlobelDir)
 
 $(MillepedeLib): $(MillepedeDir)/*.h $(MillepedeDir)/*.f 
-	@echo
-	@echo "Creating shared lib libMillepede.so ..."
-	@$(MAKE) -C $(MillepedeDir)
-	@echo
+	@echo "Creating shared library $(MillepedeDir)/libMillepede.so ..."
+	@$(MAKE) -s -C $(MillepedeDir)

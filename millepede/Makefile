@@ -13,4 +13,3 @@ clean:
 
 $(LIB): millepede1.o
 	$(LD) -o $(LIB) millepede1.o -shared
-	@echo "DONE."

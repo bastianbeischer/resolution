@@ -13,7 +13,6 @@ clean:
 
 $(LIB): $(DICT).o RES_Event.o
 	$(LD) -o $(LIB) $(DICT).o RES_Event.o -shared `root-config --libs`
-	@echo "DONE."
 
 $(DICT).cc: RES_Event.hh RES_Event.cc
 	rootcint -f $(DICT).cc -c -p RES_Event.hh LinkDef.h

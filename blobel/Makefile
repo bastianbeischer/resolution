@@ -13,4 +13,3 @@ clean:
 
 $(LIB): blobel.o
 	$(LD) -o $(LIB) blobel.o -shared
-	@echo "DONE."
