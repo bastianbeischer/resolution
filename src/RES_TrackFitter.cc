@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitter.cc,v 1.47 2010/01/12 15:07:28 beischer Exp $
+// $Id: RES_TrackFitter.cc,v 1.48 2010/01/13 15:24:31 beischer Exp $
 
 #include <cmath>
 #include <fstream>
@@ -164,13 +164,14 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
   // basic dimensions of matrices
   unsigned int nRow = nHits - numberOfLayersToBeSkipped;
   unsigned int nCol = 4;
+  unsigned int nModules = det->GetNumberOfModules();
 
   // declare matrices for the calculation
   TMatrixD A(nRow,nCol);
   TVectorD b(nRow);
   TMatrixD U(nRow,nRow);
   TMatrixD CombineXandY(1,2);
-  TMatrixD SolutionToPositions(2*nHits,nCol);
+  TMatrixD SolutionToPositions(2*nModules,nCol);
 
   unsigned int counter = 0;
   for (unsigned int i = 0; i < nHits; i++) {
@@ -261,17 +262,18 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
   G4double chi2 = (vecTrans * Uinv * vec)(0,0);
 
   // SolutionToPositions is the linear transformation that maps the solution to positions
-  for (unsigned int i = 0; i < 2*nHits; i++){
+  for (unsigned int i = 0; i < 2*nModules; i++){
+    G4double z = det->GetModule(i/2)->GetPlacement().z();
     SolutionToPositions(i,i%2)     = 1.;
-    SolutionToPositions(i,(i%2)+2) = m_smearedHits[i/2].z() - z0;
+    SolutionToPositions(i,(i%2)+2) = z - z0;
   }
   TVectorD positions = SolutionToPositions*solution;
 
   // Fill information in m_currentRecEvent (usually done in RES_EventActionReconstruction for other fit methods)
   m_currentRecEvent = RES_Event();
-  for (unsigned int i = 0; i < nHits; i++) {
-    G4int iModule = m_currentGenEvent.GetModuleID(i);
-    G4int iLayer  = m_currentGenEvent.GetLayerID(i);
+  for (unsigned int i = 0; i < 2*nModules; i++) {
+    G4int iModule = i/2;
+    G4int iLayer  = i%2;
     m_currentRecEvent.AddHit(iModule, iLayer, positions(2*i), positions(2*i+1), m_smearedHits[i].z());
   }
   m_currentRecEvent.SetChi2(chi2);
@@ -373,12 +375,14 @@ void RES_TrackFitter::CalculateStartParameters()
     G4double deltaTheta = fabs(dy_over_dz_bottom - dy_over_dz_top);
 
     // TODO: CHANGED HARDCODED VALUES HERE
-    G4double magnetHeight = 50*cm; // PEBS MAGNET HERE
+    G4double magnetHeight = 8*cm; // PERDAIX MAGNET HERE
+    //G4double magnetHeight = 50*cm; // PEBS MAGNET HERE
     G4double y0_magnet = y0_bottom + (-magnetHeight/2.)*dy_over_dz_bottom;
     G4double y1_magnet = y0_top    +  (magnetHeight/2.)*dy_over_dz_top;
     G4double z0_magnet = -magnetHeight/2.;
     G4double z1_magnet =  magnetHeight/2.;
-    G4double B  = 0.50;
+    G4double B  = 0.27; // PERDAIX MAGNET HERE
+    //G4double B  = 0.27; // PEBS MAGNET HERE
     G4double L  = sqrt(pow(y1_magnet - y0_magnet, 2.) + pow(z1_magnet - z0_magnet,2.))/m;
     G4double pt = 0.3*B*L/deltaTheta*GeV;
 
@@ -403,16 +407,21 @@ void RES_TrackFitter::CalculateStartParameters()
     delete[] z;
     delete[] k;
 
-    m_step[0] = 0.1*m_parameter[0];
-    m_step[1] = sigmaV;
-    m_step[2] = sigmaPhi;
-    m_step[3] = sigmaEllipsis;
-    m_step[4] = sigmaTheta;
+  for (int i = 0; i < 5; i++) {
+    m_step[i] = 0.1*m_parameter[i];
+  }
+    // m_step[0] = 0.1*m_parameter[0];
+    // m_step[1] = sigmaV;
+    // m_step[2] = sigmaPhi;
+    // m_step[3] = sigmaEllipsis;
+    // m_step[4] = sigmaTheta;
   }
   
   for (int i = 0; i < 5; i++) {
-    m_lowerBound[i] = m_parameter[i] - 5.*fabs(m_step[i]);
-    m_upperBound[i] = m_parameter[i] + 5.*fabs(m_step[i]);
+    // m_lowerBound[i] = m_parameter[i] - 10.*fabs(m_step[i]);
+    // m_upperBound[i] = m_parameter[i] + 10.*fabs(m_step[i]);
+    m_lowerBound[i] = 0.;
+    m_upperBound[i] = 0.;
   }
 
   if (m_verbose > 0) {
@@ -474,7 +483,7 @@ G4int RES_TrackFitter::DoMinuitFit(G4int npar)
 
   // Now ready for minimization step
   arglist[0] = 500;
-  arglist[1] = 1.;
+  arglist[1] = 0.1;
   //gMinuit->mnexcm("SIMPLEX", arglist, 2, ierflg);
   gMinuit->mnexcm("MIGRAD", arglist, 2, ierflg);
 

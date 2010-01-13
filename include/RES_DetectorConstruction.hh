@@ -1,4 +1,4 @@
-// $Id: RES_DetectorConstruction.hh,v 1.18 2010/01/11 14:47:40 beischer Exp $
+// $Id: RES_DetectorConstruction.hh,v 1.19 2010/01/13 15:24:30 beischer Exp $
 
 #ifndef RES_DetectorConstruction_hh
 #define RES_DetectorConstruction_hh
@@ -26,6 +26,7 @@ public:
   G4double GetWorldX() {return m_worldX;}
   G4double GetWorldY() {return m_worldY;}
   G4double GetWorldZ() {return m_worldZ;}
+  unsigned int GetNumberOfModules() {return m_modules.size();}
   RES_Module* GetModule(unsigned int i) {assert(i < m_modules.size()); return m_modules.at(i);}
 
   void AddModulePlacement(G4ThreeVector where) {m_modules.push_back(new RES_Module(where));}

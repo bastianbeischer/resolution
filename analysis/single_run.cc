@@ -1,4 +1,4 @@
-// $Id: single_run.cc,v 1.14 2010/01/11 15:46:19 beischer Exp $
+// $Id: single_run.cc,v 1.15 2010/01/13 15:24:30 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -107,7 +107,7 @@ int main(int argc, char** argv)
   //  TH1D resHist("resHist", "resHist", 100, 0.5, 1.5);
   TH1D ptHist("ptHist", "ptHist", 100, 1. - 5.*momRes, 1. + 5.*momRes);
   //int nHits = genEvent->GetNbOfHits();
-  int nHits = 12;
+  int nHits = 8;
   int nBins = 100;
   TH1D** xDeltaGenHist = new TH1D*[nHits];
   for (int i = 0;i < nHits; i++) {
@@ -152,7 +152,7 @@ int main(int argc, char** argv)
     int nHitsGen = genEvent->GetNbOfHits();
     int nHitsRec = recEvent->GetNbOfHits();
 
-    if (nHits == 0 || (nHitsGen != nHitsRec)) continue;
+    if (nHitsGen <= 4 || (nHitsGen != nHitsRec)) continue;
     resHist.Fill(genEvent->GetMomentum()/recEvent->GetMomentum());
     ptHist.Fill(genEvent->GetTransverseMomentum()/recEvent->GetTransverseMomentum());
 

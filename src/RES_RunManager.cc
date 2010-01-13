@@ -1,7 +1,10 @@
-// $Id: RES_RunManager.cc,v 1.15 2010/01/12 14:32:22 beischer Exp $
+// $Id: RES_RunManager.cc,v 1.16 2010/01/13 15:24:31 beischer Exp $
 
 #include "RES_RunManager.hh"
 
+#include "G4RunManager.hh"
+
+#include "RES_DetectorConstruction.hh"
 #include "RES_RunMessenger.hh"
 #include "RES_DataHandler.hh"
 #include "RES_EventActionGeneration.hh"
@@ -53,6 +56,16 @@ void RES_RunManager::StartReconstructionRun()
   primaryGeneratorAction->SetRandomOrigin(false);
   primaryGeneratorAction->SetRandomDirection(false);
 
+  RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
+  std::vector<double> backupEfficiencies;
+  for (unsigned int i = 0; i < det->GetNumberOfModules(); i++) {
+    RES_Module* module = det->GetModule(i);
+    backupEfficiencies.push_back(module->GetUpperEfficiency());
+    backupEfficiencies.push_back(module->GetLowerEfficiency());
+    module->SetUpperEfficiency(1.0);
+    module->SetLowerEfficiency(1.0);
+  }
+
   int Nevents = m_dataHandler->GetNumberOfGeneratedEvents();
   for (int i = 0; i < Nevents; i++) {
 
@@ -70,6 +83,12 @@ void RES_RunManager::StartReconstructionRun()
   }
   if (m_storeResults) {
     m_dataHandler->WriteFile();
+  }
+
+  for (unsigned int i = 0; i < det->GetNumberOfModules(); i++) {
+    RES_Module* module = det->GetModule(i);
+    module->SetUpperEfficiency(backupEfficiencies.at(2*i));
+    module->SetLowerEfficiency(backupEfficiencies.at(2*i+1));
   }
 
   primaryGeneratorAction->SetRandomOrigin(randOriginValue);  
