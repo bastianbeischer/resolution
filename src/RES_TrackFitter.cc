@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitter.cc,v 1.48 2010/01/13 15:24:31 beischer Exp $
+// $Id: RES_TrackFitter.cc,v 1.49 2010/01/15 15:26:29 beischer Exp $
 
 #include <cmath>
 #include <fstream>
@@ -171,7 +171,7 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
   TVectorD b(nRow);
   TMatrixD U(nRow,nRow);
   TMatrixD CombineXandY(1,2);
-  TMatrixD SolutionToPositions(2*nModules,nCol);
+  TMatrixD SolutionToPositions(4*nModules,nCol);
 
   unsigned int counter = 0;
   for (unsigned int i = 0; i < nHits; i++) {
@@ -262,8 +262,10 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
   G4double chi2 = (vecTrans * Uinv * vec)(0,0);
 
   // SolutionToPositions is the linear transformation that maps the solution to positions
-  for (unsigned int i = 0; i < 2*nModules; i++){
-    G4double z = det->GetModule(i/2)->GetPlacement().z();
+  for (unsigned int i = 0; i < 4*nModules; i++){
+    G4double z;
+    if ((i%4) < 2) z = det->GetModule(i/4)->GetUpperZ();
+    else           z = det->GetModule(i/4)->GetLowerZ();
     SolutionToPositions(i,i%2)     = 1.;
     SolutionToPositions(i,(i%2)+2) = z - z0;
   }
@@ -274,7 +276,10 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
   for (unsigned int i = 0; i < 2*nModules; i++) {
     G4int iModule = i/2;
     G4int iLayer  = i%2;
-    m_currentRecEvent.AddHit(iModule, iLayer, positions(2*i), positions(2*i+1), m_smearedHits[i].z());
+    G4double z;
+    if (iLayer == 0) z = det->GetModule(iModule)->GetUpperZ();
+    else             z = det->GetModule(iModule)->GetLowerZ();
+    m_currentRecEvent.AddHit(iModule, iLayer, positions(2*i), positions(2*i+1), z);
   }
   m_currentRecEvent.SetChi2(chi2);
   m_currentRecEvent.SetDof(nRow - nCol);
@@ -284,7 +289,7 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
 
   // print covariance matrix if the user wants to
   if (m_verbose > 1) {
-    TMatrixD SolutionToPositionsTrans(nCol, 2*nHits);
+    TMatrixD SolutionToPositionsTrans(nCol, 2*nModules);
     SolutionToPositionsTrans.Transpose(SolutionToPositions);
     TMatrixD Cov(2*nHits, 2*nHits);
     Cov = SolutionToPositions * Minv * SolutionToPositionsTrans;

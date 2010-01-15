@@ -72,10 +72,19 @@ void RES_Module::InitializeCommonValues()
 
 void RES_Module::ComputeParameters()
 {
-  if (m_type == fiber)
+  if (m_type == fiber) {
     m_height = 2*(m_foamThickness + m_plasticThickness + m_fiberThickness);
-  else if (m_type == silicon)
+    G4double zInModule = m_foamThickness + m_plasticThickness + 0.5*m_fiberThickness;
+    m_upperZ = m_placement.z() + zInModule;
+    m_lowerZ = m_placement.z() - zInModule;
+  }
+  else if (m_type == silicon) {
     m_height = 2*(m_kaptonThickness + m_siliconThickness + m_gapSiliconThickness);
+    G4double zInModule = 0.5*m_siliconThickness;
+    m_upperZ = m_placement.z() + zInModule;
+    m_lowerZ = m_placement.z() - zInModule;
+  }
+
 }
 
 void RES_Module::SetDefaultValuesForFiber()

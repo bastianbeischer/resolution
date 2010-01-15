@@ -47,6 +47,8 @@ public:
   G4double      GetLength()          {return m_length;}
   G4double      GetWidth()           {return m_width;}
   G4double      GetHeight()          {return m_height;}
+  G4double      GetUpperZ()          {return m_upperZ;}
+  G4double      GetLowerZ()          {return m_lowerZ;}
   G4double      GetUpperSigmaU()     {return m_upperSigmaU;}
   G4double      GetUpperSigmaV()     {return m_upperSigmaV;}
   G4double      GetUpperSigmaZ()     {return m_upperSigmaZ;}
@@ -78,6 +80,8 @@ private:
   G4double      m_length;
   G4double      m_width;
   G4double      m_height;
+  G4double      m_upperZ;
+  G4double      m_lowerZ;
   G4double      m_upperSigmaU;
   G4double      m_upperSigmaV;
   G4double      m_upperSigmaZ;

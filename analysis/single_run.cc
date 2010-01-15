@@ -1,4 +1,4 @@
-// $Id: single_run.cc,v 1.15 2010/01/13 15:24:30 beischer Exp $
+// $Id: single_run.cc,v 1.16 2010/01/15 15:26:29 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -106,8 +106,7 @@ int main(int argc, char** argv)
   TH1D resHist("resHist", "resHist", 100, 1. - 5.*momRes, 1. + 5.*momRes);
   //  TH1D resHist("resHist", "resHist", 100, 0.5, 1.5);
   TH1D ptHist("ptHist", "ptHist", 100, 1. - 5.*momRes, 1. + 5.*momRes);
-  //int nHits = genEvent->GetNbOfHits();
-  int nHits = 8;
+  int nHits = recEvent->GetNbOfHits();
   int nBins = 100;
   TH1D** xDeltaGenHist = new TH1D*[nHits];
   for (int i = 0;i < nHits; i++) {
@@ -152,21 +151,19 @@ int main(int argc, char** argv)
     int nHitsGen = genEvent->GetNbOfHits();
     int nHitsRec = recEvent->GetNbOfHits();
 
-    if (nHitsGen <= 4 || (nHitsGen != nHitsRec)) continue;
+    if (nHitsGen <= 4 || nHitsRec == 0) continue;
     resHist.Fill(genEvent->GetMomentum()/recEvent->GetMomentum());
     ptHist.Fill(genEvent->GetTransverseMomentum()/recEvent->GetTransverseMomentum());
 
-    for (int i = 0; i < nHitsRec; i++) {
+    for (int i = 0; i < nHitsGen; i++) {
       unsigned int genUniqueLayer = 2*genEvent->GetModuleID(i) + genEvent->GetLayerID(i);
-      unsigned int recUniqueLayer = 2*recEvent->GetModuleID(i) + recEvent->GetLayerID(i);
-      if (genUniqueLayer != recUniqueLayer)
-        continue;
-      xDeltaGenHist[genUniqueLayer]->Fill(genEvent->GetHitPosition(i).x() - recEvent->GetHitPosition(i).x());
-      yDeltaGenHist[genUniqueLayer]->Fill(genEvent->GetHitPosition(i).y() - recEvent->GetHitPosition(i).y());
-      xDeltaSmearedHist[genUniqueLayer]->Fill(genEvent->GetSmearedHitPosition(i).x() - recEvent->GetHitPosition(i).x());
-      yDeltaSmearedHist[genUniqueLayer]->Fill(genEvent->GetSmearedHitPosition(i).y() - recEvent->GetHitPosition(i).y());
-      totalXhist.Fill(genEvent->GetHitPosition(i).x() - recEvent->GetHitPosition(i).x());
-      totalYhist.Fill(genEvent->GetHitPosition(i).y() - recEvent->GetHitPosition(i).y());
+      unsigned int iRec = genUniqueLayer;
+      xDeltaGenHist[genUniqueLayer]->Fill(genEvent->GetHitPosition(i).x() - recEvent->GetHitPosition(iRec).x());
+      yDeltaGenHist[genUniqueLayer]->Fill(genEvent->GetHitPosition(i).y() - recEvent->GetHitPosition(iRec).y());
+      xDeltaSmearedHist[genUniqueLayer]->Fill(genEvent->GetSmearedHitPosition(i).x() - recEvent->GetHitPosition(iRec).x());
+      yDeltaSmearedHist[genUniqueLayer]->Fill(genEvent->GetSmearedHitPosition(i).y() - recEvent->GetHitPosition(iRec).y());
+      totalXhist.Fill(genEvent->GetHitPosition(i).x() - recEvent->GetHitPosition(iRec).x());
+      totalYhist.Fill(genEvent->GetHitPosition(i).y() - recEvent->GetHitPosition(iRec).y());
     }
 
     double angle1 = (genEvent->GetHitPosition(1).y() - genEvent->GetHitPosition(0).y())/(genEvent->GetHitPosition(1).z() - genEvent->GetHitPosition(0).z());
