@@ -1,4 +1,4 @@
-// $Id: single_run.cc,v 1.16 2010/01/15 15:26:29 beischer Exp $
+// $Id: single_run.cc,v 1.17 2010/01/19 13:42:50 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -75,7 +75,7 @@ int main(int argc, char** argv)
   }
   const char* filename = argv[1];
 
-  TApplication app("app", &argc, argv);
+  //TApplication app("app", &argc, argv);
 
   MyROOTStyle myStyle("myStyle");
   myStyle.cd();
@@ -176,134 +176,140 @@ int main(int argc, char** argv)
     chi2Hist.SetTitle(title);
   }
 
-
-  gStyle->SetOptFit(11);
-  TCanvas canvas("canvas", "Momentum resolution", 1024, 768);
-  canvas.Draw();
-  canvas.Divide(1,2);
-  canvas.cd(1);
-  resHist.Draw();
-  resHist.Fit("gaus", "EQR", "", 0.1, 1.+5*momRes);
-  resHist.GetXaxis()->SetTitle("p_{gen}/p_{rec}");
-  resHist.GetYaxis()->SetTitle("N");
-  canvas.cd(2);
-  ptHist.Draw();
-  ptHist.Fit("gaus", "EQR", "", 0.1, 1.+5*momRes);
-  ptHist.GetXaxis()->SetTitle("pt_{gen}/pt_{rec}");
-  ptHist.GetYaxis()->SetTitle("N");
-
-  TCanvas canvas2("canvas2", "x: Reconstructed vs generated position", 1024, 768);
-  canvas2.Divide(nHits/2,2);
-  canvas2.Draw();
-
   for (int i = 0; i < nHits; i++) {
-    char xtitle[256];
-    sprintf(xtitle, "(x_{%d,gen} - x_{%d,rec}) / mm", i, i);
-    canvas2.cd(i+1);
-    xDeltaGenHist[i]->Draw();
-    xDeltaGenHist[i]->GetXaxis()->SetTitle(xtitle);
-    xDeltaGenHist[i]->GetYaxis()->SetTitle("N");
-    xDeltaGenHist[i]->Fit("gaus", "Q");
-    TF1* fitFunc = xDeltaGenHist[i]->GetFunction("gaus");
-    if (fitFunc)
-      std::cout << "x" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
-  }
-
-  TCanvas canvas3("canvas3", "y: Reconstructed vs generated position", 1024, 768);
-  canvas3.Divide(nHits/2,2);
-  canvas3.Draw();
-  for (int i = 0; i < nHits; i++) {
-    char ytitle[256];
-    sprintf(ytitle, "(y_{%d,gen} - y_{%d,rec}) / mm", i, i);
-    canvas3.cd(i+1);
-    yDeltaGenHist[i]->Draw();
-    yDeltaGenHist[i]->GetXaxis()->SetTitle(ytitle);
-    yDeltaGenHist[i]->GetYaxis()->SetTitle("N");
-    yDeltaGenHist[i]->Fit("gaus", "Q");
+    yDeltaGenHist[i]->Fit("gaus", "Q0");
     TF1* fitFunc = yDeltaGenHist[i]->GetFunction("gaus");
     if (fitFunc)
       std::cout << "y" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
   }
 
-  TCanvas canvas4("canvas4", "x: Reconstructed vs measured position", 1024, 768);
-  canvas4.Divide(nHits/2,2);
-  canvas4.Draw();
+  // gStyle->SetOptFit(11);
+  // TCanvas canvas("canvas", "Momentum resolution", 1024, 768);
+  // canvas.Draw();
+  // canvas.Divide(1,2);
+  // canvas.cd(1);
+  // resHist.Draw();
+  // resHist.Fit("gaus", "EQR", "", 0.1, 1.+5*momRes);
+  // resHist.GetXaxis()->SetTitle("p_{gen}/p_{rec}");
+  // resHist.GetYaxis()->SetTitle("N");
+  // canvas.cd(2);
+  // ptHist.Draw();
+  // ptHist.Fit("gaus", "EQR", "", 0.1, 1.+5*momRes);
+  // ptHist.GetXaxis()->SetTitle("pt_{gen}/pt_{rec}");
+  // ptHist.GetYaxis()->SetTitle("N");
 
-  for (int i = 0; i < nHits; i++) {
-    char xtitle[256];
-    sprintf(xtitle, "(x_{%d,meas} - x_{%d,rec}) / mm", i, i);
-    canvas4.cd(i+1);
-    xDeltaSmearedHist[i]->Draw();
-    xDeltaSmearedHist[i]->GetXaxis()->SetTitle(xtitle);
-    xDeltaSmearedHist[i]->GetYaxis()->SetTitle("N");
-    xDeltaSmearedHist[i]->Fit("gaus", "Q");
-    TF1* fitFunc = xDeltaSmearedHist[i]->GetFunction("gaus");
-    if (fitFunc)
-      std::cout << "x" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
-   }
+  // TCanvas canvas2("canvas2", "x: Reconstructed vs generated position", 1024, 768);
+  // canvas2.Divide(nHits/2,2);
+  // canvas2.Draw();
 
-  TCanvas canvas5("canvas5", "y: Reconstructed vs measured Position", 1024, 768);
-  canvas5.Divide(nHits/2,2);
-  canvas5.Draw();
-  for (int i = 0; i < nHits; i++) {
-    char ytitle[256];
-    sprintf(ytitle, "(y_{%d,meas} - y_{%d,rec}) / mm", i, i);
-    canvas5.cd(i+1);
-    yDeltaSmearedHist[i]->Draw();
-    yDeltaSmearedHist[i]->GetXaxis()->SetTitle(ytitle);
-    yDeltaSmearedHist[i]->GetYaxis()->SetTitle("N");
-    yDeltaSmearedHist[i]->Fit("gaus", "Q");
-    TF1* fitFunc = yDeltaSmearedHist[i]->GetFunction("gaus");
-    if (fitFunc)
-      std::cout << "y" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
-  }
+  // for (int i = 0; i < nHits; i++) {
+  //   char xtitle[256];
+  //   sprintf(xtitle, "(x_{%d,gen} - x_{%d,rec}) / mm", i, i);
+  //   canvas2.cd(i+1);
+  //   xDeltaGenHist[i]->Draw();
+  //   xDeltaGenHist[i]->GetXaxis()->SetTitle(xtitle);
+  //   xDeltaGenHist[i]->GetYaxis()->SetTitle("N");
+  //   xDeltaGenHist[i]->Fit("gaus", "Q");
+  //   TF1* fitFunc = xDeltaGenHist[i]->GetFunction("gaus");
+  //   // if (fitFunc)
+  //   //   std::cout << "x" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
+  // }
 
-  TCanvas canvas6("canvas6", "Sum of reconstructed vs generated position histograms", 1024, 768);
-  canvas6.Draw();
-  canvas6.Divide(1,2);
-  canvas6.cd(1);
-  totalXhist.Draw();
-  totalXhist.GetXaxis()->SetTitle("(x_{sim,total} - x_{rec,total}) / mm");
-  totalXhist.GetYaxis()->SetTitle("N");
-  canvas6.cd(2);
-  totalYhist.Draw();
-  totalYhist.GetXaxis()->SetTitle("(y_{sim,total} - y_{rec,total}) / mm");
-  totalYhist.GetYaxis()->SetTitle("N");
+  // TCanvas canvas3("canvas3", "y: Reconstructed vs generated position", 1024, 768);
+  // canvas3.Divide(nHits/2,2);
+  // canvas3.Draw();
+  // for (int i = 0; i < nHits; i++) {
+  //   char ytitle[256];
+  //   sprintf(ytitle, "(y_{%d,gen} - y_{%d,rec}) / mm", i, i);
+  //   canvas3.cd(i+1);
+  //   yDeltaGenHist[i]->Draw();
+  //   yDeltaGenHist[i]->GetXaxis()->SetTitle(ytitle);
+  //   yDeltaGenHist[i]->GetYaxis()->SetTitle("N");
+  //   yDeltaGenHist[i]->Fit("gaus", "Q");
+  //   TF1* fitFunc = yDeltaGenHist[i]->GetFunction("gaus");
+  //   if (fitFunc)
+  //     std::cout << "y" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
+  // }
 
-  TF1 chi2Dist("chi2Dist", chi2dist, 0.0, 100.0, 2);
-  chi2Dist.SetNpx(1000);
+  // TCanvas canvas4("canvas4", "x: Reconstructed vs measured position", 1024, 768);
+  // canvas4.Divide(nHits/2,2);
+  // canvas4.Draw();
+
+  // for (int i = 0; i < nHits; i++) {
+  //   char xtitle[256];
+  //   sprintf(xtitle, "(x_{%d,meas} - x_{%d,rec}) / mm", i, i);
+  //   canvas4.cd(i+1);
+  //   xDeltaSmearedHist[i]->Draw();
+  //   xDeltaSmearedHist[i]->GetXaxis()->SetTitle(xtitle);
+  //   xDeltaSmearedHist[i]->GetYaxis()->SetTitle("N");
+  //   xDeltaSmearedHist[i]->Fit("gaus", "Q");
+  //   TF1* fitFunc = xDeltaSmearedHist[i]->GetFunction("gaus");
+  //   // if (fitFunc)
+  //   //   std::cout << "x" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
+  //  }
+
+  // TCanvas canvas5("canvas5", "y: Reconstructed vs measured Position", 1024, 768);
+  // canvas5.Divide(nHits/2,2);
+  // canvas5.Draw();
+  // for (int i = 0; i < nHits; i++) {
+  //   char ytitle[256];
+  //   sprintf(ytitle, "(y_{%d,meas} - y_{%d,rec}) / mm", i, i);
+  //   canvas5.cd(i+1);
+  //   yDeltaSmearedHist[i]->Draw();
+  //   yDeltaSmearedHist[i]->GetXaxis()->SetTitle(ytitle);
+  //   yDeltaSmearedHist[i]->GetYaxis()->SetTitle("N");
+  //   yDeltaSmearedHist[i]->Fit("gaus", "Q");
+  //   TF1* fitFunc = yDeltaSmearedHist[i]->GetFunction("gaus");
+  //   // if (fitFunc)
+  //   //   std::cout << "y" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
+  // }
+
+  // TCanvas canvas6("canvas6", "Sum of reconstructed vs generated position histograms", 1024, 768);
+  // canvas6.Draw();
+  // canvas6.Divide(1,2);
+  // canvas6.cd(1);
+  // totalXhist.Draw();
+  // totalXhist.GetXaxis()->SetTitle("(x_{sim,total} - x_{rec,total}) / mm");
+  // totalXhist.GetYaxis()->SetTitle("N");
+  // canvas6.cd(2);
+  // totalYhist.Draw();
+  // totalYhist.GetXaxis()->SetTitle("(y_{sim,total} - y_{rec,total}) / mm");
+  // totalYhist.GetYaxis()->SetTitle("N");
+
+  // TF1 chi2Dist("chi2Dist", chi2dist, 0.0, 100.0, 2);
+  // chi2Dist.SetNpx(1000);
   
-  chi2Dist.FixParameter(0, 1);
-  chi2Dist.FixParameter(1, recEvent->GetDof());
-  TCanvas canvas7("canvas7", "Chi2 distribution", 1024, 768);
-  canvas7.Draw();
-  chi2Hist.Draw();
-  chi2Hist.Scale(1./(chi2Hist.Integral("WIDTH")));
-  chi2Hist.GetXaxis()->SetTitle("#chi^{2}");
-  chi2Hist.GetYaxis()->SetTitle("N");
-  //  chi2Hist.Fit(&chi2Dist, "E");
-  chi2Dist.Draw("SAME");
-  chi2Dist.SetLineColor(kRed);
+  // chi2Dist.FixParameter(0, 1);
+  // chi2Dist.FixParameter(1, recEvent->GetDof());
+  // TCanvas canvas7("canvas7", "Chi2 distribution", 1024, 768);
+  // canvas7.Draw();
+  // chi2Hist.Draw();
+  // chi2Hist.Scale(1./(chi2Hist.Integral("WIDTH")));
+  // chi2Hist.GetXaxis()->SetTitle("#chi^{2}");
+  // chi2Hist.GetYaxis()->SetTitle("N");
+  // //  chi2Hist.Fit(&chi2Dist, "E");
+  // chi2Dist.Draw("SAME");
+  // chi2Dist.SetLineColor(kRed);
 
-  TCanvas canvas8("canvas8", "Deflection angle distribution", 1024, 768);
-  canvas8.Draw();
-  angleHist.Draw();
-  angleHist.GetXaxis()->SetTitle("#Delta #theta [rad]");
-  angleHist.GetYaxis()->SetTitle("N");
+  // TCanvas canvas8("canvas8", "Deflection angle distribution", 1024, 768);
+  // canvas8.Draw();
+  // angleHist.Draw();
+  // angleHist.GetXaxis()->SetTitle("#Delta #theta [rad]");
+  // angleHist.GetYaxis()->SetTitle("N");
 
-  app.Run();
+  //app.Run();
 
   file.Close();
-  delete genEvent;
-  delete recEvent;
+  // delete genEvent;
+  // delete recEvent;
 
-  for (int i = 0; i < nHits; i++)
-    delete xDeltaGenHist[i];
-  delete xDeltaGenHist;
+  // for (int i = 0; i < nHits; i++)
+  //   delete xDeltaGenHist[i];
+  // delete xDeltaGenHist;
 
-  for (int i = 0; i < nHits; i++)
-    delete yDeltaGenHist[i];
-  delete yDeltaGenHist;
+  // for (int i = 0; i < nHits; i++)
+  //   delete yDeltaGenHist[i];
+  // delete yDeltaGenHist;
 
 
   return 1;
