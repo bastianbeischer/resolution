@@ -1,4 +1,4 @@
-// $Id: test.cc,v 1.10 2010/01/05 13:47:38 beischer Exp $
+// $Id: test.cc,v 1.11 2010/01/28 13:43:37 beischer Exp $
 
 #include "RES_Event.hh"
 
@@ -22,6 +22,7 @@ int main(int argc, char** argv)
   recTree->SetBranchAddress("event", &recEvent);
 
   std::cout << "Generated events:" << std::endl;
+  std::cout << genTree->GetEntries() << std::endl;
   for (unsigned int i = 0; i < genTree->GetEntries(); i++) {
     genTree->GetEntry(i);
     std::cout << "--------------------------------------------------" << std::endl;

@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitter.cc,v 1.49 2010/01/15 15:26:29 beischer Exp $
+// $Id: RES_TrackFitter.cc,v 1.50 2010/01/28 13:43:37 beischer Exp $
 
 #include <cmath>
 #include <fstream>
@@ -380,14 +380,14 @@ void RES_TrackFitter::CalculateStartParameters()
     G4double deltaTheta = fabs(dy_over_dz_bottom - dy_over_dz_top);
 
     // TODO: CHANGED HARDCODED VALUES HERE
-    G4double magnetHeight = 8*cm; // PERDAIX MAGNET HERE
-    //G4double magnetHeight = 50*cm; // PEBS MAGNET HERE
+    //G4double magnetHeight = 8*cm; // PERDAIX MAGNET HERE
+    G4double magnetHeight = 50*cm; // PEBS MAGNET HERE
     G4double y0_magnet = y0_bottom + (-magnetHeight/2.)*dy_over_dz_bottom;
     G4double y1_magnet = y0_top    +  (magnetHeight/2.)*dy_over_dz_top;
     G4double z0_magnet = -magnetHeight/2.;
     G4double z1_magnet =  magnetHeight/2.;
-    G4double B  = 0.27; // PERDAIX MAGNET HERE
-    //G4double B  = 0.27; // PEBS MAGNET HERE
+    //G4double B  = 0.27; // PERDAIX MAGNET HERE
+    G4double B  = 0.27; // PEBS MAGNET HERE
     G4double L  = sqrt(pow(y1_magnet - y0_magnet, 2.) + pow(z1_magnet - z0_magnet,2.))/m;
     G4double pt = 0.3*B*L/deltaTheta*GeV;
 
@@ -399,13 +399,13 @@ void RES_TrackFitter::CalculateStartParameters()
     m_parameter[3] = x[0];
     m_parameter[4] = theta;
 
-    RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
-    RES_Module* firstModule = det->GetModule(0);
-    G4double sigmaV = firstModule->GetUpperSigmaV();
+    // RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
+    // RES_Module* firstModule = det->GetModule(0);
+    // G4double sigmaV = firstModule->GetUpperSigmaV();
 
-    G4double sigmaEllipsis = 1.*mm;
-    G4double sigmaPhi   = sqrt(2) * sigmaV      / ((z[1]-z[0])*(1 + pow((y[1]-y[0])/(z[1]-z[0]),2.0)));
-    G4double sigmaTheta = sqrt(2) * sigmaEllipsis / ((z[1]-z[0])*(1 + pow((x[1]-x[0])/(z[1]-z[0]),2.0)));
+    // G4double sigmaEllipsis = 1.*mm;
+    // G4double sigmaPhi   = sqrt(2) * sigmaV      / ((z[1]-z[0])*(1 + pow((y[1]-y[0])/(z[1]-z[0]),2.0)));
+    // G4double sigmaTheta = sqrt(2) * sigmaEllipsis / ((z[1]-z[0])*(1 + pow((x[1]-x[0])/(z[1]-z[0]),2.0)));
 
     delete[] x;
     delete[] y;

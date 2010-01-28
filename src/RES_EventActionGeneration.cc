@@ -1,4 +1,4 @@
-// $Id: RES_EventActionGeneration.cc,v 1.21 2010/01/19 13:42:50 beischer Exp $
+// $Id: RES_EventActionGeneration.cc,v 1.22 2010/01/28 13:43:37 beischer Exp $
 
 #include "RES_EventActionGeneration.hh"
 
@@ -26,20 +26,20 @@ void RES_EventActionGeneration::BeginOfEventAction(const G4Event* event)
   if( (event->GetEventID() > 0) && (event->GetEventID() % 100 == 0) )
     G4cout << ">>> Event " << event->GetEventID() << G4endl;
 
+  // NASTY HARDCODED!!!
   RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
 
-  // // NASTY HARDCODED!!!
-  // std::vector<int> used;
-  // int nDof = 8;
-  // for (unsigned int i = 0; i < 8-nDof; i++) {
-  //   int layer = floor(CLHEP::RandFlat::shoot(2,10));
-  //   while(std::find(used.begin(), used.end(), layer) != used.end()) {
-  //     layer = floor(CLHEP::RandFlat::shoot(2,10));
-  //   }
-  //   used.push_back(layer);
-  //   RES_Module* module = det->GetModule(layer/2);
-  //   layer%2 ? module->SetUpperEfficiency(0.) : module->SetLowerEfficiency(0.);
-  // }
+  std::vector<int> used;
+  int nDof = 8;
+  for (unsigned int i = 0; i < 8-nDof; i++) {
+    int layer = floor(CLHEP::RandFlat::shoot(2,10));
+    while(std::find(used.begin(), used.end(), layer) != used.end()) {
+      layer = floor(CLHEP::RandFlat::shoot(2,10));
+    }
+    used.push_back(layer);
+    RES_Module* module = det->GetModule(layer/2);
+    layer%2 ? module->SetUpperEfficiency(0.) : module->SetLowerEfficiency(0.);
+  }
 }
 
 void RES_EventActionGeneration::EndOfEventAction(const G4Event* event)
@@ -74,14 +74,13 @@ void RES_EventActionGeneration::EndOfEventAction(const G4Event* event)
     dataHandler->AddEvent(newEvent);
   }
 
+  // NASTY HARDCODED!!!
   RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
-
-  // // NASTY HARDCODED!!!
-  // for (unsigned int i = 0; i < det->GetNumberOfModules(); i++) {
-  //   RES_Module* module = det->GetModule(i);
-  //   module->SetUpperEfficiency(1.);
-  //   module->SetLowerEfficiency(1.);
-  // }
+  for (unsigned int i = 0; i < det->GetNumberOfModules(); i++) {
+    RES_Module* module = det->GetModule(i);
+    module->SetUpperEfficiency(1.);
+    module->SetLowerEfficiency(1.);
+  }
 }
 
 void RES_EventActionGeneration::SmearHits(RES_Event* event)

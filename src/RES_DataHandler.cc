@@ -1,4 +1,4 @@
-// $Id: RES_DataHandler.cc,v 1.10 2009/12/14 08:52:52 beischer Exp $
+// $Id: RES_DataHandler.cc,v 1.11 2010/01/28 13:43:37 beischer Exp $
 
 #include "RES_DataHandler.hh"
 
@@ -110,9 +110,9 @@ void RES_DataHandler::AddEvent(RES_Event event)
 void RES_DataHandler::WriteFile()
 {
   if (m_initialized) {
+    m_file->cd();
     m_genTree->Write();
     m_recTree->Write();
-    m_file->Write();
   }
   else {
     G4cerr << "Data Handler not initialized! (Call SetFileName or construct with string parameter)" << G4endl;
