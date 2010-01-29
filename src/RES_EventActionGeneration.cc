@@ -1,4 +1,4 @@
-// $Id: RES_EventActionGeneration.cc,v 1.22 2010/01/28 13:43:37 beischer Exp $
+// $Id: RES_EventActionGeneration.cc,v 1.23 2010/01/29 12:51:38 beischer Exp $
 
 #include "RES_EventActionGeneration.hh"
 
@@ -26,20 +26,33 @@ void RES_EventActionGeneration::BeginOfEventAction(const G4Event* event)
   if( (event->GetEventID() > 0) && (event->GetEventID() % 100 == 0) )
     G4cout << ">>> Event " << event->GetEventID() << G4endl;
 
-  // NASTY HARDCODED!!!
-  RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
+  RES_RunManager* mgr = RES_RunManager::GetRunManager();
+  G4int nDof = mgr->GetFixedDof();
 
-  std::vector<int> used;
-  int nDof = 8;
-  for (unsigned int i = 0; i < 8-nDof; i++) {
-    int layer = floor(CLHEP::RandFlat::shoot(2,10));
-    while(std::find(used.begin(), used.end(), layer) != used.end()) {
-      layer = floor(CLHEP::RandFlat::shoot(2,10));
+  if (nDof >= 0) {
+    RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
+    std::vector<G4int> used;
+    
+    // NASTY HARDCODED!!! for testbeam!
+    used.push_back(1);
+    used.push_back(11);
+
+    G4int nModules = det->GetNumberOfModules();
+    G4int iMin = 0;
+    G4int iMax = 2*nModules;
+    G4int nPar = 4;
+    G4int numberOfLayersToRemove = 2*nModules - nPar - nDof;
+    for (G4int i = 0; i < numberOfLayersToRemove; i++) {
+      G4int layer = floor(CLHEP::RandFlat::shoot(iMin, iMax));
+      while(std::find(used.begin(), used.end(), layer) != used.end()) {
+        layer = floor(CLHEP::RandFlat::shoot(iMin, iMax));
+      }
+      used.push_back(layer);
+      RES_Module* module = det->GetModule(layer/2);
+      layer%2 ? module->SetUpperEfficiency(0.) : module->SetLowerEfficiency(0.);
     }
-    used.push_back(layer);
-    RES_Module* module = det->GetModule(layer/2);
-    layer%2 ? module->SetUpperEfficiency(0.) : module->SetLowerEfficiency(0.);
   }
+
 }
 
 void RES_EventActionGeneration::EndOfEventAction(const G4Event* event)
@@ -57,7 +70,7 @@ void RES_EventActionGeneration::EndOfEventAction(const G4Event* event)
     RES_Event newEvent;
 
     G4int NbHits = HC->entries();
-    for (int i = 0; i < NbHits; i++) {
+    for (G4int i = 0; i < NbHits; i++) {
       RES_Hit* hit = (*HC)[i];
       newEvent.AddHit(hit->GetModuleID(),hit->GetLayerID(),hit->GetPosition().x(),hit->GetPosition().y(),hit->GetPosition().z());
     }
@@ -74,12 +87,15 @@ void RES_EventActionGeneration::EndOfEventAction(const G4Event* event)
     dataHandler->AddEvent(newEvent);
   }
 
-  // NASTY HARDCODED!!!
-  RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
-  for (unsigned int i = 0; i < det->GetNumberOfModules(); i++) {
-    RES_Module* module = det->GetModule(i);
-    module->SetUpperEfficiency(1.);
-    module->SetLowerEfficiency(1.);
+  RES_RunManager* mgr = RES_RunManager::GetRunManager();
+  G4int nDof = mgr->GetFixedDof();
+  if (nDof > 0) {
+    RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
+    for (unsigned int i = 0; i < det->GetNumberOfModules(); i++) {
+      RES_Module* module = det->GetModule(i);
+      module->SetUpperEfficiency(1.);
+      module->SetLowerEfficiency(1.);
+    }
   }
 }
 
@@ -88,7 +104,7 @@ void RES_EventActionGeneration::SmearHits(RES_Event* event)
   G4int nHits = event->GetNbOfHits();
   RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
 
-  for (int i = 0; i < nHits; i++) {
+  for (G4int i = 0; i < nHits; i++) {
     G4int iModule = event->GetModuleID(i);
     G4int iLayer  = event->GetLayerID(i);
     RES_Module* module = det->GetModule(iModule);

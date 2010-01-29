@@ -1,4 +1,4 @@
-// $Id: RES_RunMessenger.cc,v 1.6 2009/12/14 08:52:53 beischer Exp $
+// $Id: RES_RunMessenger.cc,v 1.7 2010/01/29 12:51:38 beischer Exp $
 
 #include "RES_RunMessenger.hh"
 
@@ -39,10 +39,14 @@ RES_RunMessenger::RES_RunMessenger(RES_RunManager* manager)
   m_reconstructWithoutLayerCmd->AvailableForStates(G4State_Idle);
 
   m_scanChi2FuncCmd = new G4UIcmdWithAString("/RES/Run/ScanChi2", this);
-  m_scanChi2FuncCmd->SetGuidance("Scan the chi2 function and write the output to the given file")
-;
+  m_scanChi2FuncCmd->SetGuidance("Scan the chi2 function and write the output to the given file");
   m_scanChi2FuncCmd->SetParameterName("filename", false);
   m_scanChi2FuncCmd->AvailableForStates(G4State_Idle);
+
+  m_fixedDofCmd = new G4UIcmdWithAnInteger("/RES/Run/SetFixedDof", this);
+  m_fixedDofCmd->SetGuidance("Fix the degrees of freedom for event generation (random layers will be removed)");
+  m_fixedDofCmd->SetParameterName("dof", false);
+  m_fixedDofCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
 }
 
 RES_RunMessenger::~RES_RunMessenger()
@@ -53,6 +57,7 @@ RES_RunMessenger::~RES_RunMessenger()
   delete m_reconstructCmd;
   delete m_reconstructWithoutLayerCmd;
   delete m_scanChi2FuncCmd;
+  delete m_fixedDofCmd;
 }
 
 void RES_RunMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
@@ -75,5 +80,9 @@ void RES_RunMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
     G4int jPar = m_scanChi2FuncCmd->ConvertToInt(newValue.substr(2,3).c_str());
     G4String filename = newValue.substr(4).c_str();
     m_manager->ScanChi2Function(iPar, jPar, filename);
+  }
+  if (command == m_fixedDofCmd) {
+    G4int value = m_fixedDofCmd->GetNewIntValue(newValue);
+    m_manager->SetFixedDof(value);
   }
 }

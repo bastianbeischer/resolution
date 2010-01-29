@@ -1,4 +1,4 @@
-// $Id: RES_RunManager.cc,v 1.16 2010/01/13 15:24:31 beischer Exp $
+// $Id: RES_RunManager.cc,v 1.17 2010/01/29 12:51:38 beischer Exp $
 
 #include "RES_RunManager.hh"
 
@@ -13,6 +13,14 @@
 #include "RES_Event.hh"
 #include "RES_PrimaryGeneratorAction.hh"
 
+RES_RunManager* RES_RunManager::m_instance = 0;
+
+RES_RunManager* RES_RunManager::GetRunManager()
+{
+  if (!m_instance) m_instance = new RES_RunManager();
+  return m_instance;
+}
+
 RES_RunManager::RES_RunManager() :
   G4RunManager()
 {
@@ -22,6 +30,7 @@ RES_RunManager::RES_RunManager() :
   m_eventActionGen = new RES_EventActionGeneration();
   m_eventActionRec = new RES_EventActionReconstruction(m_trackFitter);
   m_storeResults = false;
+  m_fixedDof = -1;
 
   SetActionsForGeneration();
 }

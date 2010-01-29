@@ -1,4 +1,4 @@
-// $Id: RES_RunMessenger.hh,v 1.4 2009/12/14 08:52:51 beischer Exp $
+// $Id: RES_RunMessenger.hh,v 1.5 2010/01/29 12:51:39 beischer Exp $
 
 #ifndef RES_RunMessenger_hh
 #define RES_RunMessenger_hh
@@ -31,6 +31,7 @@ private:
   G4UIcmdWithoutParameter* m_reconstructCmd;
   G4UIcmdWithAnInteger*    m_reconstructWithoutLayerCmd;
   G4UIcmdWithAString*      m_scanChi2FuncCmd;
+  G4UIcmdWithAnInteger*    m_fixedDofCmd;
 
 };
 

@@ -26,7 +26,7 @@ RES_ApplicationManager::RES_ApplicationManager()
   m_messenger = new RES_ApplicationMessenger(this);
 
   // create a new RunManager
-  m_runManager = new RES_RunManager();
+  m_runManager = RES_RunManager::GetRunManager();
 
   RES_AlignmentManager::GetInstance();
 
