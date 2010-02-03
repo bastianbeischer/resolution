@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitter.cc,v 1.50 2010/01/28 13:43:37 beischer Exp $
+// $Id: RES_TrackFitter.cc,v 1.51 2010/02/03 15:16:23 beischer Exp $
 
 #include <cmath>
 #include <fstream>
@@ -92,6 +92,10 @@ RES_Event RES_TrackFitter::Fit()
     DoMinuitFit(5);
     break;
   case transverse:
+    CalculateStartParameters();
+    DoBlobelFit(3);
+    break;
+  case testbeam:
     CalculateStartParameters();
     DoBlobelFit(3);
     break;
@@ -315,8 +319,9 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
 void RES_TrackFitter::CalculateStartParameters()
 {
   G4double dx_over_dz_top = 0., dx_over_dz_bottom = 0., dy_over_dz_top = 0., dy_over_dz_bottom = 0.;
-  
+
   if (m_fitMethod == transverse) {
+
     dy_over_dz_top = (m_smearedHits[3].y() - m_smearedHits[0].y()) / (m_smearedHits[3].z() - m_smearedHits[0].z());
     dy_over_dz_bottom = (m_smearedHits[7].y() - m_smearedHits[4].y()) / (m_smearedHits[7].z() - m_smearedHits[4].z());
 
@@ -335,8 +340,10 @@ void RES_TrackFitter::CalculateStartParameters()
 
     for (int i = 0; i < 5; i++)
       m_step[i] = 0.1*m_parameter[i];
-  }
-  else {
+
+  } // if (method == transverse)
+
+  if (m_fitMethod == blobel || m_fitMethod == minuit || m_fitMethod == oneline || m_fitMethod == twolines) {
     G4int nHits = m_currentGenEvent.GetNbOfHits();
 
     G4double z0 = 0.;
@@ -412,15 +419,29 @@ void RES_TrackFitter::CalculateStartParameters()
     delete[] z;
     delete[] k;
 
-  for (int i = 0; i < 5; i++) {
-    m_step[i] = 0.1*m_parameter[i];
-  }
+    for (int i = 0; i < 5; i++) {
+      m_step[i] = 0.1*m_parameter[i];
+    }
     // m_step[0] = 0.1*m_parameter[0];
     // m_step[1] = sigmaV;
     // m_step[2] = sigmaPhi;
     // m_step[3] = sigmaEllipsis;
     // m_step[4] = sigmaTheta;
-  }
+
+  } // if (method == blobel,minuit,oneline,twolines)
+
+  if (m_fitMethod == testbeam) {
+    
+    m_parameter[0] = 1./(1.0*GeV);
+    m_parameter[1] = 0.;
+    m_parameter[2] = 0.;
+    m_parameter[3] = 0.;
+    m_parameter[4] = 0.;
+
+    for (int i = 0; i < 5; i++) {
+      m_step[i] = 0.1*m_parameter[i];
+    }
+  } // if (method == testbeam)
   
   for (int i = 0; i < 5; i++) {
     // m_lowerBound[i] = m_parameter[i] - 10.*fabs(m_step[i]);
@@ -435,8 +456,8 @@ void RES_TrackFitter::CalculateStartParameters()
     for (int i = 0; i < 5; i++)
       G4cout << "m_parameter["<<i<<"] = " << m_parameter[i] << ", m_step["<<i<<"] = " << m_step[i] << ", m_lowerBound["<<i<<"] = " << m_lowerBound[i] << ", m_upperBound["<<i<<"] = " << m_upperBound[i] << G4endl;
   }
-
-}  
+}
+  
 
 G4int RES_TrackFitter::DoBlobelFit(G4int npar)
 {

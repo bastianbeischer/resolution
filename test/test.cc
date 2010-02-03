@@ -1,4 +1,4 @@
-// $Id: test.cc,v 1.11 2010/01/28 13:43:37 beischer Exp $
+// $Id: test.cc,v 1.12 2010/02/03 15:16:22 beischer Exp $
 
 #include "RES_Event.hh"
 
@@ -14,42 +14,46 @@ int main(int argc, char** argv)
   const char* filename = argv[1];
 
   TFile* file = new TFile(filename, "READ");
-  TTree* genTree = (TTree*) file->Get("resolution_gen_tree");
+
+  // TTree* genTree = (TTree*) file->Get("resolution_gen_tree");
+  // if (genTree) {
+  //   RES_Event* genEvent = new RES_Event();
+  //     genTree->SetBranchAddress("event", &genEvent);
+  //   std::cout << "Generated events:" << std::endl;
+  //   std::cout << genTree->GetEntries() << std::endl;
+  //   for (unsigned int i = 0; i < genTree->GetEntries(); i++) {
+  //     genTree->GetEntry(i);
+  //     std::cout << "--------------------------------------------------" << std::endl;
+  //     std::cout << "ID: " << genEvent->GetID() << " --> "
+  //               << " p: " << genEvent->GetMomentum()
+  //               << " -----> chi2: " <<  genEvent->GetChi2() << std::endl;
+  //     for (unsigned int j = 0; j < genEvent->GetNbOfHits(); j++) {
+  //       std::cout << " (i,j): (" << genEvent->GetModuleID(j) << ", " << genEvent->GetLayerID(j) << ")"
+  //                 << " x: " << genEvent->GetHitPosition(j).x() 
+  //                 << " y: " << genEvent->GetHitPosition(j).y()
+  //                 << " z: " << genEvent->GetHitPosition(j).z() << std::endl;
+  //     }
+  //   }
+  // }
+
   TTree* recTree = (TTree*) file->Get("resolution_rec_tree");
-  RES_Event* genEvent = new RES_Event();
-  RES_Event* recEvent = new RES_Event();
-  genTree->SetBranchAddress("event", &genEvent);
-  recTree->SetBranchAddress("event", &recEvent);
-
-  std::cout << "Generated events:" << std::endl;
-  std::cout << genTree->GetEntries() << std::endl;
-  for (unsigned int i = 0; i < genTree->GetEntries(); i++) {
-    genTree->GetEntry(i);
-    std::cout << "--------------------------------------------------" << std::endl;
-    std::cout << "ID: " << genEvent->GetID() << " --> "
-              << " p: " << genEvent->GetMomentum()
-              << " -----> chi2: " <<  genEvent->GetChi2() << std::endl;
-    for (unsigned int j = 0; j < genEvent->GetNbOfHits(); j++) {
-      std::cout << " (i,j): (" << genEvent->GetModuleID(j) << ", " << genEvent->GetLayerID(j) << ")"
-                << " x: " << genEvent->GetHitPosition(j).x() 
-                << " y: " << genEvent->GetHitPosition(j).y()
-                << " z: " << genEvent->GetHitPosition(j).z() << std::endl;
-    }
-  }
-
-  std::cout << "Reconstructed events:" << std::endl;
-  for (unsigned int i = 0; i < recTree->GetEntries(); i++) {
-    recTree->GetEntry(i);
-    std::cout << "--------------------------------------------------" << std::endl;
-    std::cout << "ID: " << recEvent->GetID() << " --> "
-              << " p: " << recEvent->GetMomentum()
-              << " -----> chi2: " <<  recEvent->GetChi2() << std::endl;
-    for (unsigned int j = 0; j < recEvent->GetNbOfHits(); j++) {
-      std::cout << " nHits: " << recEvent->GetNbOfHits();
-      std::cout << " (i,j): (" << recEvent->GetModuleID(j) << ", " << recEvent->GetLayerID(j) << ")"
-                << " x: " << recEvent->GetHitPosition(j).x() 
-                << " y: " << recEvent->GetHitPosition(j).y()
-                << " z: " << recEvent->GetHitPosition(j).z() << std::endl;
+  if (recTree) {
+    RES_Event* recEvent = new RES_Event();
+    recTree->SetBranchAddress("event", &recEvent);
+    std::cout << "Reconstructed events:" << std::endl;
+    for (unsigned int i = 0; i < recTree->GetEntries(); i++) {
+      recTree->GetEntry(i);
+      std::cout << "--------------------------------------------------" << std::endl;
+      std::cout << "ID: " << recEvent->GetID() << " --> "
+                << " p: " << recEvent->GetMomentum()
+                << " -----> chi2: " <<  recEvent->GetChi2() << std::endl;
+      for (unsigned int j = 0; j < recEvent->GetNbOfHits(); j++) {
+        std::cout << " nHits: " << recEvent->GetNbOfHits();
+        std::cout << " (i,j): (" << recEvent->GetModuleID(j) << ", " << recEvent->GetLayerID(j) << ")"
+                  << " x: " << recEvent->GetHitPosition(j).x() 
+                  << " y: " << recEvent->GetHitPosition(j).y()
+                  << " z: " << recEvent->GetHitPosition(j).z() << std::endl;
+      }
     }
   }
 

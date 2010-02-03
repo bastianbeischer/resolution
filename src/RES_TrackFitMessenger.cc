@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitMessenger.cc,v 1.5 2009/10/14 09:24:23 beischer Exp $
+// $Id: RES_TrackFitMessenger.cc,v 1.6 2010/02/03 15:16:23 beischer Exp $
 
 #include "RES_TrackFitMessenger.hh"
 
@@ -52,6 +52,8 @@ void RES_TrackFitMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
       method = twolines;
     if (newValue == "transverse")
       method = transverse;
+    if (newValue == "testbeam")
+      method = testbeam;
 
     m_fitter->SetFitMethod(method);
   }

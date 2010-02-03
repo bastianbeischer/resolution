@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitter.hh,v 1.19 2009/12/14 08:52:52 beischer Exp $
+// $Id: RES_TrackFitter.hh,v 1.20 2010/02/03 15:16:23 beischer Exp $
 
 #ifndef RES_TrackFitter_hh
 #define RES_TrackFitter_hh
@@ -12,7 +12,7 @@
 
 enum FitMethod
 {
-  blobel, minuit, oneline, twolines, transverse
+  blobel, minuit, oneline, twolines, transverse, testbeam
 };
 
 class RES_TrackFitMessenger;
@@ -36,8 +36,8 @@ public:
   void ScanChi2Function(G4int i, G4int j, G4String filename);
 
 public:
-  void     CopyHits();
-  void     FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double &y0, G4double &dxdz, G4double &dydz);
+  void CopyHits();
+  void FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double &y0, G4double &dxdz, G4double &dydz);
 
   void ClearLayersToBeSkipped() {m_layersToBeSkipped.clear();}
   void AddLayerToBeSkipped(G4int layer);
