@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitter.cc,v 1.51 2010/02/03 15:16:23 beischer Exp $
+// $Id: RES_TrackFitter.cc,v 1.52 2010/02/03 18:37:55 beischer Exp $
 
 #include <cmath>
 #include <fstream>
@@ -83,7 +83,7 @@ RES_Event RES_TrackFitter::Fit()
     double x0,y0,lambda_x,lambda_y;
     FitStraightLine(0,nHits,x0,y0,lambda_x,lambda_y);
     break;
-  case blobel:
+ case blobel:
     CalculateStartParameters();
     DoBlobelFit(5);
     break;
@@ -102,6 +102,8 @@ RES_Event RES_TrackFitter::Fit()
   default:
     break;
   }
+
+  std::cout << "p: " << m_currentRecEvent.GetMomentum()/GeV << std::endl;
 
   return m_currentRecEvent;
 }
@@ -431,16 +433,23 @@ void RES_TrackFitter::CalculateStartParameters()
   } // if (method == blobel,minuit,oneline,twolines)
 
   if (m_fitMethod == testbeam) {
-    
-    m_parameter[0] = 1./(1.0*GeV);
-    m_parameter[1] = 0.;
-    m_parameter[2] = 0.;
-    m_parameter[3] = 0.;
-    m_parameter[4] = 0.;
 
-    for (int i = 0; i < 5; i++) {
+    G4int nHits = m_currentGenEvent.GetNbOfHits();
+    double x0,y0,lambda_x,lambda_y;
+
+    FitStraightLine(0,nHits,x0,y0,lambda_x,lambda_y);
+    G4double phi   = atan(lambda_y);
+    G4double theta = atan(-lambda_x*cos(phi));
+
+    m_parameter[0] = 1./(1.0*GeV);
+    m_parameter[1] = y0;
+    m_parameter[2] = phi;
+    m_parameter[3] = x0;
+    m_parameter[4] = theta;
+
+    for (int i = 0; i < 5; i++)
       m_step[i] = 0.1*m_parameter[i];
-    }
+
   } // if (method == testbeam)
   
   for (int i = 0; i < 5; i++) {
@@ -566,15 +575,14 @@ G4double RES_TrackFitter::Chi2InDetFrame()
   runManager->BeamOn(1);
 
   G4int nHits = m_currentGenEvent.GetNbOfHits();
-  G4int nRecHits = m_currentRecEvent.GetNbOfHits();
-  if (nHits != nRecHits) {
-    chi2 = DBL_MAX;
-    return chi2;
-  }
 
   for( G4int i = 0 ; i < nHits ; i++ ) {
     G4int iModule = m_currentGenEvent.GetModuleID(i);
     G4int iLayer  = m_currentGenEvent.GetLayerID(i);
+    unsigned int uniqueLayer = 2*iModule + iLayer;
+    if (uniqueLayer >= m_currentRecEvent.GetNbOfHits())
+      continue;
+
     RES_Module* module = det->GetModule(iModule);
     G4double angle = module->GetAngle();
     if (iLayer > 0) angle += module->GetInternalAngle();
@@ -592,8 +600,8 @@ G4double RES_TrackFitter::Chi2InDetFrame()
    
     G4double s = sin(angle);
     G4double c = cos(angle);
-    G4double dx = m_smearedHits[i].x() - m_currentRecEvent.GetHitPosition(i).x();
-    G4double dy = m_smearedHits[i].y() - m_currentRecEvent.GetHitPosition(i).y();
+    G4double dx = m_smearedHits[i].x() - m_currentRecEvent.GetHitPosition(uniqueLayer).x();
+    G4double dy = m_smearedHits[i].y() - m_currentRecEvent.GetHitPosition(uniqueLayer).y();
     chi2 += pow(dx*sigmaU*s / (sigmaU * sigmaV), 2.);
     chi2 += pow(dy*sigmaV*s / (sigmaU * sigmaV), 2.);
     chi2 += pow(dx*sigmaV*c / (sigmaU * sigmaV), 2.);
@@ -639,21 +647,20 @@ G4double RES_TrackFitter::Chi2InModuleFrame()
   runManager->BeamOn(1);
 
   G4int nHits = m_currentGenEvent.GetNbOfHits();
-  G4int nRecHits = m_currentRecEvent.GetNbOfHits();
-  if (nHits != nRecHits) {
-    chi2 = DBL_MAX;
-    return chi2;
-  }
 
   for( G4int i = 0 ; i < nHits ; i++ ) {
     G4int iModule = m_currentGenEvent.GetModuleID(i);
     G4int iLayer  = m_currentGenEvent.GetLayerID(i);
+    unsigned int uniqueLayer = 2*iModule + iLayer;
+    if (uniqueLayer >= m_currentRecEvent.GetNbOfHits())
+      continue;
+
     RES_Module* module = det->GetModule(iModule);
     G4double angle = module->GetAngle();
     if (iLayer > 0) angle += module->GetInternalAngle();
     G4RotationMatrix forwardRotation(angle, 0, 0);
     G4RotationMatrix backwardRotation(-angle, 0, 0);
-    G4ThreeVector hit(m_currentRecEvent.GetHitPosition(i).x(),m_currentRecEvent.GetHitPosition(i).y(),m_currentRecEvent.GetHitPosition(i).z());
+    G4ThreeVector hit(m_currentRecEvent.GetHitPosition(uniqueLayer).x(),m_currentRecEvent.GetHitPosition(uniqueLayer).y(),m_currentRecEvent.GetHitPosition(uniqueLayer).z());
 
     hit = forwardRotation*hit;
     m_smearedHits[i] = forwardRotation*m_smearedHits[i];
