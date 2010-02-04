@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitter.cc,v 1.52 2010/02/03 18:37:55 beischer Exp $
+// $Id: RES_TrackFitter.cc,v 1.53 2010/02/04 14:42:35 beischer Exp $
 
 #include <cmath>
 #include <fstream>
@@ -103,7 +103,7 @@ RES_Event RES_TrackFitter::Fit()
     break;
   }
 
-  std::cout << "p: " << m_currentRecEvent.GetMomentum()/GeV << std::endl;
+  //  std::cout << "p: " << m_currentRecEvent.GetMomentum()/GeV << std::endl;
 
   return m_currentRecEvent;
 }
@@ -574,15 +574,15 @@ G4double RES_TrackFitter::Chi2InDetFrame()
   gun->SetParticleEnergy(energy);
   runManager->BeamOn(1);
 
+  if (m_currentRecEvent.GetNbOfHits() != 2*det->GetNumberOfModules())
+    return DBL_MAX;
+
   G4int nHits = m_currentGenEvent.GetNbOfHits();
 
   for( G4int i = 0 ; i < nHits ; i++ ) {
     G4int iModule = m_currentGenEvent.GetModuleID(i);
     G4int iLayer  = m_currentGenEvent.GetLayerID(i);
     unsigned int uniqueLayer = 2*iModule + iLayer;
-    if (uniqueLayer >= m_currentRecEvent.GetNbOfHits())
-      continue;
-
     RES_Module* module = det->GetModule(iModule);
     G4double angle = module->GetAngle();
     if (iLayer > 0) angle += module->GetInternalAngle();
@@ -646,14 +646,15 @@ G4double RES_TrackFitter::Chi2InModuleFrame()
   gun->SetParticleEnergy(energy);
   runManager->BeamOn(1);
 
+  if (m_currentRecEvent.GetNbOfHits() != 2*det->GetNumberOfModules())
+    return DBL_MAX;
+
   G4int nHits = m_currentGenEvent.GetNbOfHits();
 
   for( G4int i = 0 ; i < nHits ; i++ ) {
     G4int iModule = m_currentGenEvent.GetModuleID(i);
     G4int iLayer  = m_currentGenEvent.GetLayerID(i);
     unsigned int uniqueLayer = 2*iModule + iLayer;
-    if (uniqueLayer >= m_currentRecEvent.GetNbOfHits())
-      continue;
 
     RES_Module* module = det->GetModule(iModule);
     G4double angle = module->GetAngle();

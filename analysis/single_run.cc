@@ -1,4 +1,4 @@
-// $Id: single_run.cc,v 1.20 2010/02/03 15:16:24 beischer Exp $
+// $Id: single_run.cc,v 1.21 2010/02/04 14:42:37 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -104,8 +104,8 @@ int main(int argc, char** argv)
   analyticalFormula.SetParameters(m, Lup, Ldown, Linner, magField, X0, sigmaModule);
   double momRes = analyticalFormula.Eval(genMom);
   //  TH1D resHist("resHist", "resHist", 100, 1. - 5.*momRes, 1. + 5.*momRes);
-  TH1D resHist("resHist", "resHist", 100, 0.7, 1.3);
-  TH1D ptHist("ptHist", "ptHist", 100, 1. - 5.*momRes, 1. + 5.*momRes);
+  TH1D resHist("resHist", "resHist", 50, 0.0, 2.0);
+  TH1D ptHist("ptHist", "ptHist", 50, 0.0, 2.0);
   //  int nHits = recEvent->GetNbOfHits();
   int nHits = 12;
   int nBins = 100;

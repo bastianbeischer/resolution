@@ -1,4 +1,4 @@
-// $Id: RES_FieldMessenger.cc,v 1.4 2009/10/14 09:24:24 beischer Exp $
+// $Id: RES_FieldMessenger.cc,v 1.5 2010/02/04 14:42:36 beischer Exp $
 
 #include "RES_FieldMessenger.hh"
 
@@ -30,6 +30,10 @@ RES_FieldMessenger::RES_FieldMessenger(RES_FieldManager* manager)
   m_setUniformFieldCmd = new G4UIcmdWith3VectorAndUnit("/RES/Field/SetUniformField", this);
   m_setUniformFieldCmd->SetGuidance("Set a uniform magnetic field with the value given by the specified ThreeVector");
   m_setUniformFieldCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
+
+  m_setDisplacementCmd = new G4UIcmdWith3VectorAndUnit("/RES/Field/SetDisplacement", this);
+  m_setDisplacementCmd->SetGuidance("Set displacement vector of the magnet.");
+  m_setDisplacementCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
 }
 
 RES_FieldMessenger::~RES_FieldMessenger()
@@ -38,6 +42,7 @@ RES_FieldMessenger::~RES_FieldMessenger()
   delete m_setInhomFieldFromFileCmd;
   delete m_setDummyFieldCmd;
   delete m_setUniformFieldCmd;
+  delete m_setDisplacementCmd;
 }
 
 void RES_FieldMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
@@ -50,5 +55,8 @@ void RES_FieldMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
   }
   if (command == m_setUniformFieldCmd) {
     m_manager->SwitchOnUniformField(m_setUniformFieldCmd->GetNew3VectorValue(newValue));
+  }
+  if (command == m_setDummyFieldCmd) {
+    m_manager->SetDisplacement(m_setDisplacementCmd->GetNew3VectorValue(newValue));
   }
 }

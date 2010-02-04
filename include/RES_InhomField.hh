@@ -1,9 +1,10 @@
-// $Id: RES_InhomField.hh,v 1.3 2009/10/14 09:24:30 beischer Exp $
+// $Id: RES_InhomField.hh,v 1.4 2010/02/04 14:42:36 beischer Exp $
 
 #ifndef RES_InhomField_hh
 #define RES_InhomField_hh
 
 #include "G4MagneticField.hh"
+#include "G4ThreeVector.hh"
 #include "globals.hh"
 
 class RES_Axis;
@@ -18,11 +19,15 @@ public:
 public:
   void GetFieldValue(const G4double* x, G4double* B) const;
 
+  void SetDisplacement(G4ThreeVector displacement) {m_displacement = displacement;}
+
 private:
   void ReadData();
 
 public:
   G4String      m_dataFileName;
+  G4ThreeVector m_displacement;
+
   RES_Axis*     m_axis_x;
   RES_Axis*     m_axis_y;
   RES_Axis*     m_axis_z;

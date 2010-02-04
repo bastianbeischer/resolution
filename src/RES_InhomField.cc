@@ -1,4 +1,4 @@
-// $Id: RES_InhomField.cc,v 1.10 2010/01/04 22:21:45 beischer Exp $
+// $Id: RES_InhomField.cc,v 1.11 2010/02/04 14:42:35 beischer Exp $
 
 #include "RES_InhomField.hh"
 
@@ -8,6 +8,7 @@
 
 RES_InhomField::RES_InhomField(G4String dataFileName) :
   m_dataFileName(dataFileName),
+  m_displacement(G4ThreeVector(0,0,0)),
   m_axis_x(0),
   m_axis_y(0),
   m_axis_z(0),
@@ -30,6 +31,11 @@ RES_InhomField::~RES_InhomField()
 
 void RES_InhomField::GetFieldValue(const G4double* x, G4double* B) const
 {
+  G4double pos[3] =  {x[0],x[1],x[2]};
+  pos[0] -= m_displacement.x();
+  pos[1] -= m_displacement.y();
+  pos[2] -= m_displacement.z();
+
   B[0] = 0.;
   B[1] = 0.;
   B[2] = 0.;
@@ -42,31 +48,31 @@ void RES_InhomField::GetFieldValue(const G4double* x, G4double* B) const
 
   // find the proper values for bin lower than, and above the positions on each axis
   for (int i = 0; i < 3; i++) {
-    lowerBin[i] = axis[i]->GetBin(x[i]/cm);
+    lowerBin[i] = axis[i]->GetBin(pos[i]/cm);
 
     // if the corresponding point is outside of the region where the magnetic field is defined, return
     if ( (lowerBin[i] < 0) || (lowerBin[i] >= axis[i]->GetNbins()) )
       return;
 
     // if we are in the first half of the bin, set the lowerBin to the next bin on the other side
-    if (x[i]/cm < axis[i]->GetBinCenter(lowerBin[i])) {
+    if (pos[i]/cm < axis[i]->GetBinCenter(lowerBin[i])) {
       lowerBin[i]--;
     }
     
-    // if everything is normal, lowerBin[i] contains the number of the bin to the left of x[i], while upperBin[i] will be set to the next bin, i.e. the one to the right
+    // if everything is normal, lowerBin[i] contains the number of the bin to the left of pos[i], while upperBin[i] will be set to the next bin, i.e. the one to the right
     if (lowerBin[i] >= 0 && lowerBin[i] < axis[i]->GetNbins()-1) {
       upperBin[i] = lowerBin[i] + 1;
-      d[i] = (x[i]/cm - axis[i]->GetBinCenter(lowerBin[i])) / (axis[i]->GetBinCenter(upperBin[i]) - axis[i]->GetBinCenter(lowerBin[i]));
+      d[i] = (pos[i]/cm - axis[i]->GetBinCenter(lowerBin[i])) / (axis[i]->GetBinCenter(upperBin[i]) - axis[i]->GetBinCenter(lowerBin[i]));
     }
 
-    // if lowerBin[i] is now "underflow" (this means that x[i] is in the first half of the first bin), use the first bin for the calculation and don't interpolate
+    // if lowerBin[i] is now "underflow" (this means that pos[i] is in the first half of the first bin), use the first bin for the calculation and don't interpolate
     else if (lowerBin[i] == -1) {
       lowerBin[i] = 0;
       upperBin[i] = lowerBin[i];
       d[i] = 0.;
     }
 
-    // if lowerBin[i] is now "overflow" (this means that x[i] is in the second half of the last bin), use the last bin for the calculation and don't interpolate
+    // if lowerBin[i] is now "overflow" (this means that pos[i] is in the second half of the last bin), use the last bin for the calculation and don't interpolate
     else if (lowerBin[i] == axis[i]->GetNbins()-1) {
       lowerBin[i] = axis[i]->GetNbins() - 1;
       upperBin[i] = lowerBin[i];
@@ -98,12 +104,12 @@ void RES_InhomField::ReadData()
   G4int nBins_x, nBins_y, nBins_z;
   file >> x0 >> x1 >> y0 >> y1 >> z0 >> z1 >> nBins_x >> nBins_y >> nBins_z;
 
-  x0 /= 10.;
-  x1 /= 10.;
-  y0 /= 10.;
-  y1 /= 10.;
-  z0 /= 10.;
-  z1 /= 10.;
+  // x0 /= 10.;
+  // x1 /= 10.;
+  // y0 /= 10.;
+  // y1 /= 10.;
+  // z0 /= 10.;
+  // z1 /= 10.;
 
   m_axis_x = new RES_Axis(x0,x1,nBins_x);
   m_axis_y = new RES_Axis(y0,y1,nBins_y);
@@ -137,11 +143,13 @@ void RES_InhomField::ReadData()
   G4double x, y, z, f_x, f_y, f_z, dummy;
   G4int nX, nY, nZ;
   while (!file.eof()) {
-    file >> x >> y >> z >> dummy >> f_x >> f_y >> f_z >> dummy;
+    //    file >> x >> y >> z >> dummy >> f_x >> f_y >> f_z >> dummy;
 
-    x/=10.;
-    y/=10.;
-    z/=10.;
+    // x/=10.;
+    // y/=10.;
+    // z/=10.;
+
+    file >> x >> y >> z >> f_x >> f_y >> f_z;
 
     nX = m_axis_x->GetBin(x);
     nY = m_axis_y->GetBin(y);
@@ -150,30 +158,30 @@ void RES_InhomField::ReadData()
     m_field_y[nX][nY][nZ] = f_y;
     m_field_z[nX][nY][nZ] = f_z;
 
-    // // mirror to get the full world
-    // if (y != 0.0) {
-    //   nX = m_axis_x->GetBin(x);
-    //   nY = m_axis_y->GetBin(-y);
-    //   nZ = m_axis_z->GetBin(z);
-    //   m_field_x[nX][nY][nZ] = f_x;
-    //   m_field_y[nX][nY][nZ] = -f_y;
-    //   m_field_z[nX][nY][nZ] = f_z;
-    // }
-    // if (z != 0.0) {
-    //   nX = m_axis_x->GetBin(x);
-    //   nY = m_axis_y->GetBin(y);
-    //   nZ = m_axis_z->GetBin(-z);
-    //   m_field_x[nX][nY][nZ] = f_x;
-    //   m_field_y[nX][nY][nZ] = f_y;
-    //   m_field_z[nX][nY][nZ] = -f_z;
-    // }
-    // if ( (y != 0.0) && (z != 0) ) {
-    //   nX = m_axis_x->GetBin(x);
-    //   nY = m_axis_y->GetBin(-y);
-    //   nZ = m_axis_z->GetBin(-z);
-    //   m_field_x[nX][nY][nZ] = f_x;
-    //   m_field_y[nX][nY][nZ] = -f_y;
-    //   m_field_z[nX][nY][nZ] = -f_z;
-    // }
+    // mirror to get the full world
+    if (y != 0.0) {
+      nX = m_axis_x->GetBin(x);
+      nY = m_axis_y->GetBin(-y);
+      nZ = m_axis_z->GetBin(z);
+      m_field_x[nX][nY][nZ] = f_x;
+      m_field_y[nX][nY][nZ] = -f_y;
+      m_field_z[nX][nY][nZ] = f_z;
+    }
+    if (z != 0.0) {
+      nX = m_axis_x->GetBin(x);
+      nY = m_axis_y->GetBin(y);
+      nZ = m_axis_z->GetBin(-z);
+      m_field_x[nX][nY][nZ] = f_x;
+      m_field_y[nX][nY][nZ] = f_y;
+      m_field_z[nX][nY][nZ] = -f_z;
+    }
+    if ( (y != 0.0) && (z != 0) ) {
+      nX = m_axis_x->GetBin(x);
+      nY = m_axis_y->GetBin(-y);
+      nZ = m_axis_z->GetBin(-z);
+      m_field_x[nX][nY][nZ] = f_x;
+      m_field_y[nX][nY][nZ] = -f_y;
+      m_field_z[nX][nY][nZ] = -f_z;
+    }
   }
 }

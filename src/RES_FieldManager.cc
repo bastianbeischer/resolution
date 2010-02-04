@@ -1,4 +1,4 @@
-// $Id: RES_FieldManager.cc,v 1.3 2009/10/14 09:24:24 beischer Exp $
+// $Id: RES_FieldManager.cc,v 1.4 2010/02/04 14:42:36 beischer Exp $
 
 #include "RES_FieldManager.hh"
 
@@ -40,6 +40,19 @@ void RES_FieldManager::SwitchOnUniformField(G4ThreeVector fieldVector)
 {
   SetDetectorField(new G4UniformMagField(fieldVector));
   CreateChordFinder((G4MagneticField*) GetDetectorField());
+}
+
+void RES_FieldManager::SetDisplacement(G4ThreeVector displacement)
+{
+  G4Field* field = (G4Field*)GetDetectorField();
+  if (dynamic_cast<RES_DummyField*>(field)) {
+    RES_DummyField* dummyField = (RES_DummyField*)field;
+    dummyField->SetDisplacement(displacement);
+  }
+  else if (dynamic_cast<RES_InhomField*>(field)) {
+    RES_InhomField* inhomField = (RES_InhomField*)field;
+    inhomField->SetDisplacement(displacement);
+  }
 }
 
 void RES_FieldManager::ActivateMyStepper()

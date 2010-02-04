@@ -1,4 +1,4 @@
-// $Id: RES_FieldManager.hh,v 1.3 2009/10/14 09:24:31 beischer Exp $
+// $Id: RES_FieldManager.hh,v 1.4 2010/02/04 14:42:37 beischer Exp $
 
 #ifndef RES_FieldManager_hh
 #define RES_FieldManager_hh
@@ -22,6 +22,8 @@ public:
   void SwitchOnInhomField(G4String dataFileName);
   void SwitchOnDummyField(G4ThreeVector fieldVector);
   void SwitchOnUniformField(G4ThreeVector fieldVector);
+
+  void SetDisplacement(G4ThreeVector displacement);
 
   void ActivateMyStepper();
   void DeactivateMyStepper();

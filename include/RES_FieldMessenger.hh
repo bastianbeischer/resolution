@@ -1,4 +1,4 @@
-// $Id: RES_FieldMessenger.hh,v 1.3 2009/10/14 09:24:30 beischer Exp $
+// $Id: RES_FieldMessenger.hh,v 1.4 2010/02/04 14:42:37 beischer Exp $
 
 #ifndef RES_FieldMessenger_hh
 #define RES_FieldMessenger_hh
@@ -28,6 +28,7 @@ private:
   G4UIcmdWithAString*        m_setInhomFieldFromFileCmd;
   G4UIcmdWith3VectorAndUnit* m_setDummyFieldCmd;
   G4UIcmdWith3VectorAndUnit* m_setUniformFieldCmd;
+  G4UIcmdWith3VectorAndUnit* m_setDisplacementCmd;
 
 };
 
