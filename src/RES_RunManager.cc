@@ -1,4 +1,4 @@
-// $Id: RES_RunManager.cc,v 1.17 2010/01/29 12:51:38 beischer Exp $
+// $Id: RES_RunManager.cc,v 1.18 2010/02/08 14:32:08 beischer Exp $
 
 #include "RES_RunManager.hh"
 
@@ -48,6 +48,7 @@ void RES_RunManager::SetStoreResults(G4bool value)
 
 void RES_RunManager::StartGenerationRun(G4int nEvents)
 {
+  m_dataHandler->Initialize();
   SetActionsForGeneration();
   BeamOn(nEvents);
   if (m_storeResults) m_dataHandler->WriteFile();

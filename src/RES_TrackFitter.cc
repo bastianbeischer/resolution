@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitter.cc,v 1.53 2010/02/04 14:42:35 beischer Exp $
+// $Id: RES_TrackFitter.cc,v 1.54 2010/02/08 14:32:08 beischer Exp $
 
 #include <cmath>
 #include <fstream>
@@ -103,7 +103,7 @@ RES_Event RES_TrackFitter::Fit()
     break;
   }
 
-  //  std::cout << "p: " << m_currentRecEvent.GetMomentum()/GeV << std::endl;
+  //std::cout << "p: " << m_currentRecEvent.GetMomentum()/GeV << std::endl;
 
   return m_currentRecEvent;
 }
@@ -435,16 +435,21 @@ void RES_TrackFitter::CalculateStartParameters()
   if (m_fitMethod == testbeam) {
 
     G4int nHits = m_currentGenEvent.GetNbOfHits();
-    double x0,y0,lambda_x,lambda_y;
+    double x0,y0,lambda_x,lambda_y_top,lambda_y_bottom;
 
-    FitStraightLine(0,nHits,x0,y0,lambda_x,lambda_y);
-    G4double phi   = atan(lambda_y);
+    G4double z0 = 0;
+    G4double k0 = m_smearedHits[0].z() - z0;
+
+    G4double dummy1,dummy2;
+    FitStraightLine(0,nHits,x0,dummy1,lambda_x,dummy2);
+    FitStraightLine(0,nHits/2,dummy1,y0,dummy2,lambda_y_top);
+    G4double phi   = atan(lambda_y_top);
     G4double theta = atan(-lambda_x*cos(phi));
 
     m_parameter[0] = 1./(1.0*GeV);
-    m_parameter[1] = y0;
+    m_parameter[1] = y0 + k0*lambda_y_top;
     m_parameter[2] = phi;
-    m_parameter[3] = x0;
+    m_parameter[3] = x0 + k0*lambda_x;
     m_parameter[4] = theta;
 
     for (int i = 0; i < 5; i++)

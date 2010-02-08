@@ -1,4 +1,4 @@
-// $Id: RES_InhomField.cc,v 1.11 2010/02/04 14:42:35 beischer Exp $
+// $Id: RES_InhomField.cc,v 1.12 2010/02/08 14:32:08 beischer Exp $
 
 #include "RES_InhomField.hh"
 
@@ -140,7 +140,7 @@ void RES_InhomField::ReadData()
   }
 
   // read the data (only contains all x, y >= 0, z >= 0)
-  G4double x, y, z, f_x, f_y, f_z, dummy;
+  G4double x, y, z, f_x, f_y, f_z/*, dummy*/;
   G4int nX, nY, nZ;
   while (!file.eof()) {
     //    file >> x >> y >> z >> dummy >> f_x >> f_y >> f_z >> dummy;

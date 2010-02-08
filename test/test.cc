@@ -1,4 +1,4 @@
-// $Id: test.cc,v 1.12 2010/02/03 15:16:22 beischer Exp $
+// $Id: test.cc,v 1.13 2010/02/08 14:32:08 beischer Exp $
 
 #include "RES_Event.hh"
 
@@ -15,33 +15,35 @@ int main(int argc, char** argv)
 
   TFile* file = new TFile(filename, "READ");
 
-  // TTree* genTree = (TTree*) file->Get("resolution_gen_tree");
-  // if (genTree) {
-  //   RES_Event* genEvent = new RES_Event();
-  //     genTree->SetBranchAddress("event", &genEvent);
-  //   std::cout << "Generated events:" << std::endl;
-  //   std::cout << genTree->GetEntries() << std::endl;
-  //   for (unsigned int i = 0; i < genTree->GetEntries(); i++) {
-  //     genTree->GetEntry(i);
-  //     std::cout << "--------------------------------------------------" << std::endl;
-  //     std::cout << "ID: " << genEvent->GetID() << " --> "
-  //               << " p: " << genEvent->GetMomentum()
-  //               << " -----> chi2: " <<  genEvent->GetChi2() << std::endl;
-  //     for (unsigned int j = 0; j < genEvent->GetNbOfHits(); j++) {
-  //       std::cout << " (i,j): (" << genEvent->GetModuleID(j) << ", " << genEvent->GetLayerID(j) << ")"
-  //                 << " x: " << genEvent->GetHitPosition(j).x() 
-  //                 << " y: " << genEvent->GetHitPosition(j).y()
-  //                 << " z: " << genEvent->GetHitPosition(j).z() << std::endl;
-  //     }
-  //   }
-  // }
+  TTree* genTree = (TTree*) file->Get("resolution_gen_tree");
+  if (genTree) {
+    RES_Event* genEvent = new RES_Event();
+      genTree->SetBranchAddress("event", &genEvent);
+    std::cout << "Generated events:" << std::endl;
+    std::cout << genTree->GetEntries() << std::endl;
+    //    for (unsigned int i = 0; i < genTree->GetEntries(); i++) {
+    for (unsigned int i = 0; i < 1; i++) {
+      genTree->GetEntry(i);
+      std::cout << "--------------------------------------------------" << std::endl;
+      std::cout << "ID: " << genEvent->GetID() << " --> "
+                << " p: " << genEvent->GetMomentum()
+                << " -----> chi2: " <<  genEvent->GetChi2() << std::endl;
+      for (unsigned int j = 0; j < genEvent->GetNbOfHits(); j++) {
+        std::cout << " (i,j): (" << genEvent->GetModuleID(j) << ", " << genEvent->GetLayerID(j) << ")"
+                  << " x: " << genEvent->GetHitPosition(j).x() 
+                  << " y: " << genEvent->GetHitPosition(j).y()
+                  << " z: " << genEvent->GetHitPosition(j).z() << std::endl;
+      }
+    }
+  }
 
   TTree* recTree = (TTree*) file->Get("resolution_rec_tree");
   if (recTree) {
     RES_Event* recEvent = new RES_Event();
     recTree->SetBranchAddress("event", &recEvent);
     std::cout << "Reconstructed events:" << std::endl;
-    for (unsigned int i = 0; i < recTree->GetEntries(); i++) {
+    //    for (unsigned int i = 0; i < recTree->GetEntries(); i++) {
+    for (unsigned int i = 0; i < 1; i++) {
       recTree->GetEntry(i);
       std::cout << "--------------------------------------------------" << std::endl;
       std::cout << "ID: " << recEvent->GetID() << " --> "

@@ -1,4 +1,4 @@
-// $Id: res_vs_mom.cc,v 1.4 2009/10/24 16:29:36 beischer Exp $
+// $Id: res_vs_mom.cc,v 1.5 2010/02/08 14:32:09 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -109,12 +109,13 @@ int main(int argc, char** argv)
   graph.SetTitle("momentum resolution for perdaix");
 
   int i = 0;
-  double momMin = 0.5;
-  double momMax = 10.0;
-  double momStep = 0.5;
-  for (double mom = momMin; mom <= momMax; mom += momStep) {
+  int momMin = 50;
+  int momMax = 950;
+  int momStep = 50;
+  for (int mom = momMin; mom <= momMax; mom += momStep) {
     char filename[100];
-    sprintf(filename, "../results/perdaix_%.1f_GeV_5.00_deg_inhom_msc.root", mom);
+    sprintf(filename, "../results/pebs01_%03i_GeV.root", mom);
+    std::cout << filename << std::endl;
     TFile file(filename);
 
     if (file.IsZombie())
@@ -126,9 +127,9 @@ int main(int argc, char** argv)
     recTree->SetBranchAddress("event", &recEvent);
     genTree->GetEntry(0);
     double genMom = genEvent->GetMomentum()/1000.;
-    double momRes = analyticalFormula.Eval(genMom); //calculatePrediction(&genMom, 0);
+    //    double momRes = analyticalFormula.Eval(genMom); //calculatePrediction(&genMom, 0);
 
-    TH1D resHist("resHist", "resHist", 100, 1. - 5.*momRes, 1. + 5.*momRes);    
+    TH1D resHist("resHist", "resHist", 100, -0.5, 2.5);    
     for(int j = 0; j < genTree->GetEntries(); j++) {
       genTree->GetEntry(j);
       recTree->GetEntry(j);
@@ -148,13 +149,13 @@ int main(int argc, char** argv)
 
   //  prediction.SetLineWidth(2);
 
-  TLegend legend(0.2, 0.6, 0.4, 0.8);
-  legend.AddEntry(&graph, "results of simulation", "P");
-  //  legend.AddEntry(&prediction, "theoretical prediction", "L");
-  legend.AddEntry(&analyticalFormula, "expectation", "L");
-  legend.AddEntry(&analyticalFormula2, "expectation w/o multiple scattering", "L");
+  // TLegend legend(0.2, 0.6, 0.4, 0.8);
+  // legend.AddEntry(&graph, "results of simulation", "P");
+  // //  legend.AddEntry(&prediction, "theoretical prediction", "L");
+  // legend.AddEntry(&analyticalFormula, "expectation", "L");
+  // legend.AddEntry(&analyticalFormula2, "expectation w/o multiple scattering", "L");
 
-  analyticalFormula2.SetLineStyle(2);
+  // analyticalFormula2.SetLineStyle(2);
 
   TF1 fit("fit", fitfunc, 0., 10., 2);
 
@@ -165,9 +166,9 @@ int main(int argc, char** argv)
   canvas.SetGridy();
   graph.Draw("AP");
   graph.Fit("fit", "E");
-  analyticalFormula.Draw("SAME");
-  analyticalFormula2.Draw("SAME");
-  legend.Draw("SAME");
+  // analyticalFormula.Draw("SAME");
+  // analyticalFormula2.Draw("SAME");
+  //  legend.Draw("SAME");
 
   app->Run();
 
