@@ -1,4 +1,4 @@
-// $Id: RES_InhomField.cc,v 1.12 2010/02/08 14:32:08 beischer Exp $
+// $Id: RES_InhomField.cc,v 1.13 2010/02/23 12:53:01 beischer Exp $
 
 #include "RES_InhomField.hh"
 
@@ -104,12 +104,12 @@ void RES_InhomField::ReadData()
   G4int nBins_x, nBins_y, nBins_z;
   file >> x0 >> x1 >> y0 >> y1 >> z0 >> z1 >> nBins_x >> nBins_y >> nBins_z;
 
-  // x0 /= 10.;
-  // x1 /= 10.;
-  // y0 /= 10.;
-  // y1 /= 10.;
-  // z0 /= 10.;
-  // z1 /= 10.;
+  x0 /= 10.;
+  x1 /= 10.;
+  y0 /= 10.;
+  y1 /= 10.;
+  z0 /= 10.;
+  z1 /= 10.;
 
   m_axis_x = new RES_Axis(x0,x1,nBins_x);
   m_axis_y = new RES_Axis(y0,y1,nBins_y);
@@ -140,16 +140,16 @@ void RES_InhomField::ReadData()
   }
 
   // read the data (only contains all x, y >= 0, z >= 0)
-  G4double x, y, z, f_x, f_y, f_z/*, dummy*/;
+  G4double x, y, z, f_x, f_y, f_z, dummy;
   G4int nX, nY, nZ;
   while (!file.eof()) {
-    //    file >> x >> y >> z >> dummy >> f_x >> f_y >> f_z >> dummy;
+       file >> x >> y >> z >> dummy >> f_x >> f_y >> f_z >> dummy;
 
-    // x/=10.;
-    // y/=10.;
-    // z/=10.;
+    x/=10.;
+    y/=10.;
+    z/=10.;
 
-    file >> x >> y >> z >> f_x >> f_y >> f_z;
+    //    file >> x >> y >> z >> f_x >> f_y >> f_z;
 
     nX = m_axis_x->GetBin(x);
     nY = m_axis_y->GetBin(y);
@@ -158,30 +158,30 @@ void RES_InhomField::ReadData()
     m_field_y[nX][nY][nZ] = f_y;
     m_field_z[nX][nY][nZ] = f_z;
 
-    // mirror to get the full world
-    if (y != 0.0) {
-      nX = m_axis_x->GetBin(x);
-      nY = m_axis_y->GetBin(-y);
-      nZ = m_axis_z->GetBin(z);
-      m_field_x[nX][nY][nZ] = f_x;
-      m_field_y[nX][nY][nZ] = -f_y;
-      m_field_z[nX][nY][nZ] = f_z;
-    }
-    if (z != 0.0) {
-      nX = m_axis_x->GetBin(x);
-      nY = m_axis_y->GetBin(y);
-      nZ = m_axis_z->GetBin(-z);
-      m_field_x[nX][nY][nZ] = f_x;
-      m_field_y[nX][nY][nZ] = f_y;
-      m_field_z[nX][nY][nZ] = -f_z;
-    }
-    if ( (y != 0.0) && (z != 0) ) {
-      nX = m_axis_x->GetBin(x);
-      nY = m_axis_y->GetBin(-y);
-      nZ = m_axis_z->GetBin(-z);
-      m_field_x[nX][nY][nZ] = f_x;
-      m_field_y[nX][nY][nZ] = -f_y;
-      m_field_z[nX][nY][nZ] = -f_z;
-    }
+    // // mirror to get the full world
+    // if (y != 0.0) {
+    //   nX = m_axis_x->GetBin(x);
+    //   nY = m_axis_y->GetBin(-y);
+    //   nZ = m_axis_z->GetBin(z);
+    //   m_field_x[nX][nY][nZ] = f_x;
+    //   m_field_y[nX][nY][nZ] = -f_y;
+    //   m_field_z[nX][nY][nZ] = f_z;
+    // }
+    // if (z != 0.0) {
+    //   nX = m_axis_x->GetBin(x);
+    //   nY = m_axis_y->GetBin(y);
+    //   nZ = m_axis_z->GetBin(-z);
+    //   m_field_x[nX][nY][nZ] = f_x;
+    //   m_field_y[nX][nY][nZ] = f_y;
+    //   m_field_z[nX][nY][nZ] = -f_z;
+    // }
+    // if ( (y != 0.0) && (z != 0) ) {
+    //   nX = m_axis_x->GetBin(x);
+    //   nY = m_axis_y->GetBin(-y);
+    //   nZ = m_axis_z->GetBin(-z);
+    //   m_field_x[nX][nY][nZ] = f_x;
+    //   m_field_y[nX][nY][nZ] = -f_y;
+    //   m_field_z[nX][nY][nZ] = -f_z;
+    // }
   }
 }

@@ -1,4 +1,4 @@
-// $Id: single_run.cc,v 1.21 2010/02/04 14:42:37 beischer Exp $
+// $Id: single_run.cc,v 1.22 2010/02/23 12:53:02 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -119,8 +119,8 @@ int main(int argc, char** argv)
   for (int i = 0;i < nHits; i++) {
     char title[256];
     sprintf(title, "yDeltaGenHist%d", i);
-    if (i == 0 || i == nHits - 2) yDeltaGenHist[i] = new TH1D(title,title, 500, -0.3, 0.3);
-    else yDeltaGenHist[i] = new TH1D(title,title, nBins, -0.3, 0.3);
+    if (i == 0 || i == nHits - 2) yDeltaGenHist[i] = new TH1D(title,title, 500, -1.0, 1.0);
+    else yDeltaGenHist[i] = new TH1D(title,title, nBins, -1.0, 1.0);
   }
   TH1D** xDeltaSmearedHist = new TH1D*[nHits];
   for (int i = 0;i < nHits; i++) {
@@ -132,12 +132,12 @@ int main(int argc, char** argv)
   for (int i = 0;i < nHits; i++) {
     char title[256];
     sprintf(title, "yDeltaSmearedHist%d", i);
-    if (i == 0 || i == nHits - 2) yDeltaSmearedHist[i] = new TH1D(title,title, 500, -0.3, 0.3);
-    else yDeltaSmearedHist[i] = new TH1D(title,title, nBins, -0.3, 0.3);
+    if (i == 0 || i == nHits - 2) yDeltaSmearedHist[i] = new TH1D(title,title, 500, -1.0, 1.0);
+    else yDeltaSmearedHist[i] = new TH1D(title,title, nBins, -1.0, 1.0);
   }
 
   TH1D totalXhist("totalXhist", "totalXhist", 500, -20, 20);
-  TH1D totalYhist("totalYhist", "totalYhist", 500, -0.3, 0.3);
+  TH1D totalYhist("totalYhist", "totalYhist", 500, -1.0, 1.0);
   TH1D chi2Hist("chi2Hist", "chi2Hist", 500, 0.0, 100.0);
   TH1D angleHist("angleHist", "angleHist", 500, -5e-3, 5e-3);
 
@@ -156,25 +156,25 @@ int main(int argc, char** argv)
     resHist.Fill(genEvent->GetMomentum()/recEvent->GetMomentum());
     ptHist.Fill(genEvent->GetTransverseMomentum()/recEvent->GetTransverseMomentum());
 
-    // for (int i = 0; i < nHitsGen; i++) {
-    //   unsigned int genUniqueLayer = 2*genEvent->GetModuleID(i) + genEvent->GetLayerID(i);
-    //   unsigned int iRec = genUniqueLayer;
-    //   xDeltaGenHist[genUniqueLayer]->Fill(genEvent->GetHitPosition(i).x() - recEvent->GetHitPosition(iRec).x());
-    //   yDeltaGenHist[genUniqueLayer]->Fill(genEvent->GetHitPosition(i).y() - recEvent->GetHitPosition(iRec).y());
-    //   xDeltaSmearedHist[genUniqueLayer]->Fill(genEvent->GetSmearedHitPosition(i).x() - recEvent->GetHitPosition(iRec).x());
-    //   yDeltaSmearedHist[genUniqueLayer]->Fill(genEvent->GetSmearedHitPosition(i).y() - recEvent->GetHitPosition(iRec).y());
-    //   totalXhist.Fill(genEvent->GetHitPosition(i).x() - recEvent->GetHitPosition(iRec).x());
-    //   totalYhist.Fill(genEvent->GetHitPosition(i).y() - recEvent->GetHitPosition(iRec).y());
-    // }
+    for (int i = 0; i < nHitsGen; i++) {
+      unsigned int genUniqueLayer = 2*genEvent->GetModuleID(i) + genEvent->GetLayerID(i);
+      unsigned int iRec = genUniqueLayer;
+      xDeltaGenHist[genUniqueLayer]->Fill(genEvent->GetHitPosition(i).x() - recEvent->GetHitPosition(iRec).x());
+      yDeltaGenHist[genUniqueLayer]->Fill(genEvent->GetHitPosition(i).y() - recEvent->GetHitPosition(iRec).y());
+      xDeltaSmearedHist[genUniqueLayer]->Fill(genEvent->GetSmearedHitPosition(i).x() - recEvent->GetHitPosition(iRec).x());
+      yDeltaSmearedHist[genUniqueLayer]->Fill(genEvent->GetSmearedHitPosition(i).y() - recEvent->GetHitPosition(iRec).y());
+      totalXhist.Fill(genEvent->GetHitPosition(i).x() - recEvent->GetHitPosition(iRec).x());
+      totalYhist.Fill(genEvent->GetHitPosition(i).y() - recEvent->GetHitPosition(iRec).y());
+    }
 
-    // double angle1 = (genEvent->GetHitPosition(1).y() - genEvent->GetHitPosition(0).y())/(genEvent->GetHitPosition(1).z() - genEvent->GetHitPosition(0).z());
-    // double angle2 = (genEvent->GetHitPosition(nHitsGen-1).y() - genEvent->GetHitPosition(nHitsGen-2).y())/(genEvent->GetHitPosition(nHitsGen-1).z() - genEvent->GetHitPosition(nHitsGen-2).z());
-    // angleHist.Fill(angle2-angle1);
+    double angle1 = (genEvent->GetHitPosition(1).y() - genEvent->GetHitPosition(0).y())/(genEvent->GetHitPosition(1).z() - genEvent->GetHitPosition(0).z());
+    double angle2 = (genEvent->GetHitPosition(nHitsGen-1).y() - genEvent->GetHitPosition(nHitsGen-2).y())/(genEvent->GetHitPosition(nHitsGen-1).z() - genEvent->GetHitPosition(nHitsGen-2).z());
+    angleHist.Fill(angle2-angle1);
 
-    // chi2Hist.Fill(recEvent->GetChi2());
-    // char title[128];
-    // sprintf(title, "#chi^{2} Distribution (dof = %d)", recEvent->GetDof());
-    // chi2Hist.SetTitle(title);
+    chi2Hist.Fill(recEvent->GetChi2());
+    char title[128];
+    sprintf(title, "#chi^{2} Distribution (dof = %d)", recEvent->GetDof());
+    chi2Hist.SetTitle(title);
   }
 
   for (int i = 0; i < nHits; i++) {
@@ -212,8 +212,8 @@ int main(int argc, char** argv)
     xDeltaGenHist[i]->GetYaxis()->SetTitle("N");
     xDeltaGenHist[i]->Fit("gaus", "Q");
     TF1* fitFunc = xDeltaGenHist[i]->GetFunction("gaus");
-    // if (fitFunc)
-    //   std::cout << "x" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
+    if (fitFunc)
+      std::cout << "x" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
   }
 
   TCanvas canvas3("canvas3", "y: Reconstructed vs generated position", 1024, 768);
@@ -245,8 +245,8 @@ int main(int argc, char** argv)
     xDeltaSmearedHist[i]->GetYaxis()->SetTitle("N");
     xDeltaSmearedHist[i]->Fit("gaus", "Q");
     TF1* fitFunc = xDeltaSmearedHist[i]->GetFunction("gaus");
-    // if (fitFunc)
-    //   std::cout << "x" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
+    if (fitFunc)
+      std::cout << "x" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
    }
 
   TCanvas canvas5("canvas5", "y: Reconstructed vs measured Position", 1024, 768);
@@ -261,8 +261,8 @@ int main(int argc, char** argv)
     yDeltaSmearedHist[i]->GetYaxis()->SetTitle("N");
     yDeltaSmearedHist[i]->Fit("gaus", "Q");
     TF1* fitFunc = yDeltaSmearedHist[i]->GetFunction("gaus");
-    // if (fitFunc)
-    //   std::cout << "y" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
+    if (fitFunc)
+      std::cout << "y" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
   }
 
   TCanvas canvas6("canvas6", "Sum of reconstructed vs generated position histograms", 1024, 768);
@@ -281,7 +281,8 @@ int main(int argc, char** argv)
   chi2Dist.SetNpx(1000);
   
   chi2Dist.FixParameter(0, 1);
-  chi2Dist.FixParameter(1, recEvent->GetDof());
+  chi2Dist.FixParameter(1, 7);
+  //  chi2Dist.FixParameter(1, recEvent->GetDof());
   TCanvas canvas7("canvas7", "Chi2 distribution", 1024, 768);
   canvas7.Draw();
   chi2Hist.Draw();

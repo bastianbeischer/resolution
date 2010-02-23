@@ -13,11 +13,11 @@ my $firstRunNumber = 1600;
 
 my $numberOfEventsPerRun = 10000;
 
-my $minMomentum = 0.5;
-my $maxMomentum = 10.0;
-my $momentumStep = 0.5;
-my $minAngle = 5.0;
-my $maxAngle = 5.0;
+my $minMomentum = 50.0;
+my $maxMomentum = 50.0;
+my $momentumStep = 0.0;
+my $minAngle = 0.1;
+my $maxAngle = 10.0;
 my $angleStep = 0.1;
 
 my $project_dir = "/home/home4/institut_1b/beischer/src/geant4/resolution";
@@ -35,7 +35,7 @@ for (my $angle = $minAngle; $angle <= $maxAngle; $angle += $angleStep) {
 
     my $momentumString = sprintf("%.1f", $momentum);
     my $angleString = sprintf("%.2f", $angle);
-    my $filename = "${result_dir}/perdaix_${momentumString}_GeV_${angleString}_deg_inhom_msc.root";
+    my $filename = "${result_dir}/pebs01_${momentumString}_GeV_${angleString}_deg_inhom_msc.root";
 
     print "Run $currentRun:\n";
     my $condorfile = &make_condor_file($currentRun);
@@ -44,7 +44,7 @@ for (my $angle = $minAngle; $angle <= $maxAngle; $angle += $angleStep) {
     print "$macrofile\n";
 
     unlink($filename);
-    system "condor_submit", "$condorfile";
+    system "echo", "$condorfile";
     ++$currentRun;
   }
 }
@@ -67,45 +67,117 @@ sub make_macro_file{
 /tracking/verbose 0
 /RES/Fit/Verbose 0
 
+/RES/Gun/StartZ 120 cm
 /RES/Gun/RandomOrigin
 /RES/Gun/RandomDirection
+/gun/energy ${momentum} GeV
 /gun/particle e-
-/gun/momentumAmp ${momentum} GeV
 
 /control/alias moduleRot -${rotation}
 /control/alias moduleInternalRot ${angle}
+/control/alias fiberEfficiency 1.0
+/control/alias fiberResolution 35
 
-/RES/Det/AddModule 0. 0. 18.5 cm
+# panel 1_1
+/RES/Det/AddModule 0. 0. 116.0 cm
 /RES/Det/SetModuleRotation 0 {moduleRot}
 /RES/Det/SetModuleInternalRotation 0 {moduleInternalRot}
-/RES/Det/SetModuleWidth 0 20.736
+/RES/Det/SetModuleLength 0 152.0
+/RES/Det/SetModuleWidth 0 152.0
+/RES/Det/SetModuleUpperSigmaV 0 {fiberResolution}
+/RES/Det/SetModuleLowerSigmaV 0 {fiberResolution}
+/RES/Det/SetModuleUpperEfficiency 0 {fiberEfficiency}
+/RES/Det/SetModuleLowerEfficiency 0 {fiberEfficiency}
 
-/RES/Det/AddModule 0. 0. 4.5 cm
+# panel 1_2
+/RES/Det/AddModule 0. 0. 114.0 cm
 /RES/Det/SetModuleRotation 1 {moduleRot}
 /RES/Det/SetModuleInternalRotation 1 {moduleInternalRot}
-/RES/Det/SetModuleWidth 1 13.824
+/RES/Det/SetModuleLength 1 152.0
+/RES/Det/SetModuleWidth 1 152.0
+/RES/Det/SetModuleUpperSigmaV 1 {fiberResolution}
+/RES/Det/SetModuleLowerSigmaV 1 {fiberResolution}
+/RES/Det/SetModuleUpperEfficiency 1 {fiberEfficiency}
+/RES/Det/SetModuleLowerEfficiency 1 {fiberEfficiency}
 
-/RES/Det/AddModule 0. 0. -4.5 cm
+# panel 2_1
+/RES/Det/AddModule 0. 0. 28.0 cm
 /RES/Det/SetModuleRotation 2 {moduleRot}
 /RES/Det/SetModuleInternalRotation 2 {moduleInternalRot}
-/RES/Det/SetModuleWidth 2 13.824
+/RES/Det/SetModuleLength 2 86.0
+/RES/Det/SetModuleWidth 2 86.0
+/RES/Det/SetModuleUpperSigmaV 2 {fiberResolution}
+/RES/Det/SetModuleLowerSigmaV 2 {fiberResolution}
+/RES/Det/SetModuleUpperEfficiency 2 {fiberEfficiency}
+/RES/Det/SetModuleLowerEfficiency 2 {fiberEfficiency}
 
-/RES/Det/AddModule 0. 0. -18.5 cm
+# panel 2_2
+/RES/Det/AddModule 0. 0. 26.0 cm
 /RES/Det/SetModuleRotation 3 {moduleRot}
 /RES/Det/SetModuleInternalRotation 3 {moduleInternalRot}
-/RES/Det/SetModuleWidth 3 20.736
+/RES/Det/SetModuleLength 3 86.0
+/RES/Det/SetModuleWidth 3 86.0
+/RES/Det/SetModuleUpperSigmaV 3 {fiberResolution}
+/RES/Det/SetModuleLowerSigmaV 3 {fiberResolution}
+/RES/Det/SetModuleUpperEfficiency 3 {fiberEfficiency}
+/RES/Det/SetModuleLowerEfficiency 3 {fiberEfficiency}
 
-/RES/Field/SetInhomFieldFrom ${table_dir}/perdaix_07_jul_2009.table
+# panel 3_1
+/RES/Det/AddModule 0. 0. -25.0 cm
+/RES/Det/SetModuleRotation 4 {moduleRot}
+/RES/Det/SetModuleInternalRotation 4 {moduleInternalRot}
+/RES/Det/SetModuleLength 4 86.0
+/RES/Det/SetModuleWidth 4 86.0
+/RES/Det/SetModuleUpperSigmaV 4 {fiberResolution}
+/RES/Det/SetModuleLowerSigmaV 4 {fiberResolution}
+/RES/Det/SetModuleUpperEfficiency 4 {fiberEfficiency}
+/RES/Det/SetModuleLowerEfficiency 4 {fiberEfficiency}
+
+# panel 3_2
+/RES/Det/AddModule 0. 0. -27.0 cm
+/RES/Det/SetModuleRotation 5 {moduleRot}
+/RES/Det/SetModuleInternalRotation 5 {moduleInternalRot}
+/RES/Det/SetModuleLength 5 86.0
+/RES/Det/SetModuleWidth 5 86.0
+/RES/Det/SetModuleUpperSigmaV 5 {fiberResolution}
+/RES/Det/SetModuleLowerSigmaV 5 {fiberResolution}
+/RES/Det/SetModuleUpperEfficiency 5 {fiberEfficiency}
+/RES/Det/SetModuleLowerEfficiency 5 {fiberEfficiency}
+
+# panel 4_1
+/RES/Det/AddModule 0. 0. -70.0 cm
+/RES/Det/SetModuleRotation 6 {moduleRot}
+/RES/Det/SetModuleInternalRotation 6 {moduleInternalRot}
+/RES/Det/SetModuleLength 6 86.0
+/RES/Det/SetModuleWidth 6 86.0
+/RES/Det/SetModuleUpperSigmaV 6 {fiberResolution}
+/RES/Det/SetModuleLowerSigmaV 6 {fiberResolution}
+/RES/Det/SetModuleUpperEfficiency 6 {fiberEfficiency}
+/RES/Det/SetModuleLowerEfficiency 6 {fiberEfficiency}
+
+# panel 4_2
+/RES/Det/AddModule 0. 0. -72.0 cm
+/RES/Det/SetModuleRotation 7 {moduleRot}
+/RES/Det/SetModuleInternalRotation 7 {moduleInternalRot}
+/RES/Det/SetModuleLength 7 86.0
+/RES/Det/SetModuleWidth 7 86.0
+/RES/Det/SetModuleUpperSigmaV 7 {fiberResolution}
+/RES/Det/SetModuleLowerSigmaV 7 {fiberResolution}
+/RES/Det/SetModuleUpperEfficiency 7 {fiberEfficiency}
+/RES/Det/SetModuleLowerEfficiency 7 {fiberEfficiency}
+
+/RES/Field/SetInhomFieldFrom tables/pebs01_25_jan_2010.table
 #/RES/Field/SetDummyField 0.27 0.0 0.0 tesla
 #/RES/Field/SetUniformField 0.3 0.0 0.0 tesla
-
-/RES/Fit/Method blobel
 
 /RES/Data/OverWriteFile true
 /RES/Data/SetFileName ${filename}
 /RES/Run/StoreResults
 
 /run/initialize
+
+/process/inactivate eIoni
+/process/inactivate eBrem
 
 /process/activate msc
 /RES/Run/Generate ${nEvents}

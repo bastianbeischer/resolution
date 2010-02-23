@@ -1,4 +1,4 @@
-// $Id: res_vs_angle.cc,v 1.6 2009/10/14 16:51:37 beischer Exp $
+// $Id: res_vs_angle.cc,v 1.7 2010/02/23 12:53:03 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -75,17 +75,17 @@ int main(int argc, char** argv)
   double Lup   = 0.14;   // in m
   double Ldown = 0.14;   // in m
   double magField = 0.27; // in T
-  //double m = 0.511e-3; // electron mass in GeV
-  double m = 0.0; // geantino mass in GeV
+  double m = 0.511e-3; // electron mass in GeV
+  //double m = 0.0; // geantino mass in GeV
   double sigmaModule = 50e-6/sqrt(2);
   analyticalFormula.SetParameters(m, Lup, Ldown, Linner, magField, 0., sigmaModule);
   
   TGraphErrors sigmaVsAngleGraph;
   sigmaVsAngleGraph.SetMarkerStyle(23);
   sigmaVsAngleGraph.SetMarkerColor(kRed);
-  sigmaVsAngleGraph.GetXaxis()->SetTitle("stereo angle [deg]");
+  sigmaVsAngleGraph.GetXaxis()->SetTitle("stereo angle / deg");
   sigmaVsAngleGraph.GetYaxis()->SetTitle("#sigma_{p} / p");
-  sigmaVsAngleGraph.SetTitle("momentum resolution for perdaix");
+  sigmaVsAngleGraph.SetTitle("PERDaix momentum resolution for 1 GeV electrons");
 
   TGraphErrors muVsAngleGraph;
   muVsAngleGraph.SetMarkerStyle(23);
@@ -101,7 +101,7 @@ int main(int argc, char** argv)
   double angleStep = 0.1;
   for (double angle = angleMin; angle < angleMax; angle += angleStep) {
     char filename[100];
-    sprintf(filename, "../results/perdaix_1.0_GeV_%.2f_deg_inhom.root", angle);
+    sprintf(filename, "../results/perdaix_1.0_GeV_%.2f_deg_inhom_msc.root", angle);
     TFile file(filename);
 
     std::cout << "Opening file: " << filename << std::endl;
