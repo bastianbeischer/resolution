@@ -15,7 +15,7 @@ my $numberOfEventsPerRun = 10000;
 
 my $minMomentum = 50.0;
 my $maxMomentum = 50.0;
-my $momentumStep = 0.0;
+my $momentumStep = 0.1;
 my $minAngle = 0.1;
 my $maxAngle = 10.0;
 my $angleStep = 0.1;
@@ -44,7 +44,7 @@ for (my $angle = $minAngle; $angle <= $maxAngle; $angle += $angleStep) {
     print "$macrofile\n";
 
     unlink($filename);
-    system "echo", "$condorfile";
+    system "condor_submit", "$condorfile";
     ++$currentRun;
   }
 }
@@ -166,7 +166,7 @@ sub make_macro_file{
 /RES/Det/SetModuleUpperEfficiency 7 {fiberEfficiency}
 /RES/Det/SetModuleLowerEfficiency 7 {fiberEfficiency}
 
-/RES/Field/SetInhomFieldFrom tables/pebs01_25_jan_2010.table
+/RES/Field/SetInhomFieldFrom ${table_dir}/pebs01_25_jan_2010.table
 #/RES/Field/SetDummyField 0.27 0.0 0.0 tesla
 #/RES/Field/SetUniformField 0.3 0.0 0.0 tesla
 

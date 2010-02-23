@@ -1,4 +1,4 @@
-// $Id: RES_RunManager.cc,v 1.18 2010/02/08 14:32:08 beischer Exp $
+// $Id: RES_RunManager.cc,v 1.19 2010/02/23 18:33:05 beischer Exp $
 
 #include "RES_RunManager.hh"
 
@@ -52,6 +52,11 @@ void RES_RunManager::StartGenerationRun(G4int nEvents)
   SetActionsForGeneration();
   BeamOn(nEvents);
   if (m_storeResults) m_dataHandler->WriteFile();
+  G4cout << G4endl
+         << " ---------------------------------------------- " << G4endl
+         << " Successfully generated " << nEvents << " events" << G4endl
+         << " ---------------------------------------------- " << G4endl
+         << G4endl;
 }
 
 void RES_RunManager::StartReconstructionRun()
@@ -103,6 +108,13 @@ void RES_RunManager::StartReconstructionRun()
 
   primaryGeneratorAction->SetRandomOrigin(randOriginValue);  
   primaryGeneratorAction->SetRandomDirection(randDirectionValue);  
+
+  G4int nEvents = m_dataHandler->GetNumberOfGeneratedEvents();
+  G4cout << G4endl
+         << " -------------------------------------------------- " << G4endl
+         << " Successfully reconstructed " << nEvents << " events" << G4endl
+         << " -------------------------------------------------- " << G4endl
+         << G4endl;
 }
 
 void RES_RunManager::StartReconstructionRunWithoutLayer(G4int layer)
