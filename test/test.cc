@@ -1,4 +1,4 @@
-// $Id: test.cc,v 1.13 2010/02/08 14:32:08 beischer Exp $
+// $Id: test.cc,v 1.14 2010/02/25 20:41:11 beischer Exp $
 
 #include "RES_Event.hh"
 
@@ -30,9 +30,9 @@ int main(int argc, char** argv)
                 << " -----> chi2: " <<  genEvent->GetChi2() << std::endl;
       for (unsigned int j = 0; j < genEvent->GetNbOfHits(); j++) {
         std::cout << " (i,j): (" << genEvent->GetModuleID(j) << ", " << genEvent->GetLayerID(j) << ")"
-                  << " x: " << genEvent->GetHitPosition(j).x() 
-                  << " y: " << genEvent->GetHitPosition(j).y()
-                  << " z: " << genEvent->GetHitPosition(j).z() << std::endl;
+                  << " x: " << genEvent->GetSmearedHitPosition(j).x() 
+                  << " y: " << genEvent->GetSmearedHitPosition(j).y()
+                  << " z: " << genEvent->GetSmearedHitPosition(j).z() << std::endl;
       }
     }
   }

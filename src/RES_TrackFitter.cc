@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitter.cc,v 1.54 2010/02/08 14:32:08 beischer Exp $
+// $Id: RES_TrackFitter.cc,v 1.55 2010/02/25 20:41:11 beischer Exp $
 
 #include <cmath>
 #include <fstream>
@@ -97,11 +97,17 @@ RES_Event RES_TrackFitter::Fit()
     break;
   case testbeam:
     CalculateStartParameters();
-    DoBlobelFit(3);
+    DoBlobelFit(5);
     break;
   default:
     break;
   }
+
+  if (gun->GetParticleCharge() != m_initialCharge) {
+    m_currentRecEvent.SetMomentum(-m_currentRecEvent.GetMomentum());
+    m_currentRecEvent.SetTransverseMomentum(-m_currentRecEvent.GetTransverseMomentum());
+  }
+  gun->SetParticleCharge(m_initialCharge);
 
   //std::cout << "p: " << m_currentRecEvent.GetMomentum()/GeV << std::endl;
 
@@ -278,20 +284,22 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
   TVectorD positions = SolutionToPositions*solution;
 
   // Fill information in m_currentRecEvent (usually done in RES_EventActionReconstruction for other fit methods)
-  m_currentRecEvent = RES_Event();
-  for (unsigned int i = 0; i < 2*nModules; i++) {
-    G4int iModule = i/2;
-    G4int iLayer  = i%2;
-    G4double z;
-    if (iLayer == 0) z = det->GetModule(iModule)->GetUpperZ();
-    else             z = det->GetModule(iModule)->GetLowerZ();
-    m_currentRecEvent.AddHit(iModule, iLayer, positions(2*i), positions(2*i+1), z);
+  if (m_fitMethod == oneline) {
+    m_currentRecEvent = RES_Event();
+    for (unsigned int i = 0; i < 2*nModules; i++) {
+      G4int iModule = i/2;
+      G4int iLayer  = i%2;
+      G4double z;
+      if (iLayer == 0) z = det->GetModule(iModule)->GetUpperZ();
+      else             z = det->GetModule(iModule)->GetLowerZ();
+      m_currentRecEvent.AddHit(iModule, iLayer, positions(2*i), positions(2*i+1), z);
+    }
+    m_currentRecEvent.SetChi2(chi2);
+    m_currentRecEvent.SetDof(nRow - nCol);
+    m_currentRecEvent.SetEventType(reconstructed);
+    m_currentRecEvent.SetMomentum(DBL_MAX);
+    m_currentRecEvent.SetTransverseMomentum(DBL_MAX);
   }
-  m_currentRecEvent.SetChi2(chi2);
-  m_currentRecEvent.SetDof(nRow - nCol);
-  m_currentRecEvent.SetEventType(reconstructed);
-  m_currentRecEvent.SetMomentum(DBL_MAX);
-  m_currentRecEvent.SetTransverseMomentum(DBL_MAX);
 
   // print covariance matrix if the user wants to
   if (m_verbose > 1) {
@@ -389,14 +397,14 @@ void RES_TrackFitter::CalculateStartParameters()
     G4double deltaTheta = fabs(dy_over_dz_bottom - dy_over_dz_top);
 
     // TODO: CHANGED HARDCODED VALUES HERE
-    //G4double magnetHeight = 8*cm; // PERDAIX MAGNET HERE
-    G4double magnetHeight = 50*cm; // PEBS MAGNET HERE
+    G4double magnetHeight = 8*cm; // PERDAIX MAGNET HERE
+    //G4double magnetHeight = 50*cm; // PEBS MAGNET HERE
     G4double y0_magnet = y0_bottom + (-magnetHeight/2.)*dy_over_dz_bottom;
     G4double y1_magnet = y0_top    +  (magnetHeight/2.)*dy_over_dz_top;
     G4double z0_magnet = -magnetHeight/2.;
     G4double z1_magnet =  magnetHeight/2.;
-    //G4double B  = 0.27; // PERDAIX MAGNET HERE
-    G4double B  = 0.27; // PEBS MAGNET HERE
+    G4double B  = 0.27; // PERDAIX MAGNET HERE
+    //G4double B  = 0.27; // PEBS MAGNET HERE
     G4double L  = sqrt(pow(y1_magnet - y0_magnet, 2.) + pow(z1_magnet - z0_magnet,2.))/m;
     G4double pt = 0.3*B*L/deltaTheta*GeV;
 
@@ -435,19 +443,44 @@ void RES_TrackFitter::CalculateStartParameters()
   if (m_fitMethod == testbeam) {
 
     G4int nHits = m_currentGenEvent.GetNbOfHits();
-    double x0,y0,lambda_x,lambda_y_top,lambda_y_bottom;
+    double x0,y0_top,y0_bottom,lambda_x,lambda_y_top,lambda_y_bottom;
 
     G4double z0 = 0;
     G4double k0 = m_smearedHits[0].z() - z0;
 
     G4double dummy1,dummy2;
-    FitStraightLine(0,nHits,x0,dummy1,lambda_x,dummy2);
-    FitStraightLine(0,nHits/2,dummy1,y0,dummy2,lambda_y_top);
+
+    for (int i = nHits/2; i < nHits; i++) {
+      if (i != 11)
+      AddLayerToBeSkipped(i);
+    }
+    FitStraightLine(0,nHits,x0,y0_top,lambda_x,lambda_y_top);
+    m_layersToBeSkipped.clear();
+
+    for (int i = 0; i < nHits/2; i++) {
+      if (i != 1)
+      AddLayerToBeSkipped(i);
+    }
+    FitStraightLine(0,nHits,dummy1,y0_bottom,dummy2,lambda_y_bottom);
+    m_layersToBeSkipped.clear();
+
     G4double phi   = atan(lambda_y_top);
     G4double theta = atan(-lambda_x*cos(phi));
 
-    m_parameter[0] = 1./(1.0*GeV);
-    m_parameter[1] = y0 + k0*lambda_y_top;
+    G4double deltaTheta = fabs(lambda_y_bottom - lambda_y_top);
+
+    // TODO: CHANGED HARDCODED VALUES HERE
+    G4double magnetHeight = 8*cm; // PERDAIX MAGNET HERE
+    G4double z0_magnet = -magnetHeight/2. + 5.3*cm;
+    G4double z1_magnet =  magnetHeight/2. + 5.3*cm;
+    G4double y0_magnet = y0_bottom + z0_magnet*dy_over_dz_bottom;
+    G4double y1_magnet = y0_top    + z1_magnet*dy_over_dz_top;
+    G4double B  = 0.27; // PERDAIX MAGNET HERE
+    G4double L  = sqrt(pow(y1_magnet - y0_magnet, 2.) + pow(z1_magnet - z0_magnet,2.))/m;
+    G4double pt = 0.3*B*L/deltaTheta*GeV;
+
+    m_parameter[0] = 1./pt;
+    m_parameter[1] = y0_top + k0*lambda_y_top;
     m_parameter[2] = phi;
     m_parameter[3] = x0 + k0*lambda_x;
     m_parameter[4] = theta;
@@ -565,10 +598,13 @@ G4double RES_TrackFitter::Chi2InDetFrame()
   G4ThreeVector position(x0, y0, m_smearedHits[0].z());
   position -= 1.*cm * direction;
       
-  // if (pt < 0) {
-  //   gun->SetParticleCharge(-m_initialCharge);
-  //   pt = -pt;
-  // }
+  if (pt < 0) {
+    gun->SetParticleCharge(-m_initialCharge);
+    pt = -pt;
+  }
+  else {
+    gun->SetParticleCharge(m_initialCharge);
+  }
 
   G4double mass = gun->GetParticleDefinition()->GetPDGMass();
   G4double momentum = pt/cos(theta);
@@ -633,11 +669,14 @@ G4double RES_TrackFitter::Chi2InModuleFrame()
   G4double x0    = m_parameter[3];
   G4double theta = m_parameter[4];
 
-  // if (pt < 0) {
-  //   gun->SetParticleCharge(-m_initialCharge);
-  //   pt = -pt;
-  // }
-  
+  if (pt < 0) {
+    gun->SetParticleCharge(-m_initialCharge);
+    pt = -pt;
+  }
+  else {
+    gun->SetParticleCharge(m_initialCharge);
+  }
+
   G4double mass = gun->GetParticleDefinition()->GetPDGMass();
   G4double momentum = pt/cos(theta);
   G4double energy = sqrt( pow(momentum, 2.) + pow(mass, 2.) );
