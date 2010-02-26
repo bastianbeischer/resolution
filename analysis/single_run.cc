@@ -1,4 +1,4 @@
-// $Id: single_run.cc,v 1.23 2010/02/25 20:41:11 beischer Exp $
+// $Id: single_run.cc,v 1.24 2010/02/26 17:42:21 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -105,8 +105,8 @@ int main(int argc, char** argv)
   // double momRes = analyticalFormula.Eval(genMom);
   //  TH1D resHist("resHist", "resHist", 100, 1. - 5.*momRes, 1. + 5.*momRes);
   double momRes = sqrt(pow(genMom*0.12, 2.) + pow(0.25,2.));
-  TH1D resHist("resHist", "resHist", 100, 1-5*momRes, 1+5*momRes);
-  TH1D ptHist("ptHist", "ptHist", 100, 1-5*momRes, 1+5*momRes);
+  TH1D resHist("resHist", "resHist", 40, 1-5*momRes, 1+5*momRes);
+  TH1D ptHist("ptHist", "ptHist", 40, 1-5*momRes, 1+5*momRes);
   //TH1D resHist("resHist", "resHist", 50, 0.0, 2.0);
   // TH1D ptHist("ptHist", "ptHist", 100, 0.0, 2.0);
   //int nHits = recEvent->GetNbOfHits();
@@ -155,7 +155,7 @@ int main(int argc, char** argv)
     int nHitsGen = genEvent->GetNbOfHits();
     int nHitsRec = recEvent->GetNbOfHits();
 
-    double chi2Cut = 10000;
+    double chi2Cut = 30;
     double chi2 = recEvent->GetChi2();
     if (nHitsGen <= 4 || nHitsRec == 0 || nHitsGen > nHitsRec || chi2 > chi2Cut) continue;
     resHist.Fill(genEvent->GetMomentum()/recEvent->GetMomentum());
@@ -290,7 +290,7 @@ int main(int argc, char** argv)
   chi2Dist.SetNpx(1000);
   
   chi2Dist.FixParameter(0, 1);
-  //  chi2Dist.FixParameter(1, 7);
+  //chi2Dist.FixParameter(1, 9);
   chi2Dist.FixParameter(1, recEvent->GetDof());
   TCanvas canvas7("canvas7", "Chi2 distribution", 1024, 768);
   canvas7.Draw();

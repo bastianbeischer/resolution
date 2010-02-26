@@ -7,8 +7,8 @@ G4EXLIB := true
 CPPFLAGS += -I$(ROOTSYS)/include
 EXTRALIBS += $(shell root-config --libs) -lMinuit
 
-CPPFLAGS += -g
-CPPFLAGS += -Wno-unused-result
+#CPPFLAGS += -g
+#CPPFLAGS += -Wno-unused-result
 
 RES_EventDir := ./RES_Event
 RES_EventLib := $(RES_EventDir)/libRES_Event.so

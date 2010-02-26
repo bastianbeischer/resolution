@@ -1,4 +1,4 @@
-// $Id: RES_EventActionGeneration.cc,v 1.23 2010/01/29 12:51:38 beischer Exp $
+// $Id: RES_EventActionGeneration.cc,v 1.24 2010/02/26 17:42:21 beischer Exp $
 
 #include "RES_EventActionGeneration.hh"
 
@@ -34,7 +34,9 @@ void RES_EventActionGeneration::BeginOfEventAction(const G4Event* event)
     std::vector<G4int> used;
     
     // NASTY HARDCODED!!! for testbeam!
+    used.push_back(0);
     used.push_back(1);
+    used.push_back(10);
     used.push_back(11);
 
     G4int nModules = det->GetNumberOfModules();

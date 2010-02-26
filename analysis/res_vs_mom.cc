@@ -1,4 +1,4 @@
-// $Id: res_vs_mom.cc,v 1.6 2010/02/25 20:41:11 beischer Exp $
+// $Id: res_vs_mom.cc,v 1.7 2010/02/26 17:42:21 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -114,7 +114,7 @@ int main(int argc, char** argv)
   int momStep = 1;
   for (double mom = momMin; mom <= momMax; mom += momStep) {
     char filename[100];
-    sprintf(filename, "../results/perdaix_%.1f_GeV.root", mom);
+    sprintf(filename, "../results/perdaix_%.1f_GeV_1.0_deg.root", mom);
     std::cout << filename << std::endl;
     TFile file(filename);
 
@@ -151,8 +151,8 @@ int main(int argc, char** argv)
   }
 
   TGraphErrors graph2;
-  graph2.SetMarkerStyle(23);
-  graph2.SetMarkerColor(kRed);
+  graph2.SetMarkerStyle(22);
+  graph2.SetMarkerColor(kBlue);
   graph2.GetXaxis()->SetTitle("p / GeV");
   graph2.GetYaxis()->SetTitle("#sigma_{p} / p");
   graph2.SetTitle("momentum resolution for perdaix");
@@ -160,7 +160,7 @@ int main(int argc, char** argv)
   i = 0;
   for (double mom = momMin; mom <= momMax; mom += momStep) {
     char filename[100];
-    sprintf(filename, "../results/perdaix_%.1f_GeV_5.00_deg_inhom_msc.root", mom);
+    sprintf(filename, "../results/perdaix_%.1f_GeV_2.0_deg.root", mom);
     std::cout << filename << std::endl;
     TFile file(filename);
 
@@ -220,8 +220,9 @@ int main(int argc, char** argv)
   canvas.SetGridy();
   graph1.Draw("AP");
   graph1.Fit("fit", "E");
-  graph2.Draw("SAME");
+  graph2.Draw("P");
   graph2.Fit("fit", "E");
+  graph2.GetFunction("fit")->SetLineColor(kBlue);
 
   // analyticalFormula.Draw("SAME");
   // analyticalFormula2.Draw("SAME");
