@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitter.cc,v 1.55 2010/02/25 20:41:11 beischer Exp $
+// $Id: RES_TrackFitter.cc,v 1.56 2010/02/26 12:51:11 beischer Exp $
 
 #include <cmath>
 #include <fstream>
@@ -97,7 +97,7 @@ RES_Event RES_TrackFitter::Fit()
     break;
   case testbeam:
     CalculateStartParameters();
-    DoBlobelFit(5);
+    DoBlobelFit(3);
     break;
   default:
     break;
@@ -450,16 +450,16 @@ void RES_TrackFitter::CalculateStartParameters()
 
     G4double dummy1,dummy2;
 
-    for (int i = nHits/2; i < nHits; i++) {
+    for (int i = 6; i < 12; i++) {
       if (i != 11)
-      AddLayerToBeSkipped(i);
+        AddLayerToBeSkipped(i);
     }
     FitStraightLine(0,nHits,x0,y0_top,lambda_x,lambda_y_top);
     m_layersToBeSkipped.clear();
 
-    for (int i = 0; i < nHits/2; i++) {
+    for (int i = 0; i < 6; i++) {
       if (i != 1)
-      AddLayerToBeSkipped(i);
+        AddLayerToBeSkipped(i);
     }
     FitStraightLine(0,nHits,dummy1,y0_bottom,dummy2,lambda_y_bottom);
     m_layersToBeSkipped.clear();
