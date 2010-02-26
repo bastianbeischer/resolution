@@ -1,4 +1,4 @@
-// $Id: single_run.cc,v 1.24 2010/02/26 17:42:21 beischer Exp $
+// $Id: single_run.cc,v 1.25 2010/02/26 21:08:23 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -105,8 +105,8 @@ int main(int argc, char** argv)
   // double momRes = analyticalFormula.Eval(genMom);
   //  TH1D resHist("resHist", "resHist", 100, 1. - 5.*momRes, 1. + 5.*momRes);
   double momRes = sqrt(pow(genMom*0.12, 2.) + pow(0.25,2.));
-  TH1D resHist("resHist", "resHist", 40, 1-5*momRes, 1+5*momRes);
-  TH1D ptHist("ptHist", "ptHist", 40, 1-5*momRes, 1+5*momRes);
+  TH1D resHist("resHist", "resHist", 60, 1-5*momRes, 1+5*momRes);
+  TH1D ptHist("ptHist", "ptHist", 60, 1-5*momRes, 1+5*momRes);
   //TH1D resHist("resHist", "resHist", 50, 0.0, 2.0);
   // TH1D ptHist("ptHist", "ptHist", 100, 0.0, 2.0);
   //int nHits = recEvent->GetNbOfHits();
@@ -195,10 +195,10 @@ int main(int argc, char** argv)
   canvas.Divide(1,2);
   canvas.cd(1);
   resHist.Draw();
-  // double rangeLower = 0.5;
-  // double rangeUpper = 1+2*momRes;
-  double rangeLower = 0.25;
-  double rangeUpper = 1.25;
+  double rangeLower = 1-2*momRes;
+  double rangeUpper = 1+2*momRes;
+  // double rangeLower = 0.25;
+  // double rangeUpper = 1.25;
   resHist.Fit("gaus", "EQR", "", rangeLower, rangeUpper);
   resHist.GetXaxis()->SetTitle("p_{gen}/p_{rec}");
   resHist.GetYaxis()->SetTitle("N");

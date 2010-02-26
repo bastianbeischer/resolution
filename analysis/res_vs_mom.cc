@@ -1,4 +1,4 @@
-// $Id: res_vs_mom.cc,v 1.7 2010/02/26 17:42:21 beischer Exp $
+// $Id: res_vs_mom.cc,v 1.8 2010/02/26 21:08:23 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -108,18 +108,24 @@ int main(int argc, char** argv)
   graph1.GetYaxis()->SetTitle("#sigma_{p} / p");
   graph1.SetTitle("momentum resolution for perdaix");
 
+  int momBins = 60;
+
+  double sigmaLeft = 1.;
+  double sigmaRight = 2.;
+
   int i = 0;
-  int momMin = 1;
-  int momMax = 9;
-  int momStep = 1;
+  double momMin = 0.25;
+  double momMax = 9.;
+  double momStep = 0.25;
   for (double mom = momMin; mom <= momMax; mom += momStep) {
     char filename[100];
-    sprintf(filename, "../results/perdaix_%.1f_GeV_1.0_deg.root", mom);
-    std::cout << filename << std::endl;
-    TFile file(filename);
+    sprintf(filename, "../results/perdaix_%.2f_GeV_1.00_deg.root", mom);
 
+    TFile file(filename);
     if (file.IsZombie())
       continue;
+
+    std::cout << filename << std::endl;
 
     genTree = (TTree*) file.Get("resolution_gen_tree");
     recTree = (TTree*) file.Get("resolution_rec_tree");
@@ -129,15 +135,15 @@ int main(int argc, char** argv)
     double genMom = genEvent->GetMomentum()/1000.;
     //    double momRes = analyticalFormula.Eval(genMom); //calculatePrediction(&genMom, 0);
     double momRes = sqrt(pow(genMom*0.12, 2.) + pow(0.25,2.));
-    TH1D resHist("resHist", "resHist", 50, 1-5*momRes, 1+5*momRes);
+    TH1D resHist("resHist", "resHist", momBins, 1-5*momRes, 1+5*momRes);
     //TH1D resHist("resHist", "resHist", 100, 0., 2.);
     for(int j = 0; j < genTree->GetEntries(); j++) {
       genTree->GetEntry(j);
       recTree->GetEntry(j);
       resHist.Fill(genEvent->GetMomentum()/recEvent->GetMomentum());
     }
-    double rangeLower = 0.5;
-    double rangeUpper = 1+2*momRes;
+    double rangeLower = 1-sigmaLeft*momRes;
+    double rangeUpper = 1+sigmaRight*momRes;
     resHist.Fit("gaus", "EQR0", "", rangeLower, rangeUpper);
     double sigma = resHist.GetFunction("gaus")->GetParameter(2);
     double sigmaErr = resHist.GetFunction("gaus")->GetParError(2);
@@ -160,7 +166,7 @@ int main(int argc, char** argv)
   i = 0;
   for (double mom = momMin; mom <= momMax; mom += momStep) {
     char filename[100];
-    sprintf(filename, "../results/perdaix_%.1f_GeV_2.0_deg.root", mom);
+    sprintf(filename, "../results/perdaix_%.2f_GeV_2.00_deg.root", mom);
     std::cout << filename << std::endl;
     TFile file(filename);
 
@@ -179,15 +185,16 @@ int main(int argc, char** argv)
     double genMom = genEvent->GetMomentum()/1000.;
     //    double momRes = analyticalFormula.Eval(genMom); //calculatePrediction(&genMom, 0);
     double momRes = sqrt(pow(genMom*0.12, 2.) + pow(0.25,2.));
-    TH1D resHist("resHist", "resHist", 50, 1-5*momRes, 1+5*momRes);
+    TH1D resHist("resHist", "resHist", momBins, 1-5*momRes, 1+5*momRes);
     //TH1D resHist("resHist", "resHist", 100, 0., 2.);
     for(int j = 0; j < genTree->GetEntries(); j++) {
       genTree->GetEntry(j);
       recTree->GetEntry(j);
       resHist.Fill(genEvent->GetMomentum()/recEvent->GetMomentum());
     }
-    double rangeLower = 0.5;
-    double rangeUpper = 1+2*momRes;
+
+    double rangeLower = 1-sigmaLeft*momRes;
+    double rangeUpper = 1+sigmaRight*momRes;
     resHist.Fit("gaus", "EQR0", "", rangeLower, rangeUpper);
     double sigma = resHist.GetFunction("gaus")->GetParameter(2);
     double sigmaErr = resHist.GetFunction("gaus")->GetParError(2);
@@ -202,13 +209,9 @@ int main(int argc, char** argv)
 
   //  prediction.SetLineWidth(2);
 
-  // TLegend legend(0.2, 0.6, 0.4, 0.8);
-  // legend.AddEntry(&graph, "results of simulation", "P");
-  // //  legend.AddEntry(&prediction, "theoretical prediction", "L");
-  // legend.AddEntry(&analyticalFormula, "expectation", "L");
-  // legend.AddEntry(&analyticalFormula2, "expectation w/o multiple scattering", "L");
-
-  // analyticalFormula2.SetLineStyle(2);
+  TLegend legend(0.2, 0.6, 0.4, 0.8);
+  legend.AddEntry(&graph1, "1.0deg stereo angle", "P");
+  legend.AddEntry(&graph2, "2.0deg stereo angle", "P");
 
   TF1 fit("fit", fitfunc, 0., 10., 2);
   fit.SetParNames("a", "b");
@@ -220,13 +223,18 @@ int main(int argc, char** argv)
   canvas.SetGridy();
   graph1.Draw("AP");
   graph1.Fit("fit", "E");
+  graph1.SetMarkerSize(1.5);
+  graph1.GetFunction("fit")->SetLineColor(kRed);
+  graph1.GetFunction("fit")->SetParNames("a_{1 deg}", "b_{1 deg}");
   graph2.Draw("P");
   graph2.Fit("fit", "E");
+  graph2.SetMarkerSize(1.5);
   graph2.GetFunction("fit")->SetLineColor(kBlue);
+  graph2.GetFunction("fit")->SetParNames("a_{2 deg}", "b_{2 deg}");
+  graph1.GetXaxis()->SetTitle("p / GeV");
+  graph1.GetYaxis()->SetTitle("#sigma_{p} / p");
 
-  // analyticalFormula.Draw("SAME");
-  // analyticalFormula2.Draw("SAME");
-  //  legend.Draw("SAME");
+  legend.Draw("SAME");
 
   app->Run();
 
