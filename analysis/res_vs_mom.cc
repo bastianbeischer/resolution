@@ -1,4 +1,4 @@
-// $Id: res_vs_mom.cc,v 1.8 2010/02/26 21:08:23 beischer Exp $
+// $Id: res_vs_mom.cc,v 1.9 2010/03/01 09:47:07 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -110,7 +110,7 @@ int main(int argc, char** argv)
 
   int momBins = 60;
 
-  double sigmaLeft = 1.;
+  double sigmaLeft = 2.;
   double sigmaRight = 2.;
 
   int i = 0;
@@ -119,7 +119,8 @@ int main(int argc, char** argv)
   double momStep = 0.25;
   for (double mom = momMin; mom <= momMax; mom += momStep) {
     char filename[100];
-    sprintf(filename, "../results/perdaix_%.2f_GeV_1.00_deg.root", mom);
+    //    sprintf(filename, "../results/perdaix_%.2f_GeV_1.00_deg.root", mom);
+    sprintf(filename, "../results/testbeam_%05.2f_GeV.root", mom);
 
     TFile file(filename);
     if (file.IsZombie())
@@ -156,62 +157,62 @@ int main(int argc, char** argv)
     file.Close();
   }
 
-  TGraphErrors graph2;
-  graph2.SetMarkerStyle(22);
-  graph2.SetMarkerColor(kBlue);
-  graph2.GetXaxis()->SetTitle("p / GeV");
-  graph2.GetYaxis()->SetTitle("#sigma_{p} / p");
-  graph2.SetTitle("momentum resolution for perdaix");
+  // TGraphErrors graph2;
+  // graph2.SetMarkerStyle(22);
+  // graph2.SetMarkerColor(kBlue);
+  // graph2.GetXaxis()->SetTitle("p / GeV");
+  // graph2.GetYaxis()->SetTitle("#sigma_{p} / p");
+  // graph2.SetTitle("momentum resolution for perdaix");
 
-  i = 0;
-  for (double mom = momMin; mom <= momMax; mom += momStep) {
-    char filename[100];
-    sprintf(filename, "../results/perdaix_%.2f_GeV_2.00_deg.root", mom);
-    std::cout << filename << std::endl;
-    TFile file(filename);
+  // i = 0;
+  // for (double mom = momMin; mom <= momMax; mom += momStep) {
+  //   char filename[100];
+  //   sprintf(filename, "../results/perdaix_%.2f_GeV_2.00_deg.root", mom);
+  //   std::cout << filename << std::endl;
+  //   TFile file(filename);
 
-    if (file.IsZombie())
-      continue;
+  //   if (file.IsZombie())
+  //     continue;
 
-    genTree = 0;
-    recTree = 0;
-    genEvent = 0;
-    recEvent = 0;
-    genTree = (TTree*) file.Get("resolution_gen_tree");
-    recTree = (TTree*) file.Get("resolution_rec_tree");
-    genTree->SetBranchAddress("event", &genEvent);
-    recTree->SetBranchAddress("event", &recEvent);
-    genTree->GetEntry(0);
-    double genMom = genEvent->GetMomentum()/1000.;
-    //    double momRes = analyticalFormula.Eval(genMom); //calculatePrediction(&genMom, 0);
-    double momRes = sqrt(pow(genMom*0.12, 2.) + pow(0.25,2.));
-    TH1D resHist("resHist", "resHist", momBins, 1-5*momRes, 1+5*momRes);
-    //TH1D resHist("resHist", "resHist", 100, 0., 2.);
-    for(int j = 0; j < genTree->GetEntries(); j++) {
-      genTree->GetEntry(j);
-      recTree->GetEntry(j);
-      resHist.Fill(genEvent->GetMomentum()/recEvent->GetMomentum());
-    }
+  //   genTree = 0;
+  //   recTree = 0;
+  //   genEvent = 0;
+  //   recEvent = 0;
+  //   genTree = (TTree*) file.Get("resolution_gen_tree");
+  //   recTree = (TTree*) file.Get("resolution_rec_tree");
+  //   genTree->SetBranchAddress("event", &genEvent);
+  //   recTree->SetBranchAddress("event", &recEvent);
+  //   genTree->GetEntry(0);
+  //   double genMom = genEvent->GetMomentum()/1000.;
+  //   //    double momRes = analyticalFormula.Eval(genMom); //calculatePrediction(&genMom, 0);
+  //   double momRes = sqrt(pow(genMom*0.12, 2.) + pow(0.25,2.));
+  //   TH1D resHist("resHist", "resHist", momBins, 1-5*momRes, 1+5*momRes);
+  //   //TH1D resHist("resHist", "resHist", 100, 0., 2.);
+  //   for(int j = 0; j < genTree->GetEntries(); j++) {
+  //     genTree->GetEntry(j);
+  //     recTree->GetEntry(j);
+  //     resHist.Fill(genEvent->GetMomentum()/recEvent->GetMomentum());
+  //   }
 
-    double rangeLower = 1-sigmaLeft*momRes;
-    double rangeUpper = 1+sigmaRight*momRes;
-    resHist.Fit("gaus", "EQR0", "", rangeLower, rangeUpper);
-    double sigma = resHist.GetFunction("gaus")->GetParameter(2);
-    double sigmaErr = resHist.GetFunction("gaus")->GetParError(2);
+  //   double rangeLower = 1-sigmaLeft*momRes;
+  //   double rangeUpper = 1+sigmaRight*momRes;
+  //   resHist.Fit("gaus", "EQR0", "", rangeLower, rangeUpper);
+  //   double sigma = resHist.GetFunction("gaus")->GetParameter(2);
+  //   double sigmaErr = resHist.GetFunction("gaus")->GetParError(2);
 
-    graph2.SetPoint(i, mom, sigma);
-    graph2.SetPointError(i, 0., sigmaErr);
+  //   graph2.SetPoint(i, mom, sigma);
+  //   graph2.SetPointError(i, 0., sigmaErr);
 
-    i++;
+  //   i++;
 
-    file.Close();
-  }
+  //   file.Close();
+  // }
 
   //  prediction.SetLineWidth(2);
 
   TLegend legend(0.2, 0.6, 0.4, 0.8);
   legend.AddEntry(&graph1, "1.0deg stereo angle", "P");
-  legend.AddEntry(&graph2, "2.0deg stereo angle", "P");
+  //  legend.AddEntry(&graph2, "2.0deg stereo angle", "P");
 
   TF1 fit("fit", fitfunc, 0., 10., 2);
   fit.SetParNames("a", "b");
@@ -226,11 +227,11 @@ int main(int argc, char** argv)
   graph1.SetMarkerSize(1.5);
   graph1.GetFunction("fit")->SetLineColor(kRed);
   graph1.GetFunction("fit")->SetParNames("a_{1 deg}", "b_{1 deg}");
-  graph2.Draw("P");
-  graph2.Fit("fit", "E");
-  graph2.SetMarkerSize(1.5);
-  graph2.GetFunction("fit")->SetLineColor(kBlue);
-  graph2.GetFunction("fit")->SetParNames("a_{2 deg}", "b_{2 deg}");
+  // graph2.Draw("P");
+  // graph2.Fit("fit", "E");
+  // graph2.SetMarkerSize(1.5);
+  // graph2.GetFunction("fit")->SetLineColor(kBlue);
+  // graph2.GetFunction("fit")->SetParNames("a_{2 deg}", "b_{2 deg}");
   graph1.GetXaxis()->SetTitle("p / GeV");
   graph1.GetYaxis()->SetTitle("#sigma_{p} / p");
 
