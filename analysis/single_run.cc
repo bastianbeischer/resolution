@@ -1,4 +1,4 @@
-// $Id: single_run.cc,v 1.25 2010/02/26 21:08:23 beischer Exp $
+// $Id: single_run.cc,v 1.26 2010/03/02 18:31:47 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -144,6 +144,8 @@ int main(int argc, char** argv)
   TH1D chi2Hist("chi2Hist", "chi2Hist", 500, 0.0, 100.0);
   TH1D angleHist("angleHist", "angleHist", 500, -5e-3, 5e-3);
 
+  TH1D initialP("initialP", "initialP", 500, 0., 10);
+
   char title[128];
   sprintf(title, "#chi^{2} Distribution (dof = %d)", recEvent->GetDof());
   chi2Hist.SetTitle(title);
@@ -175,6 +177,8 @@ int main(int argc, char** argv)
     double angle1 = (genEvent->GetHitPosition(1).y() - genEvent->GetHitPosition(0).y())/(genEvent->GetHitPosition(1).z() - genEvent->GetHitPosition(0).z());
     double angle2 = (genEvent->GetHitPosition(nHitsGen-1).y() - genEvent->GetHitPosition(nHitsGen-2).y())/(genEvent->GetHitPosition(nHitsGen-1).z() - genEvent->GetHitPosition(nHitsGen-2).z());
     angleHist.Fill(angle2-angle1);
+
+    initialP.Fill(recEvent->GetFinalParameter(0));
 
     chi2Hist.Fill(chi2);
     char title[128];
@@ -307,6 +311,10 @@ int main(int argc, char** argv)
   angleHist.Draw();
   angleHist.GetXaxis()->SetTitle("#Delta #theta [rad]");
   angleHist.GetYaxis()->SetTitle("N");
+
+  TCanvas canvas9("canvas9", "initialP", 1024, 768);
+  canvas9.Draw();
+  initialP.Draw();
 
   app.Run();
 

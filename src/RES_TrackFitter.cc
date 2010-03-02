@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitter.cc,v 1.56 2010/02/26 12:51:11 beischer Exp $
+// $Id: RES_TrackFitter.cc,v 1.57 2010/03/02 18:31:46 beischer Exp $
 
 #include <cmath>
 #include <fstream>
@@ -103,6 +103,8 @@ RES_Event RES_TrackFitter::Fit()
     break;
   }
 
+  m_currentRecEvent.SetFinalParameters(5, m_parameter);
+    
   if (gun->GetParticleCharge() != m_initialCharge) {
     m_currentRecEvent.SetMomentum(-m_currentRecEvent.GetMomentum());
     m_currentRecEvent.SetTransverseMomentum(-m_currentRecEvent.GetTransverseMomentum());
@@ -149,6 +151,8 @@ void RES_TrackFitter::SetStartParametesToGeneratedParticle()
   m_parameter[3] = x0;
   m_parameter[4] = theta;
 
+  m_currentRecEvent.SetInitialParameters(5, m_parameter);
+    
   for (int i = 0; i < 5; i++)
     m_step[i] = 0.1*m_parameter[i];
 }
@@ -496,6 +500,8 @@ void RES_TrackFitter::CalculateStartParameters()
     m_lowerBound[i] = 0.;
     m_upperBound[i] = 0.;
   }
+
+  m_currentRecEvent.SetInitialParameters(5, m_parameter);
 
   if (m_verbose > 0) {
     G4cout << "---------------------------------------------" << G4endl;
