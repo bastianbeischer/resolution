@@ -1,4 +1,4 @@
-// $Id: RES_RunManager.cc,v 1.19 2010/02/23 18:33:05 beischer Exp $
+// $Id: RES_RunManager.cc,v 1.20 2010/03/03 19:03:53 beischer Exp $
 
 #include "RES_RunManager.hh"
 
@@ -90,7 +90,8 @@ void RES_RunManager::StartReconstructionRun()
     m_dataHandler->LoadGeneratedEntry(i);
     RES_Event genEvent = m_dataHandler->GetCurrentEvent();
     m_trackFitter->SetCurrentGenEvent(genEvent);
-    RES_Event recEvent = m_trackFitter->Fit();
+    RES_Event recEvent;
+    recEvent = m_trackFitter->Fit();
 
     if (m_storeResults) {
       m_dataHandler->AddEvent(recEvent);

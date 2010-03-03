@@ -1,4 +1,4 @@
-// $Id: single_run.cc,v 1.26 2010/03/02 18:31:47 beischer Exp $
+// $Id: single_run.cc,v 1.27 2010/03/03 19:03:53 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -178,7 +178,7 @@ int main(int argc, char** argv)
     double angle2 = (genEvent->GetHitPosition(nHitsGen-1).y() - genEvent->GetHitPosition(nHitsGen-2).y())/(genEvent->GetHitPosition(nHitsGen-1).z() - genEvent->GetHitPosition(nHitsGen-2).z());
     angleHist.Fill(angle2-angle1);
 
-    initialP.Fill(recEvent->GetFinalParameter(0));
+    initialP.Fill(1./recEvent->GetInitialParameter(0) / 1000.);
 
     chi2Hist.Fill(chi2);
     char title[128];
@@ -312,7 +312,8 @@ int main(int argc, char** argv)
   angleHist.GetXaxis()->SetTitle("#Delta #theta [rad]");
   angleHist.GetYaxis()->SetTitle("N");
 
-  TCanvas canvas9("canvas9", "initialP", 1024, 768);
+  TCanvas canvas9("canvas9", "initialP", 1024
+, 768);
   canvas9.Draw();
   initialP.Draw();
 

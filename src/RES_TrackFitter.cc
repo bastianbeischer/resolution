@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitter.cc,v 1.57 2010/03/02 18:31:46 beischer Exp $
+// $Id: RES_TrackFitter.cc,v 1.58 2010/03/03 19:03:53 beischer Exp $
 
 #include <cmath>
 #include <fstream>
@@ -40,6 +40,7 @@ RES_TrackFitter::RES_TrackFitter() :
   m_fitMethod(blobel)
 {
   m_messenger = new RES_TrackFitMessenger(this);
+  m_initialParameter = new double[5];
   m_parameter = new double[5];
   m_step = new double[5];
   m_lowerBound = new double[5];
@@ -49,6 +50,7 @@ RES_TrackFitter::RES_TrackFitter() :
 RES_TrackFitter::~RES_TrackFitter()
 {
   delete[] m_smearedHits;
+  delete[] m_initialParameter;
   delete[] m_parameter;
   delete[] m_step;
   delete[] m_lowerBound;
@@ -103,6 +105,7 @@ RES_Event RES_TrackFitter::Fit()
     break;
   }
 
+  m_currentRecEvent.SetInitialParameters(5, m_initialParameter);
   m_currentRecEvent.SetFinalParameters(5, m_parameter);
     
   if (gun->GetParticleCharge() != m_initialCharge) {
@@ -145,14 +148,15 @@ void RES_TrackFitter::SetStartParametesToGeneratedParticle()
   double phi = atan((y1-y0)/(z1-z0));
   double theta = atan((x1-x0)/(z1-z0));
 
-  m_parameter[0] = cos(theta)/p;
-  m_parameter[1] = y0;
-  m_parameter[2] = phi;
-  m_parameter[3] = x0;
-  m_parameter[4] = theta;
+  m_initialParameter[0] = cos(theta)/p;
+  m_initialParameter[1] = y0;
+  m_initialParameter[2] = phi;
+  m_initialParameter[3] = x0;
+  m_initialParameter[4] = theta;
 
-  m_currentRecEvent.SetInitialParameters(5, m_parameter);
-    
+  for (int i = 0; i < 5; i++)
+    m_parameter[i] = m_initialParameter[i];
+
   for (int i = 0; i < 5; i++)
     m_step[i] = 0.1*m_parameter[i];
 }
@@ -346,11 +350,14 @@ void RES_TrackFitter::CalculateStartParameters()
     G4double L  = sqrt(pow(m_smearedHits[4].y()-m_smearedHits[3].y(),2.) + pow(m_smearedHits[4].z()-m_smearedHits[3].z(),2.))/m;
     G4double pt = 0.3*B*L/deltaTheta*GeV;
 
-    m_parameter[0] = 1./pt;
-    m_parameter[1] = m_smearedHits[0].y();
-    m_parameter[2] = atan(dy_over_dz_top);
-    m_parameter[3] = 0.;
-    m_parameter[4] = 0.;
+    m_initialParameter[0] = 1./pt;
+    m_initialParameter[1] = m_smearedHits[0].y();
+    m_initialParameter[2] = atan(dy_over_dz_top);
+    m_initialParameter[3] = 0.;
+    m_initialParameter[4] = 0.;
+
+    for (int i = 0; i < 5; i++)
+      m_parameter[i] = m_initialParameter[i];
 
     for (int i = 0; i < 5; i++)
       m_step[i] = 0.1*m_parameter[i];
@@ -414,11 +421,14 @@ void RES_TrackFitter::CalculateStartParameters()
 
     //    std::cout << m_currentGenEvent.GetMomentum() / GeV / (0.3*L/deltaTheta) << std::endl;
 
-    m_parameter[0] = 1./pt;
-    m_parameter[1] = y[0];
-    m_parameter[2] = phi;
-    m_parameter[3] = x[0];
-    m_parameter[4] = theta;
+    m_initialParameter[0] = 1./pt;
+    m_initialParameter[1] = y[0];
+    m_initialParameter[2] = phi;
+    m_initialParameter[3] = x[0];
+    m_initialParameter[4] = theta;
+
+    for (int i = 0; i < 5; i++)
+      m_parameter[i] = m_initialParameter[i];
 
     // RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
     // RES_Module* firstModule = det->GetModule(0);
@@ -483,11 +493,14 @@ void RES_TrackFitter::CalculateStartParameters()
     G4double L  = sqrt(pow(y1_magnet - y0_magnet, 2.) + pow(z1_magnet - z0_magnet,2.))/m;
     G4double pt = 0.3*B*L/deltaTheta*GeV;
 
-    m_parameter[0] = 1./pt;
-    m_parameter[1] = y0_top + k0*lambda_y_top;
-    m_parameter[2] = phi;
-    m_parameter[3] = x0 + k0*lambda_x;
-    m_parameter[4] = theta;
+    m_initialParameter[0] = 1./pt;
+    m_initialParameter[1] = y0_top + k0*lambda_y_top;
+    m_initialParameter[2] = phi;
+    m_initialParameter[3] = x0 + k0*lambda_x;
+    m_initialParameter[4] = theta;
+
+    for (int i = 0; i < 5; i++)
+      m_parameter[i] = m_initialParameter[i];
 
     for (int i = 0; i < 5; i++)
       m_step[i] = 0.1*m_parameter[i];
@@ -500,8 +513,6 @@ void RES_TrackFitter::CalculateStartParameters()
     m_lowerBound[i] = 0.;
     m_upperBound[i] = 0.;
   }
-
-  m_currentRecEvent.SetInitialParameters(5, m_parameter);
 
   if (m_verbose > 0) {
     G4cout << "---------------------------------------------" << G4endl;

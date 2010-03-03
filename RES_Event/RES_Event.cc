@@ -1,4 +1,4 @@
-// $Id: RES_Event.cc,v 1.10 2010/03/02 18:31:47 beischer Exp $
+// $Id: RES_Event.cc,v 1.11 2010/03/03 19:03:52 beischer Exp $
 
 #include "RES_Event.hh"
 
@@ -82,18 +82,18 @@ const RES_Event& RES_Event::operator=(const RES_Event& right)
   return *this;
 }
 
-void RES_Event::SetInitialParameters(int nPar, double* par)
+void RES_Event::SetInitialParameters(unsigned int nPar, double* par)
 {
   m_initialParameters.clear();
-  for (int i = 0; i < nPar; i++) {
+  for (unsigned int i = 0; i < nPar; i++) {
     m_initialParameters.push_back(par[i]);
   }
 }
 
-void RES_Event::SetFinalParameters(int nPar, double* par)
+void RES_Event::SetFinalParameters(unsigned int nPar, double* par)
 {
   m_finalParameters.clear();
-  for (int i = 0; i < nPar; i++) {
+  for (unsigned int i = 0; i < nPar; i++) {
     m_finalParameters.push_back(par[i]);
   }
 }

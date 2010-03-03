@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitter.hh,v 1.20 2010/02/03 15:16:23 beischer Exp $
+// $Id: RES_TrackFitter.hh,v 1.21 2010/03/03 19:03:53 beischer Exp $
 
 #ifndef RES_TrackFitter_hh
 #define RES_TrackFitter_hh
@@ -63,6 +63,7 @@ private:
   G4int                   m_verbose;
 
   G4ThreeVector*          m_smearedHits;
+  G4double*               m_initialParameter;
   G4double*               m_parameter;
   G4double*               m_step;
   G4double*               m_lowerBound;

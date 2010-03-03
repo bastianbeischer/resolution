@@ -1,4 +1,4 @@
-// $Id: RES_Event.hh,v 1.9 2010/03/02 18:31:47 beischer Exp $
+// $Id: RES_Event.hh,v 1.10 2010/03/03 19:03:52 beischer Exp $
 
 #ifndef RES_Event_hh
 #define RES_Event_hh
@@ -29,8 +29,8 @@ public:
   inline void SetMomentum(double momentum) {m_momentum = momentum;}
   inline void SetChi2(double chi2) {m_chi2 = chi2;}
   inline void SetDof(int dof) {m_dof = dof;}
-  void SetInitialParameters(int nPar, double* par);
-  void SetFinalParameters(int nPar, double* par);
+  void SetInitialParameters(unsigned int nPar, double* par);
+  void SetFinalParameters(unsigned int nPar, double* par);
 
   inline int          GetID()                               {return m_ID;}
   inline int          GetModuleID(unsigned int i)           {assert(i <m_moduleID.size()); return m_moduleID.at(i);}
