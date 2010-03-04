@@ -1,4 +1,4 @@
-// $Id: single_run.cc,v 1.27 2010/03/03 19:03:53 beischer Exp $
+// $Id: single_run.cc,v 1.28 2010/03/04 11:56:30 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -106,6 +106,7 @@ int main(int argc, char** argv)
   //  TH1D resHist("resHist", "resHist", 100, 1. - 5.*momRes, 1. + 5.*momRes);
   double momRes = sqrt(pow(genMom*0.12, 2.) + pow(0.25,2.));
   TH1D resHist("resHist", "resHist", 60, 1-5*momRes, 1+5*momRes);
+  TH1D initialP("initialP", "initialP", 60, 1-5*momRes, 1+5*momRes);
   TH1D ptHist("ptHist", "ptHist", 60, 1-5*momRes, 1+5*momRes);
   //TH1D resHist("resHist", "resHist", 50, 0.0, 2.0);
   // TH1D ptHist("ptHist", "ptHist", 100, 0.0, 2.0);
@@ -144,8 +145,6 @@ int main(int argc, char** argv)
   TH1D chi2Hist("chi2Hist", "chi2Hist", 500, 0.0, 100.0);
   TH1D angleHist("angleHist", "angleHist", 500, -5e-3, 5e-3);
 
-  TH1D initialP("initialP", "initialP", 500, 0., 10);
-
   char title[128];
   sprintf(title, "#chi^{2} Distribution (dof = %d)", recEvent->GetDof());
   chi2Hist.SetTitle(title);
@@ -178,7 +177,7 @@ int main(int argc, char** argv)
     double angle2 = (genEvent->GetHitPosition(nHitsGen-1).y() - genEvent->GetHitPosition(nHitsGen-2).y())/(genEvent->GetHitPosition(nHitsGen-1).z() - genEvent->GetHitPosition(nHitsGen-2).z());
     angleHist.Fill(angle2-angle1);
 
-    initialP.Fill(1./recEvent->GetInitialParameter(0) / 1000.);
+    initialP.Fill(recEvent->GetInitialParameter(0) * genEvent->GetMomentum());
 
     chi2Hist.Fill(chi2);
     char title[128];

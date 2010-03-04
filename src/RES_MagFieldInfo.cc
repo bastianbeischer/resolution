@@ -39,5 +39,5 @@ G4double RES_MagFieldInfo::MeanFieldAlongTrack(G4ThreeVector startPoint, G4Three
 
   for(int i = 0; i < 3; i++) meanB[i] /= m_nSteps;  
 
-  return meanB[0]/tesla;
+  return meanB[0];
 }
