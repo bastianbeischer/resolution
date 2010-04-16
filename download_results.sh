@@ -1,7 +1,11 @@
-rsync -thv beischer@portal.physik.rwth-aachen.de:~/src/geant4/resolution/results/*.root results/
-rsync -thv beischer@portal.physik.rwth-aachen.de:~/src/geant4/resolution/condor/condor.pl condor/
-rsync -thv beischer@portal.physik.rwth-aachen.de:~/src/geant4/resolution/condor/condor/*.condor condor/condor/
-rsync -thv beischer@portal.physik.rwth-aachen.de:~/src/geant4/resolution/condor/ERR/*.ERR condor/ERR/
-rsync -thv beischer@portal.physik.rwth-aachen.de:~/src/geant4/resolution/condor/LOG/*.LOG condor/LOG/
-rsync -thv beischer@portal.physik.rwth-aachen.de:~/src/geant4/resolution/condor/mac/*.mac condor/mac/
-rsync -thv beischer@portal.physik.rwth-aachen.de:~/src/geant4/resolution/condor/STD/*.STD condor/STD/
+PROGRAM="rsync"
+ARGUMENTS="-avz --exclude=CVS"
+REMOTEPATH="beischer@portal.physik.rwth-aachen.de:~/src/geant4/resolution"
+
+${PROGRAM} ${ARGUMENTS} ${REMOTEPATH}/results .
+${PROGRAM} ${ARGUMENTS} ${REMOTEPATH}/condor/condor.pl condor/
+${PROGRAM} ${ARGUMENTS} ${REMOTEPATH}/condor/condor condor/
+${PROGRAM} ${ARGUMENTS} ${REMOTEPATH}/condor/ERR condor/
+${PROGRAM} ${ARGUMENTS} ${REMOTEPATH}/condor/LOG condor/
+${PROGRAM} ${ARGUMENTS} ${REMOTEPATH}/condor/mac condor/
+${PROGRAM} ${ARGUMENTS} ${REMOTEPATH}/condor/STD condor/
