@@ -1,4 +1,4 @@
-// $Id: RES_FieldManager.hh,v 1.4 2010/02/04 14:42:37 beischer Exp $
+// $Id: RES_FieldManager.hh,v 1.5 2010/04/19 13:40:22 beischer Exp $
 
 #ifndef RES_FieldManager_hh
 #define RES_FieldManager_hh
@@ -20,6 +20,7 @@ public:
 
 public:
   void SwitchOnInhomField(G4String dataFileName);
+  void SwitchOnAMS02Field(G4String dataFileName);
   void SwitchOnDummyField(G4ThreeVector fieldVector);
   void SwitchOnUniformField(G4ThreeVector fieldVector);
 

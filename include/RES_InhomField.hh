@@ -1,4 +1,4 @@
-// $Id: RES_InhomField.hh,v 1.4 2010/02/04 14:42:36 beischer Exp $
+// $Id: RES_InhomField.hh,v 1.5 2010/04/19 13:40:22 beischer Exp $
 
 #ifndef RES_InhomField_hh
 #define RES_InhomField_hh
@@ -24,7 +24,7 @@ public:
 private:
   void ReadData();
 
-public:
+private:
   G4String      m_dataFileName;
   G4ThreeVector m_displacement;
 

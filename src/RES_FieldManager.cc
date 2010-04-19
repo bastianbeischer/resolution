@@ -1,10 +1,11 @@
-// $Id: RES_FieldManager.cc,v 1.4 2010/02/04 14:42:36 beischer Exp $
+// $Id: RES_FieldManager.cc,v 1.5 2010/04/19 13:40:22 beischer Exp $
 
 #include "RES_FieldManager.hh"
 
 #include "RES_FieldMessenger.hh"
 #include "RES_StepperMessenger.hh"
 #include "RES_InhomField.hh"
+#include "RES_AMS02Field.hh"
 #include "RES_DummyField.hh"
 
 #include "G4ChordFinder.hh"
@@ -27,6 +28,12 @@ RES_FieldManager::~RES_FieldManager()
 void RES_FieldManager::SwitchOnInhomField(G4String dataFileName)
 {
   SetDetectorField(new RES_InhomField(dataFileName));
+  CreateChordFinder((G4MagneticField*) GetDetectorField());
+}
+
+void RES_FieldManager::SwitchOnAMS02Field(G4String dataFileName)
+{
+  SetDetectorField(new RES_AMS02Field(dataFileName));
   CreateChordFinder((G4MagneticField*) GetDetectorField());
 }
 

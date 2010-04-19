@@ -1,4 +1,4 @@
-// $Id: RES_FieldMessenger.cc,v 1.5 2010/02/04 14:42:36 beischer Exp $
+// $Id: RES_FieldMessenger.cc,v 1.6 2010/04/19 13:40:21 beischer Exp $
 
 #include "RES_FieldMessenger.hh"
 
@@ -23,6 +23,10 @@ RES_FieldMessenger::RES_FieldMessenger(RES_FieldManager* manager)
   m_setInhomFieldFromFileCmd->SetGuidance("Read the field map from the specified data file");
   m_setInhomFieldFromFileCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
 
+  m_setAMS02FieldFromFileCmd = new G4UIcmdWithAString("/RES/Field/SetAMS02FieldFrom", this);
+  m_setAMS02FieldFromFileCmd->SetGuidance("Read the field map from the specified AMS02 data file");
+  m_setAMS02FieldFromFileCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
+
   m_setDummyFieldCmd = new G4UIcmdWith3VectorAndUnit("/RES/Field/SetDummyField", this);
   m_setDummyFieldCmd->SetGuidance("Set a dummy magnetic field with the value given by the specified ThreeVector");
   m_setDummyFieldCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
@@ -40,6 +44,7 @@ RES_FieldMessenger::~RES_FieldMessenger()
 {
   delete m_directory;
   delete m_setInhomFieldFromFileCmd;
+  delete m_setAMS02FieldFromFileCmd;
   delete m_setDummyFieldCmd;
   delete m_setUniformFieldCmd;
   delete m_setDisplacementCmd;
@@ -49,6 +54,9 @@ void RES_FieldMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
 {
   if (command == m_setInhomFieldFromFileCmd) {
     m_manager->SwitchOnInhomField(newValue);
+  }
+  if (command == m_setAMS02FieldFromFileCmd) {
+    m_manager->SwitchOnAMS02Field(newValue);
   }
   if (command == m_setDummyFieldCmd) {
     m_manager->SwitchOnDummyField(m_setDummyFieldCmd->GetNew3VectorValue(newValue));
