@@ -19,6 +19,12 @@ RES_AMS02Field::~RES_AMS02Field()
 
 void RES_AMS02Field::GetFieldValue(const G4double* x, G4double* B) const
 {
+  float position[3] = {x[0]/cm, x[1]/cm, x[2]/cm};
+  float Bfield[3] = {0., 0., 0.};
+  
   if(field)
-    field->GuFld((float*)x,(float*)B);
+    field->GuFld(position, Bfield);
+
+  for(int i = 0; i < 3; i++)
+    B[i] = Bfield[i];
 }
