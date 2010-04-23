@@ -1,4 +1,4 @@
-// $Id: RES_InhomField.cc,v 1.13 2010/02/23 12:53:01 beischer Exp $
+// $Id: RES_InhomField.cc,v 1.14 2010/04/23 01:07:09 beischer Exp $
 
 #include "RES_InhomField.hh"
 
@@ -116,26 +116,21 @@ void RES_InhomField::ReadData()
   m_axis_z = new RES_Axis(z0,z1,nBins_z);
 
   m_field_x = new G4double**[nBins_x];
-  for (int i = 0; i < nBins_x; i++) {
-    m_field_x[i] = new G4double*[nBins_y];
-   for (int j = 0; j < nBins_y; j++) {
-     m_field_x[i][j] = new G4double[nBins_z];
-   } 
-  }
-
   m_field_y = new G4double**[nBins_x];
-  for (int i = 0; i < nBins_x; i++) {
-    m_field_y[i] = new G4double*[nBins_y];
-   for (int j = 0; j < nBins_y; j++) {
-     m_field_y[i][j] = new G4double[nBins_z];
-   } 
-  }
-
   m_field_z = new G4double**[nBins_x];
   for (int i = 0; i < nBins_x; i++) {
+    m_field_x[i] = new G4double*[nBins_y];
+    m_field_y[i] = new G4double*[nBins_y];
     m_field_z[i] = new G4double*[nBins_y];
-   for (int j = 0; j < nBins_y; j++) {
-     m_field_z[i][j] = new G4double[nBins_z];
+    for (int j = 0; j < nBins_y; j++) {
+      m_field_x[i][j] = new G4double[nBins_z];
+      m_field_y[i][j] = new G4double[nBins_z];
+      m_field_z[i][j] = new G4double[nBins_z];
+      for (int k = 0; k < nBins_z; k++) {
+        m_field_x[i][j][k] = 0.;
+        m_field_y[i][j][k] = 0.;        
+        m_field_z[i][j][k] = 0.;
+      }
    } 
   }
 
@@ -143,8 +138,8 @@ void RES_InhomField::ReadData()
   G4double x, y, z, f_x, f_y, f_z, dummy;
   G4int nX, nY, nZ;
   while (!file.eof()) {
-       file >> x >> y >> z >> dummy >> f_x >> f_y >> f_z >> dummy;
-
+    file >> x >> y >> z >> dummy >> f_x >> f_y >> f_z >> dummy;
+    
     x/=10.;
     y/=10.;
     z/=10.;

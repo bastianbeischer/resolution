@@ -1,4 +1,4 @@
-// $Id: res_vs_mom.cc,v 1.9 2010/03/01 09:47:07 beischer Exp $
+// $Id: res_vs_mom.cc,v 1.10 2010/04/23 01:07:08 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -76,51 +76,24 @@ double calculatePrediction(double* x, double* p)
   return sigma*x[0]/(0.3*B*L*L) * sqrt(720./(N+4));
 }
 
-int main(int argc, char** argv)
+void fillGraph(TGraphErrors& graph1, const char* fileNameTemplate)
 {
-  TApplication* app = new TApplication("app", &argc, argv);
-
-  MyROOTStyle* myStyle = new MyROOTStyle("myStyle");
-  myStyle->cd();
-
   TTree* genTree;
   TTree* recTree;
   RES_Event* genEvent = new RES_Event;
   RES_Event* recEvent = new RES_Event;
-  //  TF1 prediction("prediction", calculatePrediction, 0., 100., 0);
-  TF1 analyticalFormula("analyticalFormula", analytical, 0., 100., 7);
-  TF1 analyticalFormula2("analyticalFormula2", analytical, 0., 100., 7);
-  double X0 = 0.0046875; // number of radiation lengths in fibers
-  double Linner = 0.08;  // in m
-  double Lup   = 0.14;   // in m
-  double Ldown = 0.14;   // in m
-  double magField = 0.27; // in T
-  //double m = 0.511e-3; // electron mass in GeV
-  double m = 0.0; // geantino mass in GeV
-  double sigmaModule = 50e-6/sqrt(2);
-  analyticalFormula.SetParameters(m, Lup, Ldown, Linner, magField, X0, sigmaModule);
-  analyticalFormula2.SetParameters(m, Lup, Ldown, Linner, magField, 0., sigmaModule);
-
-  TGraphErrors graph1;
-  graph1.SetMarkerStyle(23);
-  graph1.SetMarkerColor(kRed);
-  graph1.GetXaxis()->SetTitle("p / GeV");
-  graph1.GetYaxis()->SetTitle("#sigma_{p} / p");
-  graph1.SetTitle("momentum resolution for perdaix");
 
   int momBins = 60;
-
-  double sigmaLeft = 2.;
-  double sigmaRight = 2.;
-
+  double sigmaLeft = 2.5;
+  double sigmaRight = 2.5;
   int i = 0;
   double momMin = 0.25;
-  double momMax = 9.;
+  double momMax = 3.0;
   double momStep = 0.25;
   for (double mom = momMin; mom <= momMax; mom += momStep) {
     char filename[100];
-    //    sprintf(filename, "../results/perdaix_%.2f_GeV_1.00_deg.root", mom);
-    sprintf(filename, "../results/testbeam_%05.2f_GeV.root", mom);
+    sprintf(filename, fileNameTemplate, mom);
+    //    sprintf(filename, "../results/testbeam_%05.2f_GeV.root", mom);
 
     TFile file(filename);
     if (file.IsZombie())
@@ -144,6 +117,7 @@ int main(int argc, char** argv)
       resHist.Fill(genEvent->GetMomentum()/recEvent->GetMomentum());
     }
     double rangeLower = 1-sigmaLeft*momRes;
+    //double rangeLower = 0.5;
     double rangeUpper = 1+sigmaRight*momRes;
     resHist.Fit("gaus", "EQR0", "", rangeLower, rangeUpper);
     double sigma = resHist.GetFunction("gaus")->GetParameter(2);
@@ -156,6 +130,35 @@ int main(int argc, char** argv)
 
     file.Close();
   }
+}
+
+int main(int argc, char** argv)
+{
+  TApplication* app = new TApplication("app", &argc, argv);
+
+  MyROOTStyle* myStyle = new MyROOTStyle("myStyle");
+  myStyle->cd();
+
+  //  TF1 prediction("prediction", calculatePrediction, 0., 100., 0);
+  TF1 analyticalFormula("analyticalFormula", analytical, 0., 100., 7);
+  TF1 analyticalFormula2("analyticalFormula2", analytical, 0., 100., 7);
+  double X0 = 0.0046875; // number of radiation lengths in fibers
+  double Linner = 0.08;  // in m
+  double Lup   = 0.14;   // in m
+  double Ldown = 0.14;   // in m
+  double magField = 0.27; // in T
+  //double m = 0.511e-3; // electron mass in GeV
+  double m = 0.0; // geantino mass in GeV
+  double sigmaModule = 50e-6/sqrt(2);
+  analyticalFormula.SetParameters(m, Lup, Ldown, Linner, magField, X0, sigmaModule);
+  analyticalFormula2.SetParameters(m, Lup, Ldown, Linner, magField, 0., sigmaModule);
+
+  TGraphErrors graph1;
+  graph1.SetMarkerStyle(23);
+  graph1.SetMarkerColor(kRed);
+  graph1.GetXaxis()->SetTitle("p / GeV");
+  graph1.GetYaxis()->SetTitle("#sigma_{p} / p");
+  graph1.SetTitle("momentum resolution for perdaix");
 
   // TGraphErrors graph2;
   // graph2.SetMarkerStyle(22);
@@ -164,51 +167,10 @@ int main(int argc, char** argv)
   // graph2.GetYaxis()->SetTitle("#sigma_{p} / p");
   // graph2.SetTitle("momentum resolution for perdaix");
 
-  // i = 0;
-  // for (double mom = momMin; mom <= momMax; mom += momStep) {
-  //   char filename[100];
-  //   sprintf(filename, "../results/perdaix_%.2f_GeV_2.00_deg.root", mom);
-  //   std::cout << filename << std::endl;
-  //   TFile file(filename);
+  fillGraph(graph1, "../results/perdaix_%.2f_GeV_1.00_deg_msc_hom.root");
+  //  fillGraph(graph2, "../results/perdaix_%.2f_GeV_2.00_deg.root");
 
-  //   if (file.IsZombie())
-  //     continue;
-
-  //   genTree = 0;
-  //   recTree = 0;
-  //   genEvent = 0;
-  //   recEvent = 0;
-  //   genTree = (TTree*) file.Get("resolution_gen_tree");
-  //   recTree = (TTree*) file.Get("resolution_rec_tree");
-  //   genTree->SetBranchAddress("event", &genEvent);
-  //   recTree->SetBranchAddress("event", &recEvent);
-  //   genTree->GetEntry(0);
-  //   double genMom = genEvent->GetMomentum()/1000.;
-  //   //    double momRes = analyticalFormula.Eval(genMom); //calculatePrediction(&genMom, 0);
-  //   double momRes = sqrt(pow(genMom*0.12, 2.) + pow(0.25,2.));
-  //   TH1D resHist("resHist", "resHist", momBins, 1-5*momRes, 1+5*momRes);
-  //   //TH1D resHist("resHist", "resHist", 100, 0., 2.);
-  //   for(int j = 0; j < genTree->GetEntries(); j++) {
-  //     genTree->GetEntry(j);
-  //     recTree->GetEntry(j);
-  //     resHist.Fill(genEvent->GetMomentum()/recEvent->GetMomentum());
-  //   }
-
-  //   double rangeLower = 1-sigmaLeft*momRes;
-  //   double rangeUpper = 1+sigmaRight*momRes;
-  //   resHist.Fit("gaus", "EQR0", "", rangeLower, rangeUpper);
-  //   double sigma = resHist.GetFunction("gaus")->GetParameter(2);
-  //   double sigmaErr = resHist.GetFunction("gaus")->GetParError(2);
-
-  //   graph2.SetPoint(i, mom, sigma);
-  //   graph2.SetPointError(i, 0., sigmaErr);
-
-  //   i++;
-
-  //   file.Close();
-  // }
-
-  //  prediction.SetLineWidth(2);
+  //   prediction.SetLineWidth(2);
 
   TLegend legend(0.2, 0.6, 0.4, 0.8);
   legend.AddEntry(&graph1, "1.0deg stereo angle", "P");
@@ -235,12 +197,10 @@ int main(int argc, char** argv)
   graph1.GetXaxis()->SetTitle("p / GeV");
   graph1.GetYaxis()->SetTitle("#sigma_{p} / p");
 
-  legend.Draw("SAME");
+  //legend.Draw("SAME");
 
   app->Run();
 
-  delete genEvent;
-  delete recEvent;
   delete myStyle;
   delete app;
 

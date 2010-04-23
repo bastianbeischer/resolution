@@ -1,4 +1,4 @@
-// $Id: single_run.cc,v 1.28 2010/03/04 11:56:30 beischer Exp $
+// $Id: single_run.cc,v 1.29 2010/04/23 01:07:08 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -19,6 +19,35 @@
 double MS(double p, double m, double L, double X0) {
   double beta = p / sqrt(p*p + m*m);
   return 13.6e-3/(beta*p) * sqrt(X0) * L;
+}
+
+
+void fitInChi2Range(TH1D* hist, double& sigma, double& error)
+{
+  if ( hist ) {
+    double chi2 = DBL_MAX;
+    double ndf = 1;
+    int iBin = 1;
+    int nBins = hist->GetNbinsX();
+    TF1* function;
+    while(chi2/ndf > 1 && iBin < nBins/2) {
+      double center = hist->GetBinCenter(nBins/2); 
+      double range = center - hist->GetBinLowEdge(iBin);
+      hist->Fit("gaus", "QR", "", center-range, center+range);
+      function = hist->GetFunction("gaus");
+      if (function) {
+        chi2 = function->GetChisquare();
+        ndf = function->GetNDF();
+      }
+      iBin++;
+    }
+    if (function) {
+      sigma = function->GetParameter(2);
+      error = function->GetParError(2);
+    }
+    return;
+  }
+  return;
 }
 
 
@@ -104,15 +133,15 @@ int main(int argc, char** argv)
   analyticalFormula.SetParameters(m, Lup, Ldown, Linner, magField, X0, sigmaModule);
   // double momRes = analyticalFormula.Eval(genMom);
   //  TH1D resHist("resHist", "resHist", 100, 1. - 5.*momRes, 1. + 5.*momRes);
-  double momRes = sqrt(pow(genMom*0.12, 2.) + pow(0.25,2.));
-  TH1D resHist("resHist", "resHist", 60, 1-5*momRes, 1+5*momRes);
-  TH1D initialP("initialP", "initialP", 60, 1-5*momRes, 1+5*momRes);
+  double momRes = sqrt(pow(genMom*0.10, 2.) + pow(0.25,2.));
+  TH1D resHist("resHist", "resHist", 50, 1-5*momRes, 1+5*momRes);
+  TH1D initialP("initialP", "initialP", 60, 1-10*momRes, 1+10*momRes);
   TH1D ptHist("ptHist", "ptHist", 60, 1-5*momRes, 1+5*momRes);
   //TH1D resHist("resHist", "resHist", 50, 0.0, 2.0);
   // TH1D ptHist("ptHist", "ptHist", 100, 0.0, 2.0);
-  //int nHits = recEvent->GetNbOfHits();
-  int nHits = 12;
-  int nBins = 100;
+  int nHits = recEvent->GetNbOfHits();
+  //int nHits = 12;
+  int nBins = 300;
   TH1D** xDeltaGenHist = new TH1D*[nHits];
   for (int i = 0;i < nHits; i++) {
     char title[256];
@@ -143,7 +172,7 @@ int main(int argc, char** argv)
   TH1D totalXhist("totalXhist", "totalXhist", 500, -20, 20);
   TH1D totalYhist("totalYhist", "totalYhist", 500, -1.0, 1.0);
   TH1D chi2Hist("chi2Hist", "chi2Hist", 500, 0.0, 100.0);
-  TH1D angleHist("angleHist", "angleHist", 500, -5e-3, 5e-3);
+  TH1D angleHist("angleHist", "angleHist", 500, -20e-3, 20e-3);
 
   char title[128];
   sprintf(title, "#chi^{2} Distribution (dof = %d)", recEvent->GetDof());
@@ -156,9 +185,17 @@ int main(int argc, char** argv)
     int nHitsGen = genEvent->GetNbOfHits();
     int nHitsRec = recEvent->GetNbOfHits();
 
-    double chi2Cut = 30;
+    double chi2Cut = 10;
     double chi2 = recEvent->GetChi2();
-    if (nHitsGen <= 4 || nHitsRec == 0 || nHitsGen > nHitsRec || chi2 > chi2Cut) continue;
+    //    if (nHitsGen < 8 || nHitsRec == 0 || nHitsGen > nHitsRec || chi2 > chi2Cut) continue;
+   if (nHitsGen < 8 || nHitsRec == 0 || nHitsGen > nHitsRec) continue;
+
+    double angle1 = (genEvent->GetHitPosition(1).y() - genEvent->GetHitPosition(0).y())/(genEvent->GetHitPosition(1).z() - genEvent->GetHitPosition(0).z());
+    double angle2 = (genEvent->GetHitPosition(nHitsGen-1).y() - genEvent->GetHitPosition(nHitsGen-2).y())/(genEvent->GetHitPosition(nHitsGen-1).z() - genEvent->GetHitPosition(nHitsGen-2).z());
+
+    //    if (angle2 - angle1  -3e-3) continue;
+    angleHist.Fill(angle2-angle1);
+
     resHist.Fill(genEvent->GetMomentum()/recEvent->GetMomentum());
     ptHist.Fill(genEvent->GetTransverseMomentum()/recEvent->GetTransverseMomentum());
 
@@ -173,9 +210,6 @@ int main(int argc, char** argv)
       totalYhist.Fill(genEvent->GetHitPosition(i).y() - recEvent->GetHitPosition(iRec).y());
     }
 
-    double angle1 = (genEvent->GetHitPosition(1).y() - genEvent->GetHitPosition(0).y())/(genEvent->GetHitPosition(1).z() - genEvent->GetHitPosition(0).z());
-    double angle2 = (genEvent->GetHitPosition(nHitsGen-1).y() - genEvent->GetHitPosition(nHitsGen-2).y())/(genEvent->GetHitPosition(nHitsGen-1).z() - genEvent->GetHitPosition(nHitsGen-2).z());
-    angleHist.Fill(angle2-angle1);
 
     initialP.Fill(recEvent->GetInitialParameter(0) * genEvent->GetMomentum());
 
@@ -192,7 +226,7 @@ int main(int argc, char** argv)
       std::cout << "y" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
   }
 
-  gStyle->SetOptFit(11);
+  gStyle->SetOptFit(11111);
   TCanvas canvas("canvas", "Momentum resolution", 1024, 768);
   canvas.Draw();
   canvas.Divide(1,2);
@@ -202,6 +236,8 @@ int main(int argc, char** argv)
   double rangeUpper = 1+2*momRes;
   // double rangeLower = 0.25;
   // double rangeUpper = 1.25;
+  double sigma, error;
+  //fitInChi2Range(&resHist, sigma, error);
   resHist.Fit("gaus", "EQR", "", rangeLower, rangeUpper);
   resHist.GetXaxis()->SetTitle("p_{gen}/p_{rec}");
   resHist.GetYaxis()->SetTitle("N");

@@ -1,4 +1,4 @@
-// $Id: RES_DetectorConstruction.cc,v 1.23 2010/01/11 14:47:39 beischer Exp $
+// $Id: RES_DetectorConstruction.cc,v 1.24 2010/04/23 01:07:09 beischer Exp $
 
 #include "RES_DetectorConstruction.hh"
 
@@ -118,6 +118,11 @@ G4bool RES_DetectorConstruction::TrackInAcceptance(G4ThreeVector position, G4Thr
   for (unsigned int i = 0; i < m_modules.size(); i++)
     if (!m_modules.at(i)->CheckIfTrackPassesThrough(position, direction))
       retVal = false;
+
+  G4double dz = - position.z();
+  G4double l = dz / direction.z();
+  G4ThreeVector currentPosition = position + l*direction;
+  if (sqrt(pow(currentPosition.x(),2.) + pow(currentPosition.x(),2.)) > 7.5*cm)   {retVal = false;}
 
   return retVal;
 }
