@@ -1,4 +1,4 @@
-// $Id: single_run.cc,v 1.30 2010/04/24 18:18:50 beischer Exp $
+// $Id: single_run.cc,v 1.31 2010/04/24 19:17:53 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -87,15 +87,6 @@ double chi2dist(double*x, double*p)
   return amplitude*nom/denom;
 }
 
-double calculatePrediction(double* x, double* p)
-{
-  double sigma = 50e-6; // m
-  double B = 0.3;       // T
-  double L = 91e-2;     // m
-  double N = 38;
-  return sigma*x[0]/(0.3*B*L*L) * sqrt(720./(N+4));
-}
-
 int main(int argc, char** argv)
 {
   if (argc != 2) {
@@ -135,11 +126,12 @@ int main(int argc, char** argv)
   //  TH1D resHist("resHist", "resHist", 100, 1. - 5.*momRes, 1. + 5.*momRes);
   //double momRes = sqrt(pow(genMom*0.08, 2.));// + pow(0.25,2.));
   double momRes = sqrt(pow(genMom*0.08, 2.) + pow(0.21,2.));
-  TH1D resHist("resHist", "resHist", 50, 1-5*momRes, 1+5*momRes);
-  TH1D initialP("initialP", "initialP", 60, 1-10*momRes, 1+10*momRes);
-  TH1D ptHist("ptHist", "ptHist", 60, 1-5*momRes, 1+5*momRes);
-  //TH1D resHist("resHist", "resHist", 50, 0.0, 2.0);
-  // TH1D ptHist("ptHist", "ptHist", 100, 0.0, 2.0);
+  char title[256];
+  sprintf(title, "Momentum resolution for %.2f GeV", genMom);
+  TH1D resHist("Mom. Resolution", title, 50, 1-5*momRes, 1+5*momRes);
+  sprintf(title, "Initial values for %.2f GeV", genMom);
+  TH1D initialP("Inital values", title, 50, 1-5*momRes, 1+5*momRes);
+  TH1D ptHist("ptHist", "ptHist", 50, 1-5*momRes, 1+5*momRes);
   int nHits = recEvent->GetNbOfHits();
   //int nHits = 12;
   int nBins = 300;
@@ -172,14 +164,14 @@ int main(int argc, char** argv)
 
   TH1D totalXhist("totalXhist", "totalXhist", 500, -20, 20);
   TH1D totalYhist("totalYhist", "totalYhist", 500, -1.0, 1.0);
-  TH1D chi2Hist("chi2Hist", "chi2Hist", 500, 0.0, 100.0);
+  sprintf(title, "#chi^{2} Distribution (dof = %d)", recEvent->GetDof());
+  TH1D chi2Hist("#chi^{2} Distribution", "title", 50, 0.0, 20.0);
   TH1D angleHist("angleHist", "angleHist", 500, -100e-3, 100e-3);
   TH1D lHist("lHist", "lHist", 100, 0.07, 0.11);
   TH1D lOverAngleHist("lOverAngleHist", "lOverAngleHist", 100, -5., -1.);
   
 
-  char title[128];
-  sprintf(title, "#chi^{2} Distribution (dof = %d)", recEvent->GetDof());
+
   chi2Hist.SetTitle(title);
 
   for(int iEvent = 0; iEvent < genTree->GetEntries(); iEvent++) {
@@ -243,23 +235,33 @@ int main(int argc, char** argv)
   gStyle->SetOptFit(11111);
   TCanvas canvas("canvas", "Momentum resolution", 1024, 768);
   canvas.Draw();
-  canvas.Divide(1,2);
-  canvas.cd(1);
+  //  canvas.Divide(1,2);
+  //  canvas.cd(1);
   resHist.Draw();
-  double rangeLower = 1-2*momRes;
-  double rangeUpper = 1+2*momRes;
+  // double rangeLower = 1-2*momRes;
+  // double rangeUpper = 1+2*momRes;
   // double rangeLower = 0.25;
   // double rangeUpper = 1.25;
   double sigma, error;
   //fitInChi2Range(&resHist, sigma, error);
-  resHist.Fit("gaus", "EQR", "", rangeLower, rangeUpper);
+  // resHist.Fit("gaus", "EQR", "", rangeLower, rangeUpper);
+  resHist.Fit("gaus", "EQ");
+  resHist.GetFunction("gaus")->SetParName(2, "#sigma_{p}/p");
   resHist.GetXaxis()->SetTitle("p_{gen}/p_{rec}");
   resHist.GetYaxis()->SetTitle("N");
-  canvas.cd(2);
-  ptHist.Draw();
-  ptHist.Fit("gaus", "EQR", "", 0.1, 1.+5*momRes);
-  ptHist.GetXaxis()->SetTitle("pt_{gen}/pt_{rec}");
-  ptHist.GetYaxis()->SetTitle("N");
+  // canvas.cd(2);
+  // ptHist.Draw();
+  // ptHist.Fit("gaus", "EQR", "", 0.1, 1.+5*momRes);
+  // ptHist.GetXaxis()->SetTitle("pt_{gen}/pt_{rec}");
+  // ptHist.GetYaxis()->SetTitle("N");
+  char stem[256];
+  sprintf(stem,"perdaix_%.2f", genMom);
+  char saveName[256];
+  sprintf(saveName, "%s_resolution.%s", stem, "pdf");
+  canvas.SaveAs(saveName);
+  sprintf(saveName, "%s_resolution.%s", stem, "root");
+  canvas.SaveAs(saveName);
+
 
   TCanvas canvas2("canvas2", "x: Reconstructed vs generated position", 1024, 768);
   canvas2.Divide(nHits/2,2);
@@ -354,6 +356,10 @@ int main(int argc, char** argv)
   //  chi2Hist.Fit(&chi2Dist, "E");
   chi2Dist.Draw("SAME");
   chi2Dist.SetLineColor(kRed);
+  sprintf(saveName, "%s_chi2.%s", stem, "pdf");
+  canvas7.SaveAs(saveName);
+  sprintf(saveName, "%s_chi2.%s", stem, "root");
+  canvas7.SaveAs(saveName);
 
   TCanvas canvas8("canvas8", "Deflection angle distribution", 1024, 768);
   canvas8.Draw();
@@ -370,6 +376,12 @@ int main(int argc, char** argv)
   TCanvas canvas9("canvas9", "initialP", 1024, 768);
   canvas9.Draw();
   initialP.Draw();
+  initialP.Fit("gaus", "EQ");
+  initialP.GetFunction("gaus")->SetParName(2, "#sigma_{p}/p");
+  sprintf(saveName, "%s_initial.%s", stem, "pdf");
+  canvas9.SaveAs(saveName);
+  sprintf(saveName, "%s_initial.%s", stem, "root");
+  canvas9.SaveAs(saveName);
 
   app.Run();
 

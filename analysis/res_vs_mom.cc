@@ -1,4 +1,4 @@
-// $Id: res_vs_mom.cc,v 1.11 2010/04/24 18:18:50 beischer Exp $
+// $Id: res_vs_mom.cc,v 1.12 2010/04/24 19:17:53 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -11,6 +11,7 @@
 #include <TF1.h>
 #include <TCanvas.h>
 #include <TLegend.h>
+#include <TLatex.h>
 
 #include "fill_graph.hh"
 
@@ -103,6 +104,9 @@ int main(int argc, char** argv)
     pt[i]->SetY1NDC(0.5 - i*0.12);
     pt[i]->SetY2NDC(0.6 - i*0.12);
   }
+
+  TLatex text(3.1, 0.13, "#sigma_{p} / p = #sqrt{(ap)^{2} + b^{2}}");
+  text.Draw("SAME");
 
   TLegend legend(0.12, 0.68, 0.6, 0.88);
   legend.AddEntry(&graph1, "Multiple Scattering activated + Measured inhom. field", "P");
