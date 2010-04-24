@@ -1,4 +1,4 @@
-// $Id: single_run.cc,v 1.29 2010/04/23 01:07:08 beischer Exp $
+// $Id: single_run.cc,v 1.30 2010/04/24 18:18:50 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -133,7 +133,8 @@ int main(int argc, char** argv)
   analyticalFormula.SetParameters(m, Lup, Ldown, Linner, magField, X0, sigmaModule);
   // double momRes = analyticalFormula.Eval(genMom);
   //  TH1D resHist("resHist", "resHist", 100, 1. - 5.*momRes, 1. + 5.*momRes);
-  double momRes = sqrt(pow(genMom*0.10, 2.) + pow(0.25,2.));
+  //double momRes = sqrt(pow(genMom*0.08, 2.));// + pow(0.25,2.));
+  double momRes = sqrt(pow(genMom*0.08, 2.) + pow(0.21,2.));
   TH1D resHist("resHist", "resHist", 50, 1-5*momRes, 1+5*momRes);
   TH1D initialP("initialP", "initialP", 60, 1-10*momRes, 1+10*momRes);
   TH1D ptHist("ptHist", "ptHist", 60, 1-5*momRes, 1+5*momRes);
@@ -172,7 +173,10 @@ int main(int argc, char** argv)
   TH1D totalXhist("totalXhist", "totalXhist", 500, -20, 20);
   TH1D totalYhist("totalYhist", "totalYhist", 500, -1.0, 1.0);
   TH1D chi2Hist("chi2Hist", "chi2Hist", 500, 0.0, 100.0);
-  TH1D angleHist("angleHist", "angleHist", 500, -20e-3, 20e-3);
+  TH1D angleHist("angleHist", "angleHist", 500, -100e-3, 100e-3);
+  TH1D lHist("lHist", "lHist", 100, 0.07, 0.11);
+  TH1D lOverAngleHist("lOverAngleHist", "lOverAngleHist", 100, -5., -1.);
+  
 
   char title[128];
   sprintf(title, "#chi^{2} Distribution (dof = %d)", recEvent->GetDof());
@@ -190,11 +194,21 @@ int main(int argc, char** argv)
     //    if (nHitsGen < 8 || nHitsRec == 0 || nHitsGen > nHitsRec || chi2 > chi2Cut) continue;
    if (nHitsGen < 8 || nHitsRec == 0 || nHitsGen > nHitsRec) continue;
 
-    double angle1 = (genEvent->GetHitPosition(1).y() - genEvent->GetHitPosition(0).y())/(genEvent->GetHitPosition(1).z() - genEvent->GetHitPosition(0).z());
-    double angle2 = (genEvent->GetHitPosition(nHitsGen-1).y() - genEvent->GetHitPosition(nHitsGen-2).y())/(genEvent->GetHitPosition(nHitsGen-1).z() - genEvent->GetHitPosition(nHitsGen-2).z());
+    double angle1 = (genEvent->GetHitPosition(3).y() - genEvent->GetHitPosition(0).y())/(genEvent->GetHitPosition(3).z() - genEvent->GetHitPosition(0).z());
+    double angle2 = (genEvent->GetHitPosition(nHitsGen-1).y() - genEvent->GetHitPosition(4).y())/(genEvent->GetHitPosition(nHitsGen-1).z() - genEvent->GetHitPosition(4).z());
+
+    double y0 = genEvent->GetHitPosition(4).y();;
+    double y1 = genEvent->GetHitPosition(3).y();;
+    double z0 = genEvent->GetHitPosition(4).z();;
+    double z1 = genEvent->GetHitPosition(3).z();;
+
+    double L = sqrt(pow(y1 - y0, 2.) + pow (z1 - z0, 2.)) / 1000.; //mm -> m
+    lHist.Fill(L);
 
     //    if (angle2 - angle1  -3e-3) continue;
     angleHist.Fill(angle2-angle1);
+
+    lOverAngleHist.Fill(L/(angle2-angle1));
 
     resHist.Fill(genEvent->GetMomentum()/recEvent->GetMomentum());
     ptHist.Fill(genEvent->GetTransverseMomentum()/recEvent->GetTransverseMomentum());
@@ -343,12 +357,17 @@ int main(int argc, char** argv)
 
   TCanvas canvas8("canvas8", "Deflection angle distribution", 1024, 768);
   canvas8.Draw();
+  canvas8.Divide(3,1);
+  canvas8.cd(1);
   angleHist.Draw();
   angleHist.GetXaxis()->SetTitle("#Delta #theta [rad]");
   angleHist.GetYaxis()->SetTitle("N");
+  canvas8.cd(2);  
+  lHist.Draw();
+  canvas8.cd(3);  
+  lOverAngleHist.Draw();
 
-  TCanvas canvas9("canvas9", "initialP", 1024
-, 768);
+  TCanvas canvas9("canvas9", "initialP", 1024, 768);
   canvas9.Draw();
   initialP.Draw();
 

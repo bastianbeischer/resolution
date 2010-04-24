@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitter.cc,v 1.59 2010/03/04 11:56:30 beischer Exp $
+// $Id: RES_TrackFitter.cc,v 1.60 2010/04/24 18:18:50 beischer Exp $
 
 #include <cmath>
 #include <fstream>
@@ -99,8 +99,11 @@ RES_Event RES_TrackFitter::Fit()
     DoBlobelFit(3);
     break;
   case testbeam:
+    AddLayerToBeSkipped(0);
+    AddLayerToBeSkipped(10);    
     CalculateStartParameters();
     DoBlobelFit(3);
+    m_layersToBeSkipped.clear();
     break;
   default:
     break;
@@ -465,19 +468,21 @@ void RES_TrackFitter::CalculateStartParameters()
 
     G4double dummy1,dummy2;
 
-    for (int i = 6; i < 12; i++) {
+    for (int i = 6; i < 12; i++)
       if (i != 11)
         AddLayerToBeSkipped(i);
-    }
     FitStraightLine(0,nHits,x0,y0_top,lambda_x,lambda_y_top);
-    m_layersToBeSkipped.clear();
+    for (int i = 6; i < 12; i++)
+      if (i != 11)
+        RemoveLayerToBeSkipped(i);
 
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < 6; i++)
       if (i != 1)
         AddLayerToBeSkipped(i);
-    }
     FitStraightLine(0,nHits,dummy1,y0_bottom,dummy2,lambda_y_bottom);
-    m_layersToBeSkipped.clear();
+    for (int i = 0; i < 6; i++)
+      if (i != 1)
+        RemoveLayerToBeSkipped(i);
 
     G4double phi   = atan(lambda_y_top);
     G4double theta = atan(-lambda_x*cos(phi));
@@ -491,12 +496,13 @@ void RES_TrackFitter::CalculateStartParameters()
     G4double y0_magnet = y0_bottom + z0_magnet*lambda_y_bottom;
     G4double y1_magnet = y0_top    + z1_magnet*lambda_y_top;
 
-    RES_MagFieldInfo magInfo;
-    G4ThreeVector startPoint(x0 + lambda_x*z1_magnet, y0_top + lambda_y_top*z1_magnet, z1_magnet);
-    G4ThreeVector endPoint(x0 + lambda_x*z0_magnet, y0_bottom + lambda_y_bottom*z0_magnet, z0_magnet);
-    G4double B = magInfo.MeanFieldAlongTrack(startPoint, endPoint)/tesla;
-    G4double L  = sqrt(pow(y1_magnet - y0_magnet, 2.) + pow(z1_magnet - z0_magnet,2.))/m;
-    G4double pt = 0.3*B*L/deltaTheta*GeV;
+    // RES_MagFieldInfo magInfo;
+    // G4ThreeVector startPoint(x0 + lambda_x*z1_magnet, y0_top + lambda_y_top*z1_magnet, z1_magnet);
+    // G4ThreeVector endPoint(x0 + lambda_x*z0_magnet, y0_bottom + lambda_y_bottom*z0_magnet, z0_magnet);
+    // G4double B = magInfo.MeanFieldAlongTrack(startPoint, endPoint)/tesla;
+    G4double B = 0.25*tesla;
+    G4double L  = sqrt(pow(y1_magnet - y0_magnet, 2.) + pow(z1_magnet - z0_magnet,2.));
+    G4double pt = (0.3*(B/tesla)*(L/m)/deltaTheta)*GeV;
 
     m_initialParameter[0] = 1./pt;
     m_initialParameter[1] = y0_top + k0*lambda_y_top;
