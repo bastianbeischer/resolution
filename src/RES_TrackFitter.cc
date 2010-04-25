@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitter.cc,v 1.60 2010/04/24 18:18:50 beischer Exp $
+// $Id: RES_TrackFitter.cc,v 1.61 2010/04/25 19:25:28 beischer Exp $
 
 #include <cmath>
 #include <fstream>
@@ -412,14 +412,16 @@ void RES_TrackFitter::CalculateStartParameters()
     G4double deltaTheta = dy_over_dz_top - dy_over_dz_bottom;
 
     // TODO: CHANGED HARDCODED VALUES HERE
-    G4double magnetHeight = 8*cm; // PERDAIX MAGNET HERE
-    //G4double magnetHeight = 50*cm; // PEBS MAGNET HERE
+    //G4double magnetHeight = 8*cm; // PERDAIX MAGNET HERE
+    G4double magnetHeight = 50*cm; // PEBS01 MAGNET HERE
+    //G4double magnetHeight = 100*cm; // PEBS02 MAGNET HERE
     G4double y0_magnet = y0_bottom + (-magnetHeight/2.)*dy_over_dz_bottom;
     G4double y1_magnet = y0_top    +  (magnetHeight/2.)*dy_over_dz_top;
     G4double z0_magnet = -magnetHeight/2.;
     G4double z1_magnet =  magnetHeight/2.;
-    G4double B  = 0.27; // PERDAIX MAGNET HERE
-    //G4double B  = 0.27; // PEBS MAGNET HERE
+    //G4double B  = 0.27; // PERDAIX MAGNET HERE
+    G4double B  = 0.385; // PEBS01 MAGNET HERE
+    //G4double B  = 0.8; // PEBS02 MAGNET HERE
     G4double L  = sqrt(pow(y1_magnet - y0_magnet, 2.) + pow(z1_magnet - z0_magnet,2.))/m;
     G4double pt = 0.3*B*L/deltaTheta*GeV;
 

@@ -1,4 +1,4 @@
-// $Id: RES_DetectorConstruction.cc,v 1.25 2010/04/24 18:18:50 beischer Exp $
+// $Id: RES_DetectorConstruction.cc,v 1.26 2010/04/25 19:25:28 beischer Exp $
 
 #include "RES_DetectorConstruction.hh"
 
@@ -27,9 +27,9 @@ RES_DetectorConstruction::RES_DetectorConstruction() :
   m_worldMaterial = G4NistManager::Instance()->FindOrBuildMaterial( "G4_AIR" );
 
   // define world dimensions
-  m_worldX = 1.6*m;
-  m_worldY = 1.6*m;
-  m_worldZ = 2.5*m;
+  m_worldX = 3.0*m;
+  m_worldY = 3.0*m;
+  m_worldZ = 3.0*m;
 }
 
 RES_DetectorConstruction::~RES_DetectorConstruction()
@@ -122,14 +122,14 @@ G4bool RES_DetectorConstruction::TrackInAcceptance(G4ThreeVector position, G4Thr
 
   G4int nMustPass = 2;
   G4double* z = new G4double[nMustPass];
-  z[0] = 4*cm;
-  z[1] = -4*cm;
+  z[0] = 25*cm;
+  z[1] = -25*cm;
   
   for (int i = 0; i < nMustPass; i++) {
     G4double dz = z[i] - position.z();
     G4double l = dz / direction.z();
     G4ThreeVector currentPosition = position + l*direction;
-    if (sqrt(pow(currentPosition.x(),2.) + pow(currentPosition.y(),2.)) > 7.5*cm)   {retVal = false;}
+    if (sqrt(pow(currentPosition.x(),2.) + pow(currentPosition.y(),2.)) > 32*cm)   {retVal = false;}
   }
 
   delete[] z;

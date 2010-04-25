@@ -1,4 +1,4 @@
-// $Id: RES_DetectorMessenger.cc,v 1.16 2010/01/12 15:07:28 beischer Exp $
+// $Id: RES_DetectorMessenger.cc,v 1.17 2010/04/25 19:25:28 beischer Exp $
 
 #include "RES_DetectorMessenger.hh"
 
@@ -20,6 +20,24 @@ RES_DetectorMessenger::RES_DetectorMessenger(RES_DetectorConstruction* detector)
   m_topDirectory->SetGuidance("Commands for the resolution software.");
   m_detDirectory = new G4UIdirectory("/RES/Det/");
   m_detDirectory->SetGuidance("Commands for the geometry specification of the detector.");
+
+  m_setWorldXCmd = new G4UIcmdWithADoubleAndUnit("/RES/Det/SetWorldX", this);
+  m_setWorldXCmd->SetGuidance("Set the length of the world in x");
+  m_setWorldXCmd->SetParameterName("wx", false);
+  m_setWorldXCmd->SetUnitCategory("Length");
+  m_setWorldXCmd->AvailableForStates(G4State_PreInit);
+
+  m_setWorldYCmd = new G4UIcmdWithADoubleAndUnit("/RES/Det/SetWorldY", this);
+  m_setWorldYCmd->SetGuidance("Set the length of the world in y");
+  m_setWorldYCmd->SetParameterName("wy", false);
+  m_setWorldYCmd->SetUnitCategory("Length");
+  m_setWorldYCmd->AvailableForStates(G4State_PreInit);
+
+  m_setWorldZCmd = new G4UIcmdWithADoubleAndUnit("/RES/Det/SetWorldZ", this);
+  m_setWorldZCmd->SetGuidance("Set the length of the world in z");
+  m_setWorldZCmd->SetParameterName("wz", false);
+  m_setWorldZCmd->SetUnitCategory("Length");
+  m_setWorldZCmd->AvailableForStates(G4State_PreInit);
 
   m_addModulePlacementCmd = new G4UIcmdWith3VectorAndUnit("/RES/Det/AddModule", this);
   m_addModulePlacementCmd->SetGuidance("Add a module centered on the given point (relative to the world volume)");
@@ -98,6 +116,9 @@ RES_DetectorMessenger::~RES_DetectorMessenger()
 {
   delete m_topDirectory;
   delete m_detDirectory;
+  delete m_setWorldXCmd;
+  delete m_setWorldYCmd;
+  delete m_setWorldZCmd;
   delete m_addModulePlacementCmd;
   delete m_setModuleTypeCmd;
   delete m_setModuleRotationCmd;
@@ -118,6 +139,18 @@ void RES_DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
 {
   if (command == m_addModulePlacementCmd) {
     m_detector->AddModulePlacement(m_addModulePlacementCmd->GetNew3VectorValue(newValue));
+  }
+
+  if (command == m_setWorldXCmd) {
+    m_detector->SetWorldX(m_setWorldXCmd->GetNewDoubleValue(newValue));
+  }
+
+  if (command == m_setWorldYCmd) {
+    m_detector->SetWorldY(m_setWorldYCmd->GetNewDoubleValue(newValue));
+  }
+
+  if (command == m_setWorldZCmd) {
+    m_detector->SetWorldZ(m_setWorldZCmd->GetNewDoubleValue(newValue));
   }
 
   if (command == m_setModuleRotationCmd) {

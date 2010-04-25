@@ -1,4 +1,4 @@
-// $Id: single_run.cc,v 1.31 2010/04/24 19:17:53 beischer Exp $
+// $Id: single_run.cc,v 1.32 2010/04/25 19:25:27 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -125,12 +125,12 @@ int main(int argc, char** argv)
   // double momRes = analyticalFormula.Eval(genMom);
   //  TH1D resHist("resHist", "resHist", 100, 1. - 5.*momRes, 1. + 5.*momRes);
   //double momRes = sqrt(pow(genMom*0.08, 2.));// + pow(0.25,2.));
-  double momRes = sqrt(pow(genMom*0.08, 2.) + pow(0.21,2.));
+  double momRes = sqrt(pow(genMom*.8e-3, 2.) + pow(0.04,2.));
   char title[256];
   sprintf(title, "Momentum resolution for %.2f GeV", genMom);
   TH1D resHist("Mom. Resolution", title, 50, 1-5*momRes, 1+5*momRes);
   sprintf(title, "Initial values for %.2f GeV", genMom);
-  TH1D initialP("Inital values", title, 50, 1-5*momRes, 1+5*momRes);
+  TH1D initialP("Inital values", title, 100, 1-10*momRes, 1+10*momRes);
   TH1D ptHist("ptHist", "ptHist", 50, 1-5*momRes, 1+5*momRes);
   int nHits = recEvent->GetNbOfHits();
   //int nHits = 12;
@@ -165,14 +165,10 @@ int main(int argc, char** argv)
   TH1D totalXhist("totalXhist", "totalXhist", 500, -20, 20);
   TH1D totalYhist("totalYhist", "totalYhist", 500, -1.0, 1.0);
   sprintf(title, "#chi^{2} Distribution (dof = %d)", recEvent->GetDof());
-  TH1D chi2Hist("#chi^{2} Distribution", "title", 50, 0.0, 20.0);
+  TH1D chi2Hist("#chi^{2} Distribution", "title", 50, 0.0, 40.0);
   TH1D angleHist("angleHist", "angleHist", 500, -100e-3, 100e-3);
   TH1D lHist("lHist", "lHist", 100, 0.07, 0.11);
   TH1D lOverAngleHist("lOverAngleHist", "lOverAngleHist", 100, -5., -1.);
-  
-
-
-  chi2Hist.SetTitle(title);
 
   for(int iEvent = 0; iEvent < genTree->GetEntries(); iEvent++) {
     //  for(int i = 0; i < 90; i++) {
@@ -255,7 +251,7 @@ int main(int argc, char** argv)
   // ptHist.GetXaxis()->SetTitle("pt_{gen}/pt_{rec}");
   // ptHist.GetYaxis()->SetTitle("N");
   char stem[256];
-  sprintf(stem,"perdaix_%.2f", genMom);
+  sprintf(stem,"pebs01_%.0f", genMom);
   char saveName[256];
   sprintf(saveName, "%s_resolution.%s", stem, "pdf");
   canvas.SaveAs(saveName);

@@ -1,5 +1,6 @@
 single_run
 res_vs_mom
+res_vs_mom_pebs
 res_vs_angle
 chi2_dist
 compare_msc

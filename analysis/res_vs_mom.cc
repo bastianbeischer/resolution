@@ -1,4 +1,4 @@
-// $Id: res_vs_mom.cc,v 1.12 2010/04/24 19:17:53 beischer Exp $
+// $Id: res_vs_mom.cc,v 1.13 2010/04/25 19:25:27 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -49,14 +49,14 @@ int main(int argc, char** argv)
   double momMin = 0.25;
   double momMax = 9.0;
   double momStep = 0.25;
-  fillGraph(graph1, "../results/perdaix_%.2f_GeV_1.00_deg_msc_inhom.root", momMin, momMax, momStep);
+   fillGraph(graph1, "../results/perdaix_%.2f_GeV_1.00_deg_msc_inhom.root", momMin, momMax, momStep);
   fillGraph(graph2, "../results/perdaix_%.2f_GeV_1.00_deg_msc_hom.root", momMin, momMax, momStep);
   fillGraph(graph3, "../results/perdaix_%.2f_GeV_1.00_deg_nomsc_inhom.root", momMin, momMax, momStep, 0.08, 0.0);
   fillGraph(graph4, "../results/perdaix_%.2f_GeV_1.00_deg_nomsc_hom.root", momMin, momMax, momStep, 0.08, 0.0);
 
-  TF1 fitMSC("fitMSC", fitfunc, 0., 10., 2);
+  TF1 fitMSC("fitMSC", fitfunc, momMin, momMax, 2);
   fitMSC.SetParNames("a", "b");
-  TF1 fitNoMSC("fitNoMSC", "[0]*x + [1]", 0., 10.);
+  TF1 fitNoMSC("fitNoMSC", "[0]*x + [1]", momMin, momMax);
   fitNoMSC.SetParNames("a", "b");
 
   TCanvas canvas("canvas", "canvas", 1024, 768);
@@ -87,7 +87,7 @@ int main(int argc, char** argv)
 
   graph1.GetXaxis()->SetTitle("p / GeV");
   graph1.GetYaxis()->SetTitle("#sigma_{p} / p");
-  graph1.GetYaxis()->SetRangeUser(0.0, 0.8);
+  graph1.GetYaxis()->SetRangeUser(0.0, 1.0);
 
   TPaveStats* pt1 = (TPaveStats*) graph1.GetListOfFunctions()->FindObject("stats");
   pt1->SetTextColor(kRed);

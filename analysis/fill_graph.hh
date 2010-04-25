@@ -5,7 +5,7 @@
 
 #include "RES_Event.hh"
 
-void fillGraph(TGraphErrors& graph1, const char* fileNameTemplate, double min, double max, double step, double guessA = 0.08, double guessB = 0.21)
+void fillGraph(TGraphErrors& graph1, const char* fileNameTemplate, int min, int max, int step, double guessA = 0.08, double guessB = 0.21)
 {
   TTree* genTree;
   TTree* recTree;
@@ -16,7 +16,7 @@ void fillGraph(TGraphErrors& graph1, const char* fileNameTemplate, double min, d
   double sigmaLeft = 2.5;
   double sigmaRight = 2.5;
   int i = 0;
-  for (double value = min; value <= max; value += step) {
+  for (int value = min; value <= max; value += step) {
     char filename[100];
     sprintf(filename, fileNameTemplate, value);
 
