@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitter.cc,v 1.61 2010/04/25 19:25:28 beischer Exp $
+// $Id: RES_TrackFitter.cc,v 1.62 2010/05/02 22:59:27 beischer Exp $
 
 #include <cmath>
 #include <fstream>
@@ -99,8 +99,8 @@ RES_Event RES_TrackFitter::Fit()
     DoBlobelFit(3);
     break;
   case testbeam:
-    AddLayerToBeSkipped(0);
-    AddLayerToBeSkipped(10);    
+    // AddLayerToBeSkipped(0);
+    // AddLayerToBeSkipped(10);    
     CalculateStartParameters();
     DoBlobelFit(3);
     m_layersToBeSkipped.clear();
@@ -427,6 +427,10 @@ void RES_TrackFitter::CalculateStartParameters()
 
     //    std::cout << m_currentGenEvent.GetMomentum() / GeV / (0.3*L/deltaTheta) << std::endl;
 
+    // pt is by definition positive for electrons
+    if (m_initialCharge > 0)
+      pt = -pt;
+
     m_initialParameter[0] = 1./pt;
     m_initialParameter[1] = y[0];
     m_initialParameter[2] = phi;
@@ -502,7 +506,7 @@ void RES_TrackFitter::CalculateStartParameters()
     // G4ThreeVector startPoint(x0 + lambda_x*z1_magnet, y0_top + lambda_y_top*z1_magnet, z1_magnet);
     // G4ThreeVector endPoint(x0 + lambda_x*z0_magnet, y0_bottom + lambda_y_bottom*z0_magnet, z0_magnet);
     // G4double B = magInfo.MeanFieldAlongTrack(startPoint, endPoint)/tesla;
-    G4double B = 0.25*tesla;
+    G4double B = 0.27*tesla;
     G4double L  = sqrt(pow(y1_magnet - y0_magnet, 2.) + pow(z1_magnet - z0_magnet,2.));
     G4double pt = (0.3*(B/tesla)*(L/m)/deltaTheta)*GeV;
 
@@ -638,7 +642,7 @@ G4double RES_TrackFitter::Chi2InDetFrame()
 
   G4double mass = gun->GetParticleDefinition()->GetPDGMass();
   G4double momentum = pt/cos(theta);
-  G4double energy = sqrt( pow(momentum, 2.) + pow(mass, 2.) );
+  G4double energy = sqrt( pow(momentum, 2.) + pow(mass, 2.) ) - mass;
 
   gun->SetParticlePosition(position);
   gun->SetParticleMomentumDirection(direction);
@@ -709,7 +713,7 @@ G4double RES_TrackFitter::Chi2InModuleFrame()
 
   G4double mass = gun->GetParticleDefinition()->GetPDGMass();
   G4double momentum = pt/cos(theta);
-  G4double energy = sqrt( pow(momentum, 2.) + pow(mass, 2.) );
+  G4double energy = sqrt( pow(momentum, 2.) + pow(mass, 2.) ) - mass;
 
   G4ThreeVector direction(sin(theta), -cos(theta)*sin(phi), -cos(theta)*cos(phi));
   G4ThreeVector position(x0, y0, m_smearedHits[0].z());

@@ -1,4 +1,4 @@
-// $Id: single_run.cc,v 1.32 2010/04/25 19:25:27 beischer Exp $
+// $Id: single_run.cc,v 1.33 2010/05/02 22:59:28 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -124,11 +124,12 @@ int main(int argc, char** argv)
   analyticalFormula.SetParameters(m, Lup, Ldown, Linner, magField, X0, sigmaModule);
   // double momRes = analyticalFormula.Eval(genMom);
   //  TH1D resHist("resHist", "resHist", 100, 1. - 5.*momRes, 1. + 5.*momRes);
-  //double momRes = sqrt(pow(genMom*0.08, 2.));// + pow(0.25,2.));
+  //double momRes = sqrt(pow(genMom*0.08, 2.) + pow(0.21,2.));
+  //double momRes = 0.8;
   double momRes = sqrt(pow(genMom*.8e-3, 2.) + pow(0.04,2.));
   char title[256];
   sprintf(title, "Momentum resolution for %.2f GeV", genMom);
-  TH1D resHist("Mom. Resolution", title, 50, 1-5*momRes, 1+5*momRes);
+  TH1D resHist("Mom. Resolution", title, 50, 1-10*momRes, 1+10*momRes);
   sprintf(title, "Initial values for %.2f GeV", genMom);
   TH1D initialP("Inital values", title, 100, 1-10*momRes, 1+10*momRes);
   TH1D ptHist("ptHist", "ptHist", 50, 1-5*momRes, 1+5*momRes);
@@ -251,7 +252,7 @@ int main(int argc, char** argv)
   // ptHist.GetXaxis()->SetTitle("pt_{gen}/pt_{rec}");
   // ptHist.GetYaxis()->SetTitle("N");
   char stem[256];
-  sprintf(stem,"pebs01_%.0f", genMom);
+  sprintf(stem,"perdaix_%.0f", genMom);
   char saveName[256];
   sprintf(saveName, "%s_resolution.%s", stem, "pdf");
   canvas.SaveAs(saveName);

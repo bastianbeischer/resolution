@@ -1,4 +1,4 @@
-// $Id: RES_DetectorConstruction.cc,v 1.26 2010/04/25 19:25:28 beischer Exp $
+// $Id: RES_DetectorConstruction.cc,v 1.27 2010/05/02 22:59:28 beischer Exp $
 
 #include "RES_DetectorConstruction.hh"
 
@@ -41,8 +41,6 @@ RES_DetectorConstruction::~RES_DetectorConstruction()
 
 G4VPhysicalVolume* RES_DetectorConstruction::Construct()
 {
-  
-
   // --------------------------------------------
   // Volumes and Placements
   // --------------------------------------------
@@ -73,14 +71,6 @@ G4VPhysicalVolume* RES_DetectorConstruction::Construct()
   // return world
   return m_world;
 }
-
-// void RES_DetectorConstruction::ComputeParameters()
-// {
-//   m_moduleGapFiber = 2.*m_modulePlasticThickness + 2.*m_moduleFoamThickness;
-//   m_moduleHeightFiber = 2. * m_moduleFiberThickness + m_moduleGapFiber;
-
-//   m_moduleHeightSilicon = 2.*m_moduleGapSilicon + 2.*m_moduleSiliconThickness + 2*m_moduleKaptonThickness;
-// }
 
 void RES_DetectorConstruction::SortModules()
 {

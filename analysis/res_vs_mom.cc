@@ -1,4 +1,4 @@
-// $Id: res_vs_mom.cc,v 1.13 2010/04/25 19:25:27 beischer Exp $
+// $Id: res_vs_mom.cc,v 1.14 2010/05/02 22:59:29 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -12,12 +12,15 @@
 #include <TCanvas.h>
 #include <TLegend.h>
 #include <TLatex.h>
+#include <TMath.h>
 
 #include "fill_graph.hh"
 
 double fitfunc(double* x, double* p)
 {
-  return sqrt(pow(x[0]*p[0],2.) + pow(p[1], 2.));
+  double m = 5.11e-4;
+  double beta = x[0] / sqrt(pow(x[0],2.) + pow(m,2.));
+  return sqrt(pow(x[0]*p[0],2.) + pow(p[1]/beta, 2.));
 }
 
 int main(int argc, char** argv)
@@ -27,7 +30,7 @@ int main(int argc, char** argv)
   MyROOTStyle* myStyle = new MyROOTStyle("myStyle");
   myStyle->cd();
 
-  gStyle->SetOptFit(111);
+  gStyle->SetOptFit(1111);
 
   TGraphErrors graph1;
   graph1.SetMarkerStyle(23);
@@ -49,13 +52,18 @@ int main(int argc, char** argv)
   double momMin = 0.25;
   double momMax = 9.0;
   double momStep = 0.25;
-   fillGraph(graph1, "../results/perdaix_%.2f_GeV_1.00_deg_msc_inhom.root", momMin, momMax, momStep);
+  fillGraph(graph1, "../results/perdaix_%.2f_GeV_1.00_deg_msc_inhom.root", momMin, momMax, momStep);
   fillGraph(graph2, "../results/perdaix_%.2f_GeV_1.00_deg_msc_hom.root", momMin, momMax, momStep);
   fillGraph(graph3, "../results/perdaix_%.2f_GeV_1.00_deg_nomsc_inhom.root", momMin, momMax, momStep, 0.08, 0.0);
   fillGraph(graph4, "../results/perdaix_%.2f_GeV_1.00_deg_nomsc_hom.root", momMin, momMax, momStep, 0.08, 0.0);
 
+  double m_electron = 5.11e-4;
+  double m_proton   = 9.38e-1;
+
   TF1 fitMSC("fitMSC", fitfunc, momMin, momMax, 2);
   fitMSC.SetParNames("a", "b");
+  //  fitMSC.SetParNames("a", "b", "m");
+  //  fitMSC.FixParameter(2, m_electron);
   TF1 fitNoMSC("fitNoMSC", "[0]*x + [1]", momMin, momMax);
   fitNoMSC.SetParNames("a", "b");
 
@@ -65,6 +73,9 @@ int main(int argc, char** argv)
   canvas.SetGridx();
   canvas.SetGridy();
   graph1.Draw("AP");
+
+  //  fitMSC.FixParameter(2, .938);
+
   graph1.Fit("fitMSC", "E");
   graph1.SetMarkerSize(1.5);
   graph1.GetFunction("fitMSC")->SetLineColor(kRed);
@@ -87,7 +98,13 @@ int main(int argc, char** argv)
 
   graph1.GetXaxis()->SetTitle("p / GeV");
   graph1.GetYaxis()->SetTitle("#sigma_{p} / p");
-  graph1.GetYaxis()->SetRangeUser(0.0, 1.0);
+  graph1.GetYaxis()->SetRangeUser(0.0, 1.2);
+  double upperRange = 15.0;
+  graph1.GetXaxis()->SetLimits(0., upperRange);
+  graph1.GetFunction("fitMSC")->SetRange(0., upperRange);
+  graph2.GetFunction("fitMSC")->SetRange(0., upperRange);
+  graph3.GetFunction("fitNoMSC")->SetRange(0., upperRange);
+  graph4.GetFunction("fitNoMSC")->SetRange(0., upperRange);
 
   TPaveStats* pt1 = (TPaveStats*) graph1.GetListOfFunctions()->FindObject("stats");
   pt1->SetTextColor(kRed);
@@ -105,7 +122,7 @@ int main(int argc, char** argv)
     pt[i]->SetY2NDC(0.6 - i*0.12);
   }
 
-  TLatex text(3.1, 0.13, "#sigma_{p} / p = #sqrt{(ap)^{2} + b^{2}}");
+  TLatex text(3.1, 0.13, "#sigma_{p} / p = #sqrt{(ap)^{2} + (b/#beta)^{2}}");
   text.Draw("SAME");
 
   TLegend legend(0.12, 0.68, 0.6, 0.88);

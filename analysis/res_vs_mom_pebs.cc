@@ -1,4 +1,4 @@
-// $Id: res_vs_mom_pebs.cc,v 1.1 2010/04/25 19:25:27 beischer Exp $
+// $Id: res_vs_mom_pebs.cc,v 1.2 2010/05/02 22:59:28 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -34,10 +34,15 @@ int main(int argc, char** argv)
   graph1.SetMarkerColor(kRed);
   graph1.SetTitle("Momentum resolution for PEBS01 at 1^{o} stereo angle");
 
+  TGraphErrors graph2;
+  graph2.SetMarkerStyle(22);
+  graph2.SetMarkerColor(kBlue);
+
   int momMin = 10;
   int momMax = 1200;
   int momStep = 10;
   fillGraph(graph1, "../results/pebs01_%03d_GeV.root", momMin, momMax, momStep, 0.8e-3, 4e-3);
+  fillGraph(graph2, "../results/pebs01_%03d_GeV_protons.root", momMin, momMax, momStep, 0.8e-3, 4e-3);
 
   TF1 fitMSC("fitMSC", fitfunc, momMin, momMax, 2);
   fitMSC.SetParNames("a", "b");
@@ -54,15 +59,52 @@ int main(int argc, char** argv)
   graph1.PaintStats(graph1.GetFunction("fitMSC"));
   graph1.GetXaxis()->SetTitle("p / GeV");
   graph1.GetYaxis()->SetTitle("#sigma_{p} / p");
+  graph2.Draw("P");
+  graph2.Fit("fitMSC", "E");
+  graph2.SetMarkerSize(1.5);
+  graph2.GetFunction("fitMSC")->SetLineColor(kBlue);
+  graph2.PaintStats(graph2.GetFunction("fitMSC"));
+
+  TLegend legend(0.22, 0.75, 0.4, 0.83);
+  legend.AddEntry(&graph1, "electrons", "P");
+  legend.AddEntry(&graph2, "protons", "P");
+  legend.Draw("SAME");
+
   TPaveStats* pt1 = (TPaveStats*) graph1.GetListOfFunctions()->FindObject("stats");
   pt1->SetTextColor(kRed);
-  pt1->SetX1NDC(0.6);
-  pt1->SetX2NDC(0.95);
-  pt1->SetY1NDC(0.3);
-  pt1->SetY2NDC(0.45);
+  TPaveStats* pt2 = (TPaveStats*) graph2.GetListOfFunctions()->FindObject("stats");
+  pt2->SetTextColor(kBlue);
 
-  TLatex text(120, 0.7, "#sigma_{p} / p = #sqrt{(ap)^{2} + b^{2}}");
+  TPaveText* pt[2] = {pt1, pt2};
+  for(int i = 0; i < 2; i++) {
+    pt[i]->SetX1NDC(0.55);
+    pt[i]->SetX2NDC(0.80);
+    pt[i]->SetY1NDC(0.35 - i*0.2);
+    pt[i]->SetY2NDC(0.50 - i*0.2);
+  }
+
+  double MDR = graph1.GetFunction("fitMSC")->GetX(1.0);
+
+  TLatex text(120, 0.7, "#sigma_{p} / p = #sqrt{(ap)^{2} + (b/#beta)^{2}}");
   text.Draw("SAME");
+
+  char MDRtext[128];
+  sprintf(MDRtext, "MDR #approx %.0f GV", ((int)MDR/10)*10.);
+  TLatex text2(120, 0.55, MDRtext);
+  text2.Draw("SAME");
+
+  TLine yLine(0.0, 1.0, MDR, 1.0);
+  yLine.Draw();
+  yLine.SetLineColor(kBlack);
+  yLine.SetLineStyle(2);
+  yLine.SetLineWidth(3);
+
+
+  TLine xLine(MDR, 0.0, MDR, 1.0);
+  xLine.Draw();
+  xLine.SetLineColor(kBlack);
+  xLine.SetLineStyle(2);
+  xLine.SetLineWidth(3);
 
   canvas.SaveAs("pebs01_1_deg.pdf");
   canvas.SaveAs("pebs01_1_deg.root");

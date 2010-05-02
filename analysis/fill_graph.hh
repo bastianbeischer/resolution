@@ -2,21 +2,22 @@
 #include <TTree.h>
 #include <TFile.h>
 #include <TH1D.h>
+#include <TF1.h>
 
 #include "RES_Event.hh"
 
-void fillGraph(TGraphErrors& graph1, const char* fileNameTemplate, int min, int max, int step, double guessA = 0.08, double guessB = 0.21)
+void fillGraph(TGraphErrors& graph1, const char* fileNameTemplate, double min, double max, double step, double guessA = 0.08, double guessB = 0.21)
 {
   TTree* genTree;
   TTree* recTree;
   RES_Event* genEvent = new RES_Event;
   RES_Event* recEvent = new RES_Event;
 
-  int momBins = 60;
+  int momBins = 120;
   double sigmaLeft = 2.5;
   double sigmaRight = 2.5;
   int i = 0;
-  for (int value = min; value <= max; value += step) {
+  for (double value = min; value <= max; value += step) {
     char filename[100];
     sprintf(filename, fileNameTemplate, value);
 
@@ -33,7 +34,7 @@ void fillGraph(TGraphErrors& graph1, const char* fileNameTemplate, int min, int 
     genTree->GetEntry(0);
     double genMom = genEvent->GetMomentum()/1000.;
     double momRes = sqrt(pow(genMom*guessA, 2.) + pow(guessB,2.));
-    TH1D resHist("resHist", "resHist", momBins, 1-5*momRes, 1+5*momRes);
+    TH1D resHist("resHist", "resHist", momBins, 1-10*momRes, 1+10*momRes);
     for(int j = 0; j < genTree->GetEntries(); j++) {
       genTree->GetEntry(j);
       recTree->GetEntry(j);
