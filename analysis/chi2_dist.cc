@@ -1,4 +1,4 @@
-// $Id: chi2_dist.cc,v 1.2 2009/10/14 09:24:35 beischer Exp $
+// $Id: chi2_dist.cc,v 1.3 2010/05/12 01:56:30 beischer Exp $
 
 #include <iostream>
 #include <fstream>
@@ -35,9 +35,9 @@ int main(int argc, char** argv) {
 
   infile >> i >> j >> n >> x0 >> x1 >> theta0 >> theta1;
 
-  std::string axisLabels[5] = {"p / GeV", "y_{0} / mm", "#phi / rad", " x_{0} / mm", "#theta / rad"};
+  std::string axisLabels[5] = {"p / MeV", "y_{0} / mm", "#phi / rad", " x_{0} / mm", "#theta / rad"};
 
-  TH2D hist("hist","#chi^{2} distribution after fitting in bending plane", n+1, x0 - (x1-x0)/(2.*n), x1 + (x1-x0)/(2.*n), n+1, theta0 - (theta1-theta0)/(2.*n),theta1 + (theta1-theta0)/(2.*n));
+  TH2D hist("hist","#chi^{2} distribution after calculation of start parameters", n+1, x0 - (x1-x0)/(2.*n),x1 + (x1-x0)/(2.*n), n+1, theta0 - (theta1-theta0)/(2.*n),theta1 + (theta1-theta0)/(2.*n));
   for (int i = 0; i <= n; i++) {
     for (int j = 0; j <= n; j++) {
       double x,theta, chi2;

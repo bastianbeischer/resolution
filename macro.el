@@ -2,7 +2,6 @@
 (setq resolution-msc_id "msc")
 (setq resolution-filestem (format "testbeam_%s_wo_" resolution-msc_id))
 (setq resolution-geometry-file "mac/geometry_testbeam.mac")
-(setq resolution-event-action-file "src/RES_EventActionGeneration.cc")
 
 ;; Execute the entire set of things
 (defun resolution-execute-one(ladderres dof)
@@ -56,7 +55,7 @@
     (while (<= num 10)
       (unless (= num 1)
         (let ((macro (format "mac/%s%d.mac" resolution-filestem num)))
-          (shell-command (format "resolution %s" macro))))
+          (shell-command (format "resolution %s&" macro))))
       (setq num (1+ num)))))
 
 ;; Execute analysis program and store results in one output file

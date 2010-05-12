@@ -1,4 +1,4 @@
-// $Id: RES_EventActionGeneration.cc,v 1.24 2010/02/26 17:42:21 beischer Exp $
+// $Id: RES_EventActionGeneration.cc,v 1.25 2010/05/12 01:56:31 beischer Exp $
 
 #include "RES_EventActionGeneration.hh"
 
@@ -89,6 +89,7 @@ void RES_EventActionGeneration::EndOfEventAction(const G4Event* event)
     dataHandler->AddEvent(newEvent);
   }
 
+  //NASTY HARDCODED AGAIN
   RES_RunManager* mgr = RES_RunManager::GetRunManager();
   G4int nDof = mgr->GetFixedDof();
   if (nDof > 0) {

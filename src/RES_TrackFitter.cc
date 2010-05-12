@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitter.cc,v 1.62 2010/05/02 22:59:27 beischer Exp $
+// $Id: RES_TrackFitter.cc,v 1.63 2010/05/12 01:56:31 beischer Exp $
 
 #include <cmath>
 #include <fstream>
@@ -152,11 +152,17 @@ void RES_TrackFitter::SetStartParametesToGeneratedParticle()
   double phi = atan((y1-y0)/(z1-z0));
   double theta = atan((x1-x0)/(z1-z0));
 
-  m_initialParameter[0] = cos(theta)/p;
+  m_initialParameter[0] = 1./(cos(theta)*p);
   m_initialParameter[1] = y0;
   m_initialParameter[2] = phi;
   m_initialParameter[3] = x0;
   m_initialParameter[4] = theta;
+
+  m_initialParameter[0] = 1./GeV;
+  m_initialParameter[1] = 0;
+  m_initialParameter[2] = 0;
+  m_initialParameter[3] = 0;
+  m_initialParameter[4] = 0;
 
   for (int i = 0; i < 5; i++)
     m_parameter[i] = m_initialParameter[i];
@@ -315,20 +321,20 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
 
   // print covariance matrix if the user wants to
   if (m_verbose > 1) {
-    TMatrixD SolutionToPositionsTrans(nCol, 2*nModules);
-    SolutionToPositionsTrans.Transpose(SolutionToPositions);
-    TMatrixD Cov(2*nHits, 2*nHits);
-    Cov = SolutionToPositions * Minv * SolutionToPositionsTrans;
+    // TMatrixD SolutionToPositionsTrans(nCol, 4*nModules);
+    // SolutionToPositionsTrans.Transpose(SolutionToPositions);
+    // TMatrixD Cov(2*nHits, 2*nHits);
+    // Cov = SolutionToPositions * Minv * SolutionToPositionsTrans;
 
-    for (unsigned int i = 0; i < nHits; i++)
-      G4cout << "resolution in x" << i << " --> " << sqrt(Cov(2*i,2*i)) << " mm" << G4endl;
-    for (unsigned int i = 0; i < nHits; i++)
-      G4cout << "resolution in y" << i << " --> " << sqrt(Cov(2*i+1,2*i+1)) << " mm" << G4endl;
+    // for (unsigned int i = 0; i < nHits; i++)
+    //   G4cout << "resolution in x" << i << " --> " << sqrt(Cov(2*i,2*i)) << " mm" << G4endl;
+    // for (unsigned int i = 0; i < nHits; i++)
+    //   G4cout << "resolution in y" << i << " --> " << sqrt(Cov(2*i+1,2*i+1)) << " mm" << G4endl;
 
-    if (m_verbose > 2) {
-      G4cout << "covariance matrix for this fit:" << G4endl;
-      Cov.Print();
-    }
+    // if (m_verbose > 2) {
+    //   G4cout << "covariance matrix for this fit:" << G4endl;
+    //   Cov.Print();
+    // }
   }
 
   // return information from the fit.
@@ -412,15 +418,15 @@ void RES_TrackFitter::CalculateStartParameters()
     G4double deltaTheta = dy_over_dz_top - dy_over_dz_bottom;
 
     // TODO: CHANGED HARDCODED VALUES HERE
-    //G4double magnetHeight = 8*cm; // PERDAIX MAGNET HERE
-    G4double magnetHeight = 50*cm; // PEBS01 MAGNET HERE
+    G4double magnetHeight = 8*cm; // PERDAIX MAGNET HERE
+    //G4double magnetHeight = 50*cm; // PEBS01 MAGNET HERE
     //G4double magnetHeight = 100*cm; // PEBS02 MAGNET HERE
     G4double y0_magnet = y0_bottom + (-magnetHeight/2.)*dy_over_dz_bottom;
     G4double y1_magnet = y0_top    +  (magnetHeight/2.)*dy_over_dz_top;
     G4double z0_magnet = -magnetHeight/2.;
     G4double z1_magnet =  magnetHeight/2.;
-    //G4double B  = 0.27; // PERDAIX MAGNET HERE
-    G4double B  = 0.385; // PEBS01 MAGNET HERE
+    G4double B  = 0.27; // PERDAIX MAGNET HERE
+    //G4double B  = 0.385; // PEBS01 MAGNET HERE
     //G4double B  = 0.8; // PEBS02 MAGNET HERE
     G4double L  = sqrt(pow(y1_magnet - y0_magnet, 2.) + pow(z1_magnet - z0_magnet,2.))/m;
     G4double pt = 0.3*B*L/deltaTheta*GeV;
@@ -474,12 +480,16 @@ void RES_TrackFitter::CalculateStartParameters()
 
     G4double dummy1,dummy2;
 
+    std::vector<int> alreadyInToBeSkipped;
+    for (std::vector<int>::iterator it = m_layersToBeSkipped.begin(); it != m_layersToBeSkipped.end(); it++)
+      alreadyInToBeSkipped.push_back(*it);
+
     for (int i = 6; i < 12; i++)
       if (i != 11)
         AddLayerToBeSkipped(i);
     FitStraightLine(0,nHits,x0,y0_top,lambda_x,lambda_y_top);
     for (int i = 6; i < 12; i++)
-      if (i != 11)
+      if ((i != 11) && (std::find(alreadyInToBeSkipped.begin(), alreadyInToBeSkipped.end(), i) == alreadyInToBeSkipped.end()))
         RemoveLayerToBeSkipped(i);
 
     for (int i = 0; i < 6; i++)
@@ -487,7 +497,7 @@ void RES_TrackFitter::CalculateStartParameters()
         AddLayerToBeSkipped(i);
     FitStraightLine(0,nHits,dummy1,y0_bottom,dummy2,lambda_y_bottom);
     for (int i = 0; i < 6; i++)
-      if (i != 1)
+      if ((i != 1) && (std::find(alreadyInToBeSkipped.begin(), alreadyInToBeSkipped.end(), i) == alreadyInToBeSkipped.end()))
         RemoveLayerToBeSkipped(i);
 
     G4double phi   = atan(lambda_y_top);
@@ -506,7 +516,7 @@ void RES_TrackFitter::CalculateStartParameters()
     // G4ThreeVector startPoint(x0 + lambda_x*z1_magnet, y0_top + lambda_y_top*z1_magnet, z1_magnet);
     // G4ThreeVector endPoint(x0 + lambda_x*z0_magnet, y0_bottom + lambda_y_bottom*z0_magnet, z0_magnet);
     // G4double B = magInfo.MeanFieldAlongTrack(startPoint, endPoint)/tesla;
-    G4double B = 0.27*tesla;
+    G4double B = 0.246*tesla;
     G4double L  = sqrt(pow(y1_magnet - y0_magnet, 2.) + pow(z1_magnet - z0_magnet,2.));
     G4double pt = (0.3*(B/tesla)*(L/m)/deltaTheta)*GeV;
 
@@ -567,6 +577,9 @@ G4int RES_TrackFitter::DoBlobelFit(G4int npar)
     dof = nHits - (-npar);
   else
     dof = nHits - npar;
+
+  dof = dof + m_layersToBeSkipped.size();
+
   m_currentRecEvent.SetChi2(chi2);
   m_currentRecEvent.SetDof(dof);
 
@@ -604,8 +617,10 @@ G4int RES_TrackFitter::DoMinuitFit(G4int npar)
 
   // in this step a new rec event will be created with (hopefully) identical properties than the result of the minimization. this should be done properly in the future...
   G4double chi2 = Chi2InModuleFrame();
-  G4int nHits = m_currentRecEvent.GetNbOfHits();
+  G4int nHits = m_currentGenEvent.GetNbOfHits();
   G4int dof = nHits - npar;
+  dof = dof + m_layersToBeSkipped.size();
+  
   m_currentRecEvent.SetChi2(chi2);
   m_currentRecEvent.SetDof(dof);
 
@@ -658,6 +673,11 @@ G4double RES_TrackFitter::Chi2InDetFrame()
     G4int iModule = m_currentGenEvent.GetModuleID(i);
     G4int iLayer  = m_currentGenEvent.GetLayerID(i);
     unsigned int uniqueLayer = 2*iModule + iLayer;
+
+    std::vector<int>::iterator it = std::find(m_layersToBeSkipped.begin(), m_layersToBeSkipped.end(), uniqueLayer);
+    if (it != m_layersToBeSkipped.end())
+      continue;
+
     RES_Module* module = det->GetModule(iModule);
     G4double angle = module->GetAngle();
     if (iLayer > 0) angle += module->GetInternalAngle();
@@ -734,6 +754,10 @@ G4double RES_TrackFitter::Chi2InModuleFrame()
     G4int iLayer  = m_currentGenEvent.GetLayerID(i);
     unsigned int uniqueLayer = 2*iModule + iLayer;
 
+    std::vector<int>::iterator it = std::find(m_layersToBeSkipped.begin(), m_layersToBeSkipped.end(), uniqueLayer);
+    if (it != m_layersToBeSkipped.end())
+      continue;
+
     RES_Module* module = det->GetModule(iModule);
     G4double angle = module->GetAngle();
     if (iLayer > 0) angle += module->GetInternalAngle();
@@ -768,11 +792,17 @@ G4double RES_TrackFitter::Chi2InModuleFrame()
 
 void RES_TrackFitter::ScanChi2Function(G4int i, G4int j, G4String filename)
 {
-  //CalculateStartParameters();
-  SetStartParametesToGeneratedParticle();
-  
+  G4RunManager* runManager = G4RunManager::GetRunManager();
+  const RES_PrimaryGeneratorAction* genAction = (RES_PrimaryGeneratorAction*) runManager->GetUserPrimaryGeneratorAction();
+  G4ParticleGun* gun = genAction->GetParticleGun();
+  m_initialCharge = gun->GetParticleCharge();
+
+  CalculateStartParameters();
+  //SetStartParametesToGeneratedParticle();
+  DoBlobelFit(5);
+
   // hardcoded at the moment
-  m_lowerBound[0] = 1./(0.2*GeV);        m_upperBound[0] = 1./(1.8*GeV);
+  m_lowerBound[0] = 0.2*GeV;        m_upperBound[0] = 1.8*GeV;
   m_lowerBound[1] = -0.5*cm;         m_upperBound[1] = 0.5*cm;
   m_lowerBound[2] = -1.*M_PI/180.;  m_upperBound[2] = 1.*M_PI/180.;
   m_lowerBound[3] = -0.5*cm;         m_upperBound[3] = 0.5*cm;
@@ -801,14 +831,17 @@ void RES_TrackFitter::ScanChi2Function(G4int i, G4int j, G4String filename)
   }
 
   file << i << "\t" << j << "\t" << nSteps << "\t" << m_lowerBound[i] << "\t" << m_upperBound[i] << "\t" << m_lowerBound[j] << "\t" << m_upperBound[j] << std::endl;
-
+  
   m_parameter[i] = m_lowerBound[i];
   for (int ctr1 = 0; ctr1 <= nSteps; ctr1++) {
     m_parameter[j] = m_lowerBound[j];
     for (int ctr2 = 0; ctr2 <= nSteps; ctr2++) {
+      m_parameter[0] = 1./m_parameter[0];
       G4double chi2 = Chi2InModuleFrame();
+      m_parameter[0] = 1./m_parameter[0];
       file << m_parameter[i] << "\t" << m_parameter[j] << "\t" << chi2 << std::endl;;
       m_parameter[j] += m_step[j];
+      //G4cout << i << j<< " --> " << m_parameter[i] << "  " << m_parameter[j] << " ---> " << chi2 << G4endl;
     }
     m_parameter[i] += m_step[i];
   }

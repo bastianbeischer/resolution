@@ -1,4 +1,4 @@
-// $Id: res_vs_mom_pebs.cc,v 1.2 2010/05/02 22:59:28 beischer Exp $
+// $Id: res_vs_mom_pebs.cc,v 1.3 2010/05/12 01:56:30 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -38,11 +38,11 @@ int main(int argc, char** argv)
   graph2.SetMarkerStyle(22);
   graph2.SetMarkerColor(kBlue);
 
-  int momMin = 10;
-  int momMax = 1200;
-  int momStep = 10;
-  fillGraph(graph1, "../results/pebs01_%03d_GeV.root", momMin, momMax, momStep, 0.8e-3, 4e-3);
-  fillGraph(graph2, "../results/pebs01_%03d_GeV_protons.root", momMin, momMax, momStep, 0.8e-3, 4e-3);
+  double momMin = 10;
+  double momMax = 1200;
+  double momStep = 10;
+  fillGraph(graph1, "../results/pebs01_%03.0f_GeV.root", momMin, momMax, momStep, 0.8e-3, 4e-3);
+  fillGraph(graph2, "../results/pebs01_%03.0f_GeV_protons.root", momMin, momMax, momStep, 0.8e-3, 4e-3);
 
   TF1 fitMSC("fitMSC", fitfunc, momMin, momMax, 2);
   fitMSC.SetParNames("a", "b");

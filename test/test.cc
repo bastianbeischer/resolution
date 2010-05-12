@@ -1,4 +1,4 @@
-// $Id: test.cc,v 1.14 2010/02/25 20:41:11 beischer Exp $
+// $Id: test.cc,v 1.15 2010/05/12 01:56:31 beischer Exp $
 
 #include "RES_Event.hh"
 
@@ -21,8 +21,8 @@ int main(int argc, char** argv)
       genTree->SetBranchAddress("event", &genEvent);
     std::cout << "Generated events:" << std::endl;
     std::cout << genTree->GetEntries() << std::endl;
-    //    for (unsigned int i = 0; i < genTree->GetEntries(); i++) {
-    for (unsigned int i = 0; i < 1; i++) {
+    for (unsigned int i = 0; i < genTree->GetEntries(); i++) {
+      //for (unsigned int i = 0; i < 1; i++) {
       genTree->GetEntry(i);
       std::cout << "--------------------------------------------------" << std::endl;
       std::cout << "ID: " << genEvent->GetID() << " --> "
@@ -42,8 +42,8 @@ int main(int argc, char** argv)
     RES_Event* recEvent = new RES_Event();
     recTree->SetBranchAddress("event", &recEvent);
     std::cout << "Reconstructed events:" << std::endl;
-    //    for (unsigned int i = 0; i < recTree->GetEntries(); i++) {
-    for (unsigned int i = 0; i < 1; i++) {
+    for (unsigned int i = 0; i < recTree->GetEntries(); i++) {
+      //for (unsigned int i = 0; i < 1; i++) {
       recTree->GetEntry(i);
       std::cout << "--------------------------------------------------" << std::endl;
       std::cout << "ID: " << recEvent->GetID() << " --> "
