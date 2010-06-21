@@ -1,4 +1,4 @@
-// $Id: single_run.cc,v 1.34 2010/05/12 01:56:30 beischer Exp $
+// $Id: single_run.cc,v 1.35 2010/06/21 12:20:40 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -12,6 +12,7 @@
 #include <TF1.h>
 #include <TTree.h>
 #include <TH1D.h>
+#include <TLatex.h>
 #include <TMath.h>
 #include <TCanvas.h>
 #include <TStyle.h>
@@ -130,8 +131,9 @@ int main(int argc, char** argv)
   //double momRes = 0.8;
   double momRes = sqrt(pow(genMom*.8e-3, 2.) + pow(0.04,2.));
   char title[256];
-  sprintf(title, "Momentum resolution for %.2f GeV", genMom);
-  TH1D resHist("Mom. Resolution", title, 100, 1-10*momRes, 1+10*momRes);
+  sprintf(title, "Data with nominal energy of %.2f GeV", genMom);
+  // TH1D resHist("Mom. Resolution", title, 100, 1-10*momRes, 1+10*momRes);
+  TH1D resHist("Mom. Resolution", title, 100, -2.5, 3.0);
   sprintf(title, "Initial values for %.2f GeV", genMom);
   TH1D initialP("Inital values", title, 100, 1-10*momRes, 1+10*momRes);
   TH1D ptHist("ptHist", "ptHist", 50, 1-5*momRes, 1+5*momRes);
@@ -170,11 +172,14 @@ int main(int argc, char** argv)
   TH1D totalYhist("totalYhist", "totalYhist", 500, -1.0, 1.0);
   sprintf(title, "#chi^{2} Distribution (dof = %d)", recEvent->GetDof());
   //sprintf(title, "#chi^{2} Distribution (dof = %d)", 11);
-  TH1D chi2Hist("#chi^{2} Distribution", title, 50, 0.0, 40.0);
+  TH1D chi2Hist("#chi^{2} Distribution", title, 200, 0.0, 200.0);
+  TH1D dofHist("n_{dof} Disribution", title, 8, 0, 8);
   TH1D angleHist("angleHist", "angleHist", 500, -100e-3, 100e-3);
   TH1D lHist("lHist", "lHist", 100, 0.07, 0.11);
   TH1D lOverAngleHist("lOverAngleHist", "lOverAngleHist", 100, -5., -1.);
 
+  int total = 0;
+  int chi2Passed = 0;
   for(int iEvent = 0; iEvent < genTree->GetEntries(); iEvent++) {
     //  for(int i = 0; i < 90; i++) {
     genTree->GetEntry(iEvent);
@@ -182,46 +187,54 @@ int main(int argc, char** argv)
     int nHitsGen = genEvent->GetNbOfHits();
     int nHitsRec = recEvent->GetNbOfHits();
 
-    double chi2Cut = 10;
+    double chi2Cut = 200;
     double chi2 = recEvent->GetChi2();
-    //    if (nHitsGen < 8 || nHitsRec == 0 || nHitsGen > nHitsRec || chi2 > chi2Cut) continue;
-   if (nHitsGen < 8 || nHitsRec == 0 || nHitsGen > nHitsRec) continue;
+    total++;
+    if (chi2 > chi2Cut)
+      continue;
+    chi2Passed++;
+    
+  // if (nHitsGen < 8 || nHitsRec == 0 || nHitsGen > nHitsRec || chi2 > chi2Cut) continue;
+   //if (nHitsGen < 8 || nHitsRec == 0 || nHitsGen > nHitsRec) continue;
 
-    double angle1 = (genEvent->GetHitPosition(3).y() - genEvent->GetHitPosition(0).y())/(genEvent->GetHitPosition(3).z() - genEvent->GetHitPosition(0).z());
-    double angle2 = (genEvent->GetHitPosition(nHitsGen-1).y() - genEvent->GetHitPosition(4).y())/(genEvent->GetHitPosition(nHitsGen-1).z() - genEvent->GetHitPosition(4).z());
+    // double angle1 = (genEvent->GetHitPosition(3).y() - genEvent->GetHitPosition(0).y())/(genEvent->GetHitPosition(3).z() - genEvent->GetHitPosition(0).z());
+    // double angle2 = (genEvent->GetHitPosition(nHitsGen-1).y() - genEvent->GetHitPosition(4).y())/(genEvent->GetHitPosition(nHitsGen-1).z() - genEvent->GetHitPosition(4).z());
 
-    double y0 = genEvent->GetHitPosition(4).y();;
-    double y1 = genEvent->GetHitPosition(3).y();;
-    double z0 = genEvent->GetHitPosition(4).z();;
-    double z1 = genEvent->GetHitPosition(3).z();;
+    // double y0 = genEvent->GetHitPosition(4).y();;
+    // double y1 = genEvent->GetHitPosition(3).y();;
+    // double z0 = genEvent->GetHitPosition(4).z();;
+    // double z1 = genEvent->GetHitPosition(3).z();;
 
-    double L = sqrt(pow(y1 - y0, 2.) + pow (z1 - z0, 2.)) / 1000.; //mm -> m
-    lHist.Fill(L);
+    // double L = sqrt(pow(y1 - y0, 2.) + pow (z1 - z0, 2.)) / 1000.; //mm -> m
+    // lHist.Fill(L);
 
     //    if (angle2 - angle1  -3e-3) continue;
-    angleHist.Fill(angle2-angle1);
+    // angleHist.Fill(angle2-angle1);
 
-    lOverAngleHist.Fill(L/(angle2-angle1));
+    // lOverAngleHist.Fill(L/(angle2-angle1));
 
     resHist.Fill(genEvent->GetMomentum()/recEvent->GetMomentum());
     ptHist.Fill(genEvent->GetTransverseMomentum()/recEvent->GetTransverseMomentum());
 
-    for (int i = 0; i < nHitsGen; i++) {
-      unsigned int genUniqueLayer = 2*genEvent->GetModuleID(i) + genEvent->GetLayerID(i);
-      unsigned int iRec = genUniqueLayer;
-      xDeltaGenHist[genUniqueLayer]->Fill(genEvent->GetHitPosition(i).x() - recEvent->GetHitPosition(iRec).x());
-      yDeltaGenHist[genUniqueLayer]->Fill(genEvent->GetHitPosition(i).y() - recEvent->GetHitPosition(iRec).y());
-      // xDeltaGenHist[genUniqueLayer]->Fill(genEvent->GetHitPosition(i).x());
-      // yDeltaGenHist[genUniqueLayer]->Fill(genEvent->GetHitPosition(i).y());
-      xDeltaSmearedHist[genUniqueLayer]->Fill(genEvent->GetSmearedHitPosition(i).x() - recEvent->GetHitPosition(iRec).x());
-      yDeltaSmearedHist[genUniqueLayer]->Fill(genEvent->GetSmearedHitPosition(i).y() - recEvent->GetHitPosition(iRec).y());
-      totalXhist.Fill(genEvent->GetHitPosition(i).x() - recEvent->GetHitPosition(iRec).x());
-      totalYhist.Fill(genEvent->GetHitPosition(i).y() - recEvent->GetHitPosition(iRec).y());
-    }
+    // for (int i = 0; i < nHitsGen; i++) {
+    //   unsigned int genUniqueLayer = 2*genEvent->GetModuleID(i) + genEvent->GetLayerID(i);
+    //   unsigned int iRec = genUniqueLayer;
+    //   xDeltaGenHist[genUniqueLayer]->Fill(genEvent->GetHitPosition(i).x() - recEvent->GetHitPosition(iRec).x());
+    //   yDeltaGenHist[genUniqueLayer]->Fill(genEvent->GetHitPosition(i).y() - recEvent->GetHitPosition(iRec).y());
+    //   // xDeltaGenHist[genUniqueLayer]->Fill(genEvent->GetHitPosition(i).x());
+    //   // yDeltaGenHist[genUniqueLayer]->Fill(genEvent->GetHitPosition(i).y());
+    //   xDeltaSmearedHist[genUniqueLayer]->Fill(genEvent->GetSmearedHitPosition(i).x() - recEvent->GetHitPosition(iRec).x());
+    //   yDeltaSmearedHist[genUniqueLayer]->Fill(genEvent->GetSmearedHitPosition(i).y() - recEvent->GetHitPosition(iRec).y());
+    //   totalXhist.Fill(genEvent->GetHitPosition(i).x() - recEvent->GetHitPosition(iRec).x());
+    //   totalYhist.Fill(genEvent->GetHitPosition(i).y() - recEvent->GetHitPosition(iRec).y());
+    // }
 
 
     initialP.Fill(recEvent->GetInitialParameter(0) * genEvent->GetMomentum());
 
+    double dof = genEvent->GetNbOfHits() - 5;
+     dofHist.Fill(dof);
+    // if (dof == 5)
     chi2Hist.Fill(chi2);
     chi2Hist.SetTitle(title);
   }
@@ -239,6 +252,7 @@ int main(int argc, char** argv)
   //  canvas.Divide(1,2);
   //  canvas.cd(1);
   resHist.Draw();
+  
   // double rangeLower = 1-2*momRes;
   // double rangeUpper = 1+2*momRes;
   // double rangeLower = 0.25;
@@ -247,8 +261,32 @@ int main(int argc, char** argv)
   //fitInChi2Range(&resHist, sigma, error);
   // resHist.Fit("gaus", "EQR", "", rangeLower, rangeUpper);
   resHist.Fit("gaus", "EQ");
-  resHist.GetFunction("gaus")->SetParName(2, "#sigma_{p}/p");
-  resHist.GetXaxis()->SetTitle("p_{gen}/p_{rec}");
+  TF1* gausFit = resHist.GetFunction("gaus");
+  //  gausFit->SetParName(2, "#sigma_{p}/p");
+  double muFit = gausFit->GetParameter(1);
+  double muFitErr= gausFit->GetParError(1);
+  double sigmaFit = gausFit->GetParameter(2);
+  double sigmaFitErr= gausFit->GetParError(2);
+  double p_rec = genMom / muFit;
+  double p_rec_err = genMom * muFitErr / (muFit*muFit);
+  double sigmaP_overP = sigmaFit / muFit;
+  double sigmaP_overP_err = sqrt( pow(sigmaFitErr/muFit, 2.) + pow(muFitErr*sigmaFit/(muFit*muFit), 2.) );
+  char text1[128];
+
+  double max = resHist.GetMaximum();
+  sprintf(text1, "#sigma_{p}/p = %.2f #pm %.2f", sigmaP_overP, sigmaP_overP_err);
+  TLatex latex1(-2, 0.7*max, text1);
+  latex1.SetTextColor(kRed);
+  latex1.SetTextFont(42);
+  latex1.Draw("SAME");
+  char text2[128];
+  sprintf(text2, "p_{rec} = (%.2f #pm %.2f) GeV", p_rec, p_rec_err);
+  TLatex latex2(-2, 0.85*max, text2);
+  latex2.SetTextColor(kRed);
+  latex2.SetTextFont(42);
+  latex2.Draw("SAME");
+
+  resHist.GetXaxis()->SetTitle("p_{nom}/p_{rec}");
   resHist.GetYaxis()->SetTitle("N");
   // canvas.cd(2);
   // ptHist.Draw();
@@ -256,7 +294,7 @@ int main(int argc, char** argv)
   // ptHist.GetXaxis()->SetTitle("pt_{gen}/pt_{rec}");
   // ptHist.GetYaxis()->SetTitle("N");
   char stem[256];
-  sprintf(stem,"pebs_%.0f", genMom);
+  sprintf(stem,"neg_%.0fGeV", genMom);
   char saveName[256];
   sprintf(saveName, "%s_resolution.%s", stem, "pdf");
   canvas.SaveAs(saveName);
@@ -354,8 +392,8 @@ int main(int argc, char** argv)
   chi2Dist.SetNpx(1000);
   
   chi2Dist.FixParameter(0, 1);
-  //chi2Dist.FixParameter(1, 9);
-  chi2Dist.FixParameter(1, recEvent->GetDof());
+  chi2Dist.FixParameter(1, 5);
+  //chi2Dist.FixParameter(1, recEvent->GetDof());
   //chi2Dist.FixParameter(1, 11);
   TCanvas canvas7("canvas7", "Chi2 distribution", 1024, 768);
   canvas7.Draw();
@@ -367,9 +405,13 @@ int main(int argc, char** argv)
   chi2Dist.Draw("SAME");
   chi2Dist.SetLineColor(kRed);
   sprintf(saveName, "%s_chi2.%s", stem, "pdf");
-  canvas7.SaveAs(saveName);
+  //  canvas7.SaveAs(saveName);
   sprintf(saveName, "%s_chi2.%s", stem, "root");
-  canvas7.SaveAs(saveName);
+  //  canvas7.SaveAs(saveName);
+
+  TCanvas canvasDof("canvasDof", "Degrees of freedom");
+  canvasDof.cd();
+  dofHist.Draw();
 
   TCanvas canvas8("canvas8", "Deflection angle distribution", 1024, 768);
   canvas8.Draw();
@@ -389,9 +431,12 @@ int main(int argc, char** argv)
   initialP.Fit("gaus", "EQ");
   initialP.GetFunction("gaus")->SetParName(2, "#sigma_{p}/p");
   sprintf(saveName, "%s_initial.%s", stem, "pdf");
-  canvas9.SaveAs(saveName);
+  //  canvas9.SaveAs(saveName);
   sprintf(saveName, "%s_initial.%s", stem, "root");
-  canvas9.SaveAs(saveName);
+  //  canvas9.SaveAs(saveName);
+
+  std::cout << (double)(chi2Passed) / (double)total << std::endl;
+  std::cout << genTree->GetEntries() << std::endl;
 
   app.Run();
 

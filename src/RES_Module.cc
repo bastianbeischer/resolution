@@ -203,11 +203,14 @@ void RES_Module::SetVisibility()
     visAtt = new G4VisAttributes(G4Colour(1.0, 0.0, 0.0)); // red
     m_upperFiberPlacement->GetLogicalVolume()->SetVisAttributes(visAtt);
 
-    visAtt = new G4VisAttributes(G4Colour(0.0, 1.0, 0.0)); // green
+    //    visAtt = new G4VisAttributes(G4Colour(0.0, 1.0, 0.0)); // green
+    visAtt = new G4VisAttributes(G4Colour(0.0, 0.0, 0.0)); // black
     m_upperFoamPlacement->GetLogicalVolume()->SetVisAttributes(visAtt);
 
-    visAtt = new G4VisAttributes(G4Colour(0.0, 1.0, 0.0)); // green
+    //    visAtt = new G4VisAttributes(G4Colour(0.0, 1.0, 0.0)); // green
+    visAtt = new G4VisAttributes(G4Colour(0.0, 0.0, 0.0)); // black
     m_upperPlasticPlacement->GetLogicalVolume()->SetVisAttributes(visAtt);
+
   }
   else if (m_type == silicon) {
     visAtt = new G4VisAttributes(G4Colour(0.0, 0.0, 1.0)); // blue

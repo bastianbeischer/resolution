@@ -1,4 +1,4 @@
-// $Id: charge_id.cc,v 1.3 2010/05/12 01:56:30 beischer Exp $
+// $Id: charge_id.cc,v 1.4 2010/06/21 12:20:41 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -61,7 +61,7 @@ int main(int argc, char** argv)
   for(int i = 0; i < chargeID.GetN(); i++) {
     double x = chargeID.GetX()[i];
     double y = chargeID.GetY()[i];
-    double frac = 0.5;
+    double frac = 0.2;
     eContami.SetPoint(i, x, y/frac/(1+2*y/frac));
   }
 
