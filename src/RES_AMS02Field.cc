@@ -1,3 +1,5 @@
+// $Id: RES_AMS02Field.cc,v 1.3 2010/06/21 20:53:15 beischer Exp $
+
 #include "RES_AMS02Field.hh"
 
 #include "MagField.hh"

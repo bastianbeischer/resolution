@@ -1,4 +1,4 @@
-// $Id
+// $Id: RES_AMS02Field.hh,v 1.2 2010/06/21 20:53:16 beischer Exp $
 
 #ifndef RES_AMS02Field_hh
 #define RES_AMS02Field_hh
