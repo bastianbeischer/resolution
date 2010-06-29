@@ -9,7 +9,7 @@ class RES_ApplicationManager
 {
 
 public:
-  RES_ApplicationManager();
+  RES_ApplicationManager(int argc, char** argv);
   ~RES_ApplicationManager();
 
 public:
@@ -19,6 +19,9 @@ public:
 private:
   RES_ApplicationMessenger* m_messenger;
   RES_RunManager*           m_runManager;
+
+  int                       m_argc;
+  char**                    m_argv;
 
 };
 

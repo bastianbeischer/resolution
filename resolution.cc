@@ -1,4 +1,4 @@
-// $Id: resolution.cc,v 1.13 2010/01/12 14:32:23 beischer Exp $
+// $Id: resolution.cc,v 1.14 2010/06/29 13:26:14 beischer Exp $
 
 #include "RES_ApplicationManager.hh"
 
@@ -12,7 +12,7 @@ int main(int argc, char** argv)
     return -1;
   } 
 
-  RES_ApplicationManager appManager;
+  RES_ApplicationManager appManager(argc, argv);
 
   if (argc == 1) {
     appManager.CreateSession();

@@ -15,14 +15,18 @@
 
 #ifdef G4VIS_USE
 #include "G4VisExecutive.hh"
+#include "G4UIQt.hh"
 #endif
 
 #include "G4UIsession.hh"
 #include "G4UIterminal.hh"
 #include "G4UItcsh.hh"
 
-RES_ApplicationManager::RES_ApplicationManager()
+RES_ApplicationManager::RES_ApplicationManager(int argc, char** argv)
 {
+  m_argc = argc;
+  m_argv = argv;
+
   m_messenger = new RES_ApplicationMessenger(this);
 
   // create a new RunManager
@@ -69,6 +73,7 @@ int RES_ApplicationManager::RunBatchScript(G4String scriptName)
 void RES_ApplicationManager::CreateSession()
 {
   G4UIsession * session = new G4UIterminal(new G4UItcsh);
+  //G4UIsession* session = new G4UIQt(m_argc, m_argv);
   session->SessionStart(); 
   delete session;
 }

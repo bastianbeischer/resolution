@@ -93,6 +93,7 @@ private:
 
   G4double      m_foamThickness;
   G4double      m_plasticThickness;
+  G4double      m_glueThickness;
   G4double      m_fiberThickness;
 
   G4double      m_kaptonThickness;
@@ -101,6 +102,7 @@ private:
 
   G4Material*   m_moduleMaterial;
   G4Material*   m_plasticMaterial;
+  G4Material*   m_glueMaterial;
   G4Material*   m_foamMaterial;
   G4Material*   m_fiberMaterial;
   G4Material*   m_siliconMaterial;
@@ -111,8 +113,11 @@ private:
   G4PVPlacement* m_lowerFiberPlacement;
   G4PVPlacement* m_upperFoamPlacement;
   G4PVPlacement* m_lowerFoamPlacement;
-  G4PVPlacement* m_upperPlasticPlacement;
-  G4PVPlacement* m_lowerPlasticPlacement;
+  G4PVPlacement* m_firstPlasticPlacement;
+  G4PVPlacement* m_secondPlasticPlacement;
+  G4PVPlacement* m_thirdPlasticPlacement;
+  G4PVPlacement* m_fourthPlasticPlacement;
+  G4PVPlacement* m_gluePlacement;
   G4PVPlacement* m_upperSiliconPlacement;
   G4PVPlacement* m_lowerSiliconPlacement;
   G4PVPlacement* m_upperKaptonPlacement;

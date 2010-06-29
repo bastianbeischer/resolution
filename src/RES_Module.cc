@@ -33,9 +33,10 @@ RES_Module::~RES_Module()
 void RES_Module::InitializeCommonValues()
 {
   // Thickness
-  m_foamThickness = 0.3*cm;
-  m_plasticThickness = 0.01*cm;
-  m_fiberThickness = 0.1*cm;
+  m_foamThickness = 7.6*mm;
+  m_plasticThickness = 0.25*mm;
+  m_glueThickness = 0.3*mm;
+  m_fiberThickness = 1.15*mm;
 
   m_kaptonThickness = 200.*um;
   m_siliconThickness = 160.*um;
@@ -64,6 +65,7 @@ void RES_Module::InitializeCommonValues()
   // Define materials
   m_moduleMaterial = G4NistManager::Instance()->FindOrBuildMaterial( "G4_AIR" );
   m_plasticMaterial = G4NistManager::Instance()->FindOrBuildMaterial( "G4_POLYCARBONATE" );
+  m_glueMaterial = G4NistManager::Instance()->FindOrBuildMaterial( "G4_POLYCARBONATE" ); // actually epoxy, but epoxy and plastic have rougly the same density of about 1.2 g/cm3
   m_foamMaterial = rohacell;
   m_fiberMaterial = G4NistManager::Instance()->FindOrBuildMaterial( "G4_POLYSTYRENE" );
   m_siliconMaterial = Si;
@@ -73,8 +75,8 @@ void RES_Module::InitializeCommonValues()
 void RES_Module::ComputeParameters()
 {
   if (m_type == fiber) {
-    m_height = 2*(m_foamThickness + m_plasticThickness + m_fiberThickness);
-    G4double zInModule = m_foamThickness + m_plasticThickness + 0.5*m_fiberThickness;
+    m_height = 2*m_foamThickness + 4*m_plasticThickness + 2*m_fiberThickness + m_glueThickness;
+    G4double zInModule = 0.5*m_glueThickness + m_plasticThickness + m_foamThickness + m_plasticThickness + 0.5*m_fiberThickness;
     m_upperZ = m_placement.z() + zInModule + 0.5*m_fiberThickness;
     m_lowerZ = m_placement.z() - zInModule + 0.5*m_fiberThickness;
   }
@@ -92,7 +94,7 @@ void RES_Module::SetDefaultValuesForFiber()
   m_type            = fiber;
   m_angle           = 0.;
   m_internalAngle   = 0.;
-  m_length          = 30.*cm;
+  m_length          = 40.*cm;
   m_width           = 6.912*cm;
   m_upperSigmaU     = m_length/sqrt(12);
   m_upperSigmaV     = 50.*um;
@@ -109,7 +111,7 @@ void RES_Module::SetDefaultValuesForSilicon()
   m_type            = silicon;
   m_angle           = 0.;
   m_internalAngle   = M_PI/2.;
-  m_length          = 30.*cm;
+  m_length          = 40.*cm;
   m_width           = 10.*cm;
   m_upperSigmaU     = m_length/sqrt(12);
   m_upperSigmaV     = 10.*um;
@@ -133,24 +135,32 @@ G4PVPlacement* RES_Module::Construct(G4VPhysicalVolume* mother, G4int copyNumber
 
   // interior of modules
   if (m_type == fiber) {
-    G4Box* fiberSolid = new G4Box("moduleFiber", 0.5*m_length, 0.5*m_width, 0.5*m_fiberThickness);
-    G4LogicalVolume* fiberLogic = new G4LogicalVolume(fiberSolid, m_fiberMaterial, "moduleFiber", 0, 0, 0);
-    m_upperFiberPlacement = new G4PVPlacement(0, G4ThreeVector(0, 0, m_foamThickness + m_plasticThickness + 0.5*m_fiberThickness),
-                                                                  fiberLogic, "moduleFiber", moduleLogic, false, 0);
-    m_lowerFiberPlacement = new G4PVPlacement(0, G4ThreeVector(0, 0, -m_foamThickness - m_plasticThickness - 0.5*m_fiberThickness),
-                                                                  fiberLogic, "moduleFiber", moduleLogic, false, 1);
+    G4Box* glueSolid = new G4Box("moduleFoam", 0.5*m_length, 0.5*m_width, 0.5*m_glueThickness);
+    G4LogicalVolume* glueLogic = new G4LogicalVolume(glueSolid, m_glueMaterial, "moduleGlue", 0, 0, 0);
+    m_gluePlacement = new G4PVPlacement(0, G4ThreeVector(0,0,0), glueLogic, "moduleGlue", moduleLogic, false, 0);
 
     G4Box* plasticSolid = new G4Box("modulePlastic", 0.5*m_length, 0.5*m_width, 0.5*m_plasticThickness);
     G4LogicalVolume* plasticLogic = new G4LogicalVolume(plasticSolid, m_plasticMaterial, "modulePlastic", 0, 0, 0);
-    m_upperPlasticPlacement = new G4PVPlacement(0, G4ThreeVector(0,0,m_foamThickness + 0.5*m_plasticThickness),
-                                                                    plasticLogic, "modulePlastic", moduleLogic, false, 0);
-    m_lowerPlasticPlacement = new G4PVPlacement(0, G4ThreeVector(0,0,-m_foamThickness - 0.5*m_plasticThickness),
-                                                                    plasticLogic, "modulePlastic", moduleLogic, false, 1);
+    m_firstPlasticPlacement = new G4PVPlacement(0, G4ThreeVector(0,0, 0.5*m_glueThickness + m_plasticThickness + m_foamThickness + 0.5*m_plasticThickness),
+                                                plasticLogic, "modulePlastic", moduleLogic, false, 0);
+    m_secondPlasticPlacement = new G4PVPlacement(0, G4ThreeVector(0,0, 0.5*m_glueThickness + 0.5*m_plasticThickness),
+                                                 plasticLogic, "modulePlastic", moduleLogic, false, 1);
+    m_thirdPlasticPlacement = new G4PVPlacement(0, G4ThreeVector(0,0, -0.5*m_glueThickness - 0.5*m_plasticThickness),
+                                                plasticLogic, "modulePlastic", moduleLogic, false, 2);
+    m_fourthPlasticPlacement = new G4PVPlacement(0, G4ThreeVector(0,0, -0.5*m_glueThickness - m_plasticThickness - m_foamThickness - 0.5*m_plasticThickness),
+                                                 plasticLogic, "modulePlastic", moduleLogic, false, 3);
 
     G4Box* foamSolid = new G4Box("moduleFoam", 0.5*m_length, 0.5*m_width, 0.5*m_foamThickness);
     G4LogicalVolume* foamLogic = new G4LogicalVolume(foamSolid, m_foamMaterial, "moduleFoam", 0, 0, 0);
-    m_upperFoamPlacement = new G4PVPlacement(0, G4ThreeVector(0,0,0.5*m_foamThickness), foamLogic, "moduleFoam", moduleLogic, false, 0);
-    m_lowerFoamPlacement = new G4PVPlacement(0, G4ThreeVector(0,0,-0.5*m_foamThickness),foamLogic, "moduleFoam", moduleLogic, false, 1);
+    m_upperFoamPlacement = new G4PVPlacement(0, G4ThreeVector(0,0, 0.5*m_glueThickness + m_plasticThickness + 0.5*m_foamThickness), foamLogic, "moduleFoam", moduleLogic, false, 0);
+    m_lowerFoamPlacement = new G4PVPlacement(0, G4ThreeVector(0,0, -0.5*m_glueThickness - m_plasticThickness - 0.5*m_foamThickness),foamLogic, "moduleFoam", moduleLogic, false, 1);
+
+    G4Box* fiberSolid = new G4Box("moduleFiber", 0.5*m_length, 0.5*m_width, 0.5*m_fiberThickness);
+    G4LogicalVolume* fiberLogic = new G4LogicalVolume(fiberSolid, m_fiberMaterial, "moduleFiber", 0, 0, 0);
+    m_upperFiberPlacement = new G4PVPlacement(0, G4ThreeVector(0, 0, 0.5*m_glueThickness + m_plasticThickness + m_foamThickness + m_plasticThickness + 0.5*m_fiberThickness),
+                                                                  fiberLogic, "moduleFiber", moduleLogic, false, 0);
+    m_lowerFiberPlacement = new G4PVPlacement(0, G4ThreeVector(0, 0, -0.5*m_glueThickness - m_plasticThickness - m_foamThickness - m_plasticThickness - 0.5*m_fiberThickness),
+                                                                  fiberLogic, "moduleFiber", moduleLogic, false, 1);
   }
   else if (m_type == silicon) {
     G4Box* siliconSolid = new G4Box("moduleSilicon", 0.5*m_length, 0.5*m_width, 0.5*m_siliconThickness);
@@ -203,14 +213,17 @@ void RES_Module::SetVisibility()
     visAtt = new G4VisAttributes(G4Colour(1.0, 0.0, 0.0)); // red
     m_upperFiberPlacement->GetLogicalVolume()->SetVisAttributes(visAtt);
 
-    //    visAtt = new G4VisAttributes(G4Colour(0.0, 1.0, 0.0)); // green
-    visAtt = new G4VisAttributes(G4Colour(0.0, 0.0, 0.0)); // black
+    visAtt = new G4VisAttributes(G4Colour(0.0, 1.0, 0.0)); // green
+    //    visAtt = new G4VisAttributes(G4Colour(0.0, 0.0, 0.0)); // black
     m_upperFoamPlacement->GetLogicalVolume()->SetVisAttributes(visAtt);
 
-    //    visAtt = new G4VisAttributes(G4Colour(0.0, 1.0, 0.0)); // green
-    visAtt = new G4VisAttributes(G4Colour(0.0, 0.0, 0.0)); // black
-    m_upperPlasticPlacement->GetLogicalVolume()->SetVisAttributes(visAtt);
+    visAtt = new G4VisAttributes(G4Colour(0.0, 0.0, 1.0)); // green
+    //visAtt = new G4VisAttributes(G4Colour(0.0, 0.0, 0.0)); // black
+    m_firstPlasticPlacement->GetLogicalVolume()->SetVisAttributes(visAtt);
 
+    visAtt = new G4VisAttributes(G4Colour(0.0, 0.0, 1.0)); // green
+    //visAtt = new G4VisAttributes(G4Colour(0.0, 0.0, 0.0)); // black
+    m_gluePlacement->GetLogicalVolume()->SetVisAttributes(visAtt);
   }
   else if (m_type == silicon) {
     visAtt = new G4VisAttributes(G4Colour(0.0, 0.0, 1.0)); // blue
