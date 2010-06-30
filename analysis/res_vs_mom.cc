@@ -1,4 +1,4 @@
-// $Id: res_vs_mom.cc,v 1.14 2010/05/02 22:59:29 beischer Exp $
+// $Id: res_vs_mom.cc,v 1.15 2010/06/30 07:02:41 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -18,7 +18,8 @@
 
 double fitfunc(double* x, double* p)
 {
-  double m = 5.11e-4;
+  //  double m = 5.11e-4;
+  double m = p[2];
   double beta = x[0] / sqrt(pow(x[0],2.) + pow(m,2.));
   return sqrt(pow(x[0]*p[0],2.) + pow(p[1]/beta, 2.));
 }
@@ -52,20 +53,20 @@ int main(int argc, char** argv)
   double momMin = 0.25;
   double momMax = 9.0;
   double momStep = 0.25;
-  fillGraph(graph1, "../results/perdaix_%.2f_GeV_1.00_deg_msc_inhom.root", momMin, momMax, momStep);
-  fillGraph(graph2, "../results/perdaix_%.2f_GeV_1.00_deg_msc_hom.root", momMin, momMax, momStep);
-  fillGraph(graph3, "../results/perdaix_%.2f_GeV_1.00_deg_nomsc_inhom.root", momMin, momMax, momStep, 0.08, 0.0);
-  fillGraph(graph4, "../results/perdaix_%.2f_GeV_1.00_deg_nomsc_hom.root", momMin, momMax, momStep, 0.08, 0.0);
+  fillGraph(graph1, "../results/perdaix_%.2f_GeV_1.00_deg_msc_inhom_protons.root", momMin, momMax, momStep, 0.08, 0.3);
+  //  fillGraph(graph2, "../results/perdaix_%.2f_GeV_1.00_deg_msc_hom.root", momMin, momMax, momStep);
+  // fillGraph(graph3, "../results/perdaix_%.2f_GeV_1.00_deg_nomsc_inhom.root", momMin, momMax, momStep, 0.08, 0.0);
+  // fillGraph(graph4, "../results/perdaix_%.2f_GeV_1.00_deg_nomsc_hom.root", momMin, momMax, momStep, 0.08, 0.0);
 
   double m_electron = 5.11e-4;
   double m_proton   = 9.38e-1;
 
-  TF1 fitMSC("fitMSC", fitfunc, momMin, momMax, 2);
-  fitMSC.SetParNames("a", "b");
-  //  fitMSC.SetParNames("a", "b", "m");
-  //  fitMSC.FixParameter(2, m_electron);
-  TF1 fitNoMSC("fitNoMSC", "[0]*x + [1]", momMin, momMax);
-  fitNoMSC.SetParNames("a", "b");
+  TF1 fitMSC("fitMSC", fitfunc, momMin, momMax, 3);
+  //  fitMSC.SetParNames("a", "b");
+  fitMSC.SetParNames("a", "b", "m");
+  fitMSC.FixParameter(2, m_proton);
+  // TF1 fitNoMSC("fitNoMSC", "[0]*x + [1]", momMin, momMax);
+  // fitNoMSC.SetParNames("a", "b");
 
   TCanvas canvas("canvas", "canvas", 1024, 768);
   canvas.Draw();
@@ -80,21 +81,21 @@ int main(int argc, char** argv)
   graph1.SetMarkerSize(1.5);
   graph1.GetFunction("fitMSC")->SetLineColor(kRed);
   graph1.PaintStats(graph1.GetFunction("fitMSC"));
-  graph2.Draw("P");
-  graph2.Fit("fitMSC", "E");
-  graph2.SetMarkerSize(1.5);
-  graph2.GetFunction("fitMSC")->SetLineColor(kBlue);
-  graph2.PaintStats(graph2.GetFunction("fitMSC"));
-  graph3.Draw("P");
-  graph3.Fit("fitNoMSC", "E");
-  graph3.SetMarkerSize(1.5);
-  graph3.GetFunction("fitNoMSC")->SetLineColor(kBlack);
-  graph3.PaintStats(graph3.GetFunction("fitNoMSC"));
-  graph4.Draw("P");
-  graph4.Fit("fitNoMSC", "E");
-  graph4.SetMarkerSize(1.5);
-  graph4.GetFunction("fitNoMSC")->SetLineColor(kViolet);
-  graph4.PaintStats(graph4.GetFunction("fitNoMSC"));
+  // graph2.Draw("P");
+  // graph2.Fit("fitMSC", "E");
+  // graph2.SetMarkerSize(1.5);
+  // graph2.GetFunction("fitMSC")->SetLineColor(kBlue);
+  // graph2.PaintStats(graph2.GetFunction("fitMSC"));
+  // graph3.Draw("P");
+  // graph3.Fit("fitNoMSC", "E");
+  // graph3.SetMarkerSize(1.5);
+  // graph3.GetFunction("fitNoMSC")->SetLineColor(kBlack);
+  // graph3.PaintStats(graph3.GetFunction("fitNoMSC"));
+  // graph4.Draw("P");
+  // graph4.Fit("fitNoMSC", "E");
+  // graph4.SetMarkerSize(1.5);
+  // graph4.GetFunction("fitNoMSC")->SetLineColor(kViolet);
+  // graph4.PaintStats(graph4.GetFunction("fitNoMSC"));
 
   graph1.GetXaxis()->SetTitle("p / GeV");
   graph1.GetYaxis()->SetTitle("#sigma_{p} / p");
@@ -102,20 +103,20 @@ int main(int argc, char** argv)
   double upperRange = 15.0;
   graph1.GetXaxis()->SetLimits(0., upperRange);
   graph1.GetFunction("fitMSC")->SetRange(0., upperRange);
-  graph2.GetFunction("fitMSC")->SetRange(0., upperRange);
-  graph3.GetFunction("fitNoMSC")->SetRange(0., upperRange);
-  graph4.GetFunction("fitNoMSC")->SetRange(0., upperRange);
+  // graph2.GetFunction("fitMSC")->SetRange(0., upperRange);
+  // graph3.GetFunction("fitNoMSC")->SetRange(0., upperRange);
+  // graph4.GetFunction("fitNoMSC")->SetRange(0., upperRange);
 
   TPaveStats* pt1 = (TPaveStats*) graph1.GetListOfFunctions()->FindObject("stats");
   pt1->SetTextColor(kRed);
-  TPaveStats* pt2 = (TPaveStats*) graph2.GetListOfFunctions()->FindObject("stats");
-  pt2->SetTextColor(kBlue);
-  TPaveStats* pt3 = (TPaveStats*) graph3.GetListOfFunctions()->FindObject("stats");
-  pt3->SetTextColor(kBlack);
-  TPaveStats* pt4 = (TPaveStats*) graph4.GetListOfFunctions()->FindObject("stats");
-  pt4->SetTextColor(kViolet);
-  TPaveStats* pt[4] = {pt1, pt2, pt3, pt4};
-  for (int i = 0; i < 4; i++) {
+  // TPaveStats* pt2 = (TPaveStats*) graph2.GetListOfFunctions()->FindObject("stats");
+  // pt2->SetTextColor(kBlue);
+  // TPaveStats* pt3 = (TPaveStats*) graph3.GetListOfFunctions()->FindObject("stats");
+  // pt3->SetTextColor(kBlack);
+  // TPaveStats* pt4 = (TPaveStats*) graph4.GetListOfFunctions()->FindObject("stats");
+  // pt4->SetTextColor(kViolet);
+  TPaveStats* pt[1] = {pt1};//, pt2, pt3, pt4};
+  for (int i = 0; i < 1; i++) {
     pt[i]->SetX1NDC(0.7);
     pt[i]->SetX2NDC(0.95);
     pt[i]->SetY1NDC(0.5 - i*0.12);
@@ -127,9 +128,9 @@ int main(int argc, char** argv)
 
   TLegend legend(0.12, 0.68, 0.6, 0.88);
   legend.AddEntry(&graph1, "Multiple Scattering activated + Measured inhom. field", "P");
-  legend.AddEntry(&graph2, "Multiple Scattering activated + Hom. approximation in center", "P");
-  legend.AddEntry(&graph3, "Multiple Scattering deactivated + Measured inhom. field", "P");
-  legend.AddEntry(&graph4, "Multiple Scattering deactivated + Hom. approximation in center", "P");
+  // legend.AddEntry(&graph2, "Multiple Scattering activated + Hom. approximation in center", "P");
+  // legend.AddEntry(&graph3, "Multiple Scattering deactivated + Measured inhom. field", "P");
+  // legend.AddEntry(&graph4, "Multiple Scattering deactivated + Hom. approximation in center", "P");
   legend.Draw("SAME");
 
   canvas.SaveAs("perdaix_1_deg.pdf");
