@@ -19,6 +19,7 @@ private:
   RES_ApplicationManager* m_manager;
 
   G4UIcmdWithoutParameter* m_createSessionCmd;
+  G4UIcmdWithoutParameter* m_setSeedToSystemTimeCmd;
 
 };
 

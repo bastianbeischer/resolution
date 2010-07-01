@@ -1,4 +1,4 @@
-// $Id: res_vs_mom.cc,v 1.16 2010/07/01 08:31:25 beischer Exp $
+.// $Id: res_vs_mom.cc,v 1.17 2010/07/01 14:26:31 beischer Exp $
 
 #include <iostream>
 #include <cmath>

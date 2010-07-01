@@ -1,3 +1,4 @@
+
 #include "RES_ApplicationManager.hh"
 
 #include "RES_ApplicationMessenger.hh"
@@ -21,6 +22,9 @@
 #include "G4UIsession.hh"
 #include "G4UIterminal.hh"
 #include "G4UItcsh.hh"
+
+#include "CLHEP/Random/Random.h"
+#include <time.h>
 
 RES_ApplicationManager::RES_ApplicationManager(int argc, char** argv)
 {
@@ -72,10 +76,17 @@ int RES_ApplicationManager::RunBatchScript(G4String scriptName)
 
 void RES_ApplicationManager::CreateSession()
 {
-  //G4UIsession * session = new G4UIterminal(new G4UItcsh);
-  G4UIQt* session = new G4UIQt(m_argc, m_argv);
-  session->AddMenu("macs", "Macros");
-  session->AddButton("macs", "vis.ogl.mac", "/control/execute mac/vis.ogl.mac");
+  G4UIsession * session = new G4UIterminal(new G4UItcsh);
+  // G4UIQt* session = new G4UIQt(m_argc, m_argv);
+  // session->AddMenu("macs", "Macros");
+  // session->AddButton("macs", "vis.ogl.mac", "/control/execute mac/vis.ogl.mac");
   session->SessionStart(); 
   delete session;
+}
+
+void RES_ApplicationManager::SetSeedToSystemTime()
+{
+  long ltime = time(NULL);
+  int  stime = (unsigned) ltime/2;
+  CLHEP::HepRandom::setTheSeed(stime);
 }

@@ -15,6 +15,7 @@ public:
 public:
   int RunBatchScript(G4String scriptName);
   void CreateSession();
+  void SetSeedToSystemTime();
 
 private:
   RES_ApplicationMessenger* m_messenger;
