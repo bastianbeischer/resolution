@@ -1,4 +1,4 @@
-// $Id: RES_DetectorMessenger.cc,v 1.18 2010/07/01 18:37:22 beischer Exp $
+// $Id: RES_DetectorMessenger.cc,v 1.19 2010/07/01 18:41:26 beischer Exp $
 
 #include "RES_DetectorMessenger.hh"
 
@@ -168,7 +168,7 @@ void RES_DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
 
   if (command == m_setModuleSubtractHolesCmd) {
     G4int iModule = m_setModuleSubtractHolesCmd->ConvertToInt(newValue.substr(0,1).c_str());
-    G4Bool value = m_setModuleSubtractHolesCmd->ConvertToBool(newValue.substr(2,newValue.length()).c_str());
+    G4bool value = m_setModuleSubtractHolesCmd->ConvertToBool(newValue.substr(2,newValue.length()).c_str());
     RES_Module* module = m_detector->GetModule(iModule);
     module->SetSubtractHoles(value);
   }
