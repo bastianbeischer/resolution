@@ -39,6 +39,7 @@ public:
   void SetKaptonThickness(G4double thickness)     {m_kaptonThickness = thickness;}
   void SetSiliconThickness(G4double thickness)    {m_siliconThickness = thickness;}
   void SetGapSiliconThickness(G4double thickness) {m_gapSiliconThickness = thickness;}
+  void SetSubtractHoles(G4bool value)             {m_subtractHoles = value;}
 
   ModuleType    GetType()            {return m_type;}
   G4ThreeVector GetPlacement()       {return m_placement;}
@@ -91,6 +92,8 @@ private:
   G4double      m_upperEfficiency;
   G4double      m_lowerEfficiency;
 
+  G4bool        m_subtractHoles;
+
   G4double      m_foamThickness;
   G4double      m_carbonFiberThickness;
   G4double      m_epoxyThickness;
@@ -117,7 +120,10 @@ private:
   G4PVPlacement* m_secondCarbonFiberPlacement;
   G4PVPlacement* m_thirdCarbonFiberPlacement;
   G4PVPlacement* m_fourthCarbonFiberPlacement;
-  G4PVPlacement* m_epoxyPlacement;
+  G4PVPlacement* m_firstEpoxyPlacement;
+  G4PVPlacement* m_secondEpoxyPlacement;
+  G4PVPlacement* m_thirdEpoxyPlacement;
+  G4PVPlacement* m_fourthEpoxyPlacement;
   G4PVPlacement* m_upperSiliconPlacement;
   G4PVPlacement* m_lowerSiliconPlacement;
   G4PVPlacement* m_upperKaptonPlacement;
