@@ -34,7 +34,7 @@ public:
   void SetUpperEfficiency(G4double efficiency)    {m_upperEfficiency = efficiency;}
   void SetLowerEfficiency(G4double efficiency)    {m_lowerEfficiency = efficiency;}
   void SetFoamThickness(G4double thickness)       {m_foamThickness = thickness;}
-  void SetPlasticThickness(G4double thickness)    {m_plasticThickness = thickness;}
+  void SetCarbonFiberThickness(G4double thickness)    {m_carbonFiberThickness = thickness;}
   void SetFiberThickness(G4double thickness)      {m_fiberThickness = thickness;}
   void SetKaptonThickness(G4double thickness)     {m_kaptonThickness = thickness;}
   void SetSiliconThickness(G4double thickness)    {m_siliconThickness = thickness;}
@@ -92,8 +92,8 @@ private:
   G4double      m_lowerEfficiency;
 
   G4double      m_foamThickness;
-  G4double      m_plasticThickness;
-  G4double      m_glueThickness;
+  G4double      m_carbonFiberThickness;
+  G4double      m_epoxyThickness;
   G4double      m_fiberThickness;
 
   G4double      m_kaptonThickness;
@@ -101,8 +101,8 @@ private:
   G4double      m_gapSiliconThickness;
 
   G4Material*   m_moduleMaterial;
-  G4Material*   m_plasticMaterial;
-  G4Material*   m_glueMaterial;
+  G4Material*   m_carbonFiberMaterial;
+  G4Material*   m_epoxyMaterial;
   G4Material*   m_foamMaterial;
   G4Material*   m_fiberMaterial;
   G4Material*   m_siliconMaterial;
@@ -113,11 +113,11 @@ private:
   G4PVPlacement* m_lowerFiberPlacement;
   G4PVPlacement* m_upperFoamPlacement;
   G4PVPlacement* m_lowerFoamPlacement;
-  G4PVPlacement* m_firstPlasticPlacement;
-  G4PVPlacement* m_secondPlasticPlacement;
-  G4PVPlacement* m_thirdPlasticPlacement;
-  G4PVPlacement* m_fourthPlasticPlacement;
-  G4PVPlacement* m_gluePlacement;
+  G4PVPlacement* m_firstCarbonFiberPlacement;
+  G4PVPlacement* m_secondCarbonFiberPlacement;
+  G4PVPlacement* m_thirdCarbonFiberPlacement;
+  G4PVPlacement* m_fourthCarbonFiberPlacement;
+  G4PVPlacement* m_epoxyPlacement;
   G4PVPlacement* m_upperSiliconPlacement;
   G4PVPlacement* m_lowerSiliconPlacement;
   G4PVPlacement* m_upperKaptonPlacement;
