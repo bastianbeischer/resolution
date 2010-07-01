@@ -1,4 +1,4 @@
-// $Id: RES_DetectorMessenger.cc,v 1.17 2010/04/25 19:25:28 beischer Exp $
+// $Id: RES_DetectorMessenger.cc,v 1.18 2010/07/01 18:37:22 beischer Exp $
 
 #include "RES_DetectorMessenger.hh"
 
@@ -45,6 +45,11 @@ RES_DetectorMessenger::RES_DetectorMessenger(RES_DetectorConstruction* detector)
   m_addModulePlacementCmd->SetDefaultUnit("cm");
   m_addModulePlacementCmd->SetUnitCategory("Length");
   m_addModulePlacementCmd->AvailableForStates(G4State_PreInit);
+
+  m_setModuleSubtractHolesCmd = new G4UIcmdWithAString("/RES/Det/SetModuleSubtractHoles", this);
+  m_setModuleSubtractHolesCmd->SetGuidance("Choose whether to subtract holes in the module");
+  m_setModuleSubtractHolesCmd->SetParameterName("subtractHolesString", false);
+  m_setModuleSubtractHolesCmd->AvailableForStates(G4State_PreInit);
 
   m_setModuleTypeCmd = new G4UIcmdWithAString("/RES/Det/SetModuleType", this);
   m_setModuleTypeCmd->SetGuidance("Set the type of the module (silicon ladder/fiber module)");
@@ -120,6 +125,7 @@ RES_DetectorMessenger::~RES_DetectorMessenger()
   delete m_setWorldYCmd;
   delete m_setWorldZCmd;
   delete m_addModulePlacementCmd;
+  delete m_setModuleSubtractHolesCmd;
   delete m_setModuleTypeCmd;
   delete m_setModuleRotationCmd;
   delete m_setModuleInternalRotationCmd;
@@ -158,6 +164,13 @@ void RES_DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
     G4double angle = m_setModuleRotationCmd->ConvertToDouble(newValue.substr(2,newValue.length()).c_str()) * M_PI/180.;
     RES_Module* module = m_detector->GetModule(iModule);
     module->SetAngle(angle);
+  }
+
+  if (command == m_setModuleSubtractHolesCmd) {
+    G4int iModule = m_setModuleSubtractHolesCmd->ConvertToInt(newValue.substr(0,1).c_str());
+    G4Bool value = m_setModuleSubtractHolesCmd->ConvertToBool(newValue.substr(2,newValue.length()).c_str());
+    RES_Module* module = m_detector->GetModule(iModule);
+    module->SetSubtractHoles(value);
   }
 
   if (command == m_setModuleTypeCmd) {

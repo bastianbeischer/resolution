@@ -5,6 +5,7 @@
 #include "G4VPhysicalVolume.hh"
 #include "G4PVPlacement.hh"
 #include "G4Box.hh"
+#include "G4SubtractionSolid.hh"
 #include "G4LogicalVolume.hh"
 #include "G4SDManager.hh"
 #include "G4VisAttributes.hh"
@@ -33,10 +34,12 @@ RES_Module::~RES_Module()
 void RES_Module::InitializeCommonValues()
 {
   // Thickness
-  m_foamThickness = 7.6*mm;
-  m_carbonFiberThickness = 0.25*mm;
-  m_epoxyThickness = 0.3*mm;
   m_fiberThickness = 1.15*mm;
+  m_carbonFiberThickness = 0.25*mm;
+  m_epoxyThickness = 0.4*mm;
+  m_foamThickness = 7.6*mm - 2*m_epoxyThickness;
+
+  m_subtractHoles = false;
 
   m_kaptonThickness = 200.*um;
   m_siliconThickness = 160.*um;
@@ -45,6 +48,7 @@ void RES_Module::InitializeCommonValues()
   // Placeholders
   G4String symbol;
   G4double density,z,a;
+  G4double fraction;
   G4int components,natoms;
 
   // Elements
@@ -53,36 +57,32 @@ void RES_Module::InitializeCommonValues()
   G4Element* N  = new G4Element("Nitrogen",symbol="N" , z= 7., a= 14.01*g/mole);
   G4Element* O  = new G4Element("Oxygen"  ,symbol="O" , z= 8., a= 16.00*g/mole);
 
-  // Carbon Fiber
-  G4Material* Cf = new G4Material("Carbon Fibre", 2.0*g/cm3, components=2);
-  Cf->AddElement(C,natoms=1);
-  Cf->AddElement(H,natoms=2);
-
   // Epoxy
-  G4Material* Epoxy = new G4Material("Epoxy", 1.3*g/cm3, components=2);
-  // Cf->AddElement(C,natoms=1);
-  // Cf->AddElement(H,natoms=2);
+  G4Material* Epoxy = new G4Material("Epoxy", 1.3*g/cm3, components=3);
+  Epoxy->AddElement(H,natoms=44);
+  Epoxy->AddElement(C,natoms=15);
+  Epoxy->AddElement(O,natoms=7);
 
-  // Carbon Fiber Layer with Epoxy (60% Cf, 40% Epoxy)
+  // Carbon Fiber Layer with Epoxy (60% C, 40% Epoxy)
+  G4Material* CarbonFiber = new G4Material("Carbon Fibre", 1.8*g/cm3, components=2);
+  CarbonFiber->AddElement(C,fraction=0.6);
+  CarbonFiber->AddMaterial(Epoxy,fraction=0.4);
 
   // Rohacell
-  G4Material* rohacell = new G4Material( "rohacell", density = 32.*kg/m3, components = 4 );
-  rohacell->AddElement(H, natoms=5); // ???
-  rohacell->AddElement(C, natoms=3); // ???
-  rohacell->AddElement(N, natoms=1); // ???
-  rohacell->AddElement(O, natoms=1); // ???
-
-  // Foam with glue
-  
+  G4Material* Rohacell = new G4Material( "rohacell", density = 32.*kg/m3, components = 4 );
+  Rohacell->AddElement(H, natoms=5); // ???
+  Rohacell->AddElement(C, natoms=3); // ???
+  Rohacell->AddElement(N, natoms=1); // ???
+  Rohacell->AddElement(O, natoms=1); // ???
 
   // Silicon
   G4Material* Si = new G4Material("Silicon", z=14, a=28.09*g/mole, density=2.33*g/cm3);
 
   // Define materials
   m_moduleMaterial = G4NistManager::Instance()->FindOrBuildMaterial( "G4_AIR" );
-  m_carbonFiberMaterial = Cf;
-  m_epoxyMaterial = G4NistManager::Instance()->FindOrBuildMaterial( "G4_POLYCARBONATE" ); // actually epoxy, but epoxy and carbonFiber have rougly the same density of about 1.2 g/cm3
-  m_foamMaterial = rohacell;
+  m_carbonFiberMaterial = CarbonFiber;
+  m_epoxyMaterial = Epoxy;
+  m_foamMaterial = Rohacell;
   m_fiberMaterial = G4NistManager::Instance()->FindOrBuildMaterial( "G4_POLYSTYRENE" );
   m_siliconMaterial = Si;
   m_kaptonMaterial = G4NistManager::Instance()->FindOrBuildMaterial( "G4_KAPTON" );
@@ -151,32 +151,69 @@ G4PVPlacement* RES_Module::Construct(G4VPhysicalVolume* mother, G4int copyNumber
 
   // interior of modules
   if (m_type == fiber) {
-    G4Box* epoxySolid = new G4Box("moduleFoam", 0.5*m_length, 0.5*m_width, 0.5*m_epoxyThickness);
-    G4LogicalVolume* epoxyLogic = new G4LogicalVolume(epoxySolid, m_epoxyMaterial, "moduleEpoxy", 0, 0, 0);
-    m_epoxyPlacement = new G4PVPlacement(0, G4ThreeVector(0,0,0), epoxyLogic, "moduleEpoxy", moduleLogic, false, 0);
+    G4VSolid*           fiberSolid       = new G4Box("moduleFiber", 0.5*m_length, 0.5*m_width, 0.5*m_fiberThickness);
+    G4VSolid*           carbonFiberSolid = new G4Box("moduleCarbonFiber", 0.5*m_length, 0.5*m_width, 0.5*m_carbonFiberThickness);
+    G4VSolid*           epoxySolid       = new G4Box("moduleFoam", 0.5*m_length, 0.5*m_width, 0.5*m_epoxyThickness);
+    G4VSolid*           foamSolid        = new G4Box("moduleFoam", 0.5*m_length, 0.5*m_width, 0.5*m_foamThickness);
 
-    G4Box* carbonFiberSolid = new G4Box("moduleCarbonFiber", 0.5*m_length, 0.5*m_width, 0.5*m_carbonFiberThickness);
+    if (m_subtractHoles) {
+      G4double holePositions[7] = {-16.5*cm, -11.*cm, -5.5*cm, 0.*cm, 5.5*cm, 11.*cm, 16.5*cm};
+      G4double holeSideLength = 4.5*cm;
+      
+      G4Box* hole = new G4Box("hole", 0.5*holeSideLength, 0.5*holeSideLength, 0.5*m_carbonFiberThickness);
+      G4SubtractionSolid* carbonFiberSubSolid = new G4SubtractionSolid("carbonFiberSubSolid", carbonFiberSolid, hole, 0, G4ThreeVector(holePositions[0], 0.25*m_width, 0));
+      for (int i = 1; i < 7; i++)
+        carbonFiberSubSolid = new G4SubtractionSolid("carbonFiberSubSolid", carbonFiberSubSolid, hole, 0, G4ThreeVector(holePositions[i], 0.25*m_width, 0));
+      for (int i = 0; i < 7; i++)
+        carbonFiberSubSolid = new G4SubtractionSolid("carbonFiberSubSolid", carbonFiberSubSolid, hole, 0, G4ThreeVector(holePositions[i], -0.25*m_width, 0));
+      carbonFiberSolid = carbonFiberSubSolid;
+
+      hole = new G4Box("hole", 0.5*holeSideLength, 0.5*holeSideLength, 0.5*m_epoxyThickness);
+      G4SubtractionSolid* epoxySubSolid = new G4SubtractionSolid("epoxySubSolid", epoxySolid, hole, 0, G4ThreeVector(holePositions[0], 0.25*m_width, 0));
+      for (int i = 1; i < 7; i++)
+        epoxySubSolid = new G4SubtractionSolid("epoxySubSolid", epoxySubSolid, hole, 0, G4ThreeVector(holePositions[i], 0.25*m_width, 0));
+      for (int i = 0; i < 7; i++)
+        epoxySubSolid = new G4SubtractionSolid("epoxySubSolid", epoxySubSolid, hole, 0, G4ThreeVector(holePositions[i], -0.25*m_width, 0));
+      epoxySolid = epoxySubSolid;
+
+      hole = new G4Box("hole", 0.5*holeSideLength, 0.5*holeSideLength, 0.5*m_foamThickness);
+      G4SubtractionSolid* foamSubSolid = new G4SubtractionSolid("foamSubSolid", foamSolid, hole, 0, G4ThreeVector(holePositions[0], 0.25*m_width, 0));
+      for (int i = 1; i < 7; i++)
+        foamSubSolid = new G4SubtractionSolid("foamSubSolid", foamSubSolid, hole, 0, G4ThreeVector(holePositions[i], 0.25*m_width, 0));
+      for (int i = 0; i < 7; i++)
+        foamSubSolid = new G4SubtractionSolid("foamSubSolid", foamSubSolid, hole, 0, G4ThreeVector(holePositions[i], -0.25*m_width, 0));
+      foamSolid = foamSubSolid;
+    }
+
+    G4LogicalVolume* fiberLogic       = new G4LogicalVolume(fiberSolid, m_fiberMaterial, "moduleFiber", 0, 0, 0);
     G4LogicalVolume* carbonFiberLogic = new G4LogicalVolume(carbonFiberSolid, m_carbonFiberMaterial, "moduleCarbonFiber", 0, 0, 0);
-    m_firstCarbonFiberPlacement = new G4PVPlacement(0, G4ThreeVector(0,0, 0.5*m_epoxyThickness + m_carbonFiberThickness + m_foamThickness + 0.5*m_carbonFiberThickness),
-                                                carbonFiberLogic, "moduleCarbonFiber", moduleLogic, false, 0);
-    m_secondCarbonFiberPlacement = new G4PVPlacement(0, G4ThreeVector(0,0, 0.5*m_epoxyThickness + 0.5*m_carbonFiberThickness),
-                                                 carbonFiberLogic, "moduleCarbonFiber", moduleLogic, false, 1);
-    m_thirdCarbonFiberPlacement = new G4PVPlacement(0, G4ThreeVector(0,0, -0.5*m_epoxyThickness - 0.5*m_carbonFiberThickness),
-                                                carbonFiberLogic, "moduleCarbonFiber", moduleLogic, false, 2);
-    m_fourthCarbonFiberPlacement = new G4PVPlacement(0, G4ThreeVector(0,0, -0.5*m_epoxyThickness - m_carbonFiberThickness - m_foamThickness - 0.5*m_carbonFiberThickness),
-                                                 carbonFiberLogic, "moduleCarbonFiber", moduleLogic, false, 3);
+    G4LogicalVolume* epoxyLogic       = new G4LogicalVolume(epoxySolid, m_epoxyMaterial, "moduleEpoxy", 0, 0, 0);
+    G4LogicalVolume* foamLogic        = new G4LogicalVolume(foamSolid, m_foamMaterial, "moduleFoam", 0, 0, 0);
 
-    G4Box* foamSolid = new G4Box("moduleFoam", 0.5*m_length, 0.5*m_width, 0.5*m_foamThickness);
-    G4LogicalVolume* foamLogic = new G4LogicalVolume(foamSolid, m_foamMaterial, "moduleFoam", 0, 0, 0);
-    m_upperFoamPlacement = new G4PVPlacement(0, G4ThreeVector(0,0, 0.5*m_epoxyThickness + m_carbonFiberThickness + 0.5*m_foamThickness), foamLogic, "moduleFoam", moduleLogic, false, 0);
-    m_lowerFoamPlacement = new G4PVPlacement(0, G4ThreeVector(0,0, -0.5*m_epoxyThickness - m_carbonFiberThickness - 0.5*m_foamThickness),foamLogic, "moduleFoam", moduleLogic, false, 1);
-
-    G4Box* fiberSolid = new G4Box("moduleFiber", 0.5*m_length, 0.5*m_width, 0.5*m_fiberThickness);
-    G4LogicalVolume* fiberLogic = new G4LogicalVolume(fiberSolid, m_fiberMaterial, "moduleFiber", 0, 0, 0);
-    m_upperFiberPlacement = new G4PVPlacement(0, G4ThreeVector(0, 0, 0.5*m_epoxyThickness + m_carbonFiberThickness + m_foamThickness + m_carbonFiberThickness + 0.5*m_fiberThickness),
-                                                                  fiberLogic, "moduleFiber", moduleLogic, false, 0);
-    m_lowerFiberPlacement = new G4PVPlacement(0, G4ThreeVector(0, 0, -0.5*m_epoxyThickness - m_carbonFiberThickness - m_foamThickness - m_carbonFiberThickness - 0.5*m_fiberThickness),
-                                                                  fiberLogic, "moduleFiber", moduleLogic, false, 1);
+    m_upperFiberPlacement        = new G4PVPlacement(0, G4ThreeVector(0,0,m_epoxyThickness + m_carbonFiberThickness + m_foamThickness + m_carbonFiberThickness + m_epoxyThickness + 0.5*m_fiberThickness),
+                                                     fiberLogic, "moduleFiber", moduleLogic, false, 0);
+    m_firstEpoxyPlacement        = new G4PVPlacement(0, G4ThreeVector(0,0,m_epoxyThickness + m_carbonFiberThickness + m_foamThickness + m_carbonFiberThickness + 0.5*m_epoxyThickness),
+                                                     epoxyLogic, "moduleEpoxy", moduleLogic, false, 0);
+    m_firstCarbonFiberPlacement  = new G4PVPlacement(0, G4ThreeVector(0,0,m_epoxyThickness + m_carbonFiberThickness + m_foamThickness + 0.5*m_carbonFiberThickness),
+                                                     carbonFiberLogic, "moduleCarbonFiber", moduleLogic, false, 0);
+    m_upperFoamPlacement         = new G4PVPlacement(0, G4ThreeVector(0,0,m_epoxyThickness + m_carbonFiberThickness + 0.5*m_foamThickness),
+                                                     foamLogic, "moduleFoam", moduleLogic, false, 0);
+    m_secondCarbonFiberPlacement = new G4PVPlacement(0, G4ThreeVector(0,0,m_epoxyThickness + 0.5*m_carbonFiberThickness),
+                                                     carbonFiberLogic, "moduleCarbonFiber", moduleLogic, false, 1);
+    m_secondEpoxyPlacement       = new G4PVPlacement(0, G4ThreeVector(0,0,0.5*m_epoxyThickness),
+                                                     epoxyLogic, "moduleEpoxy",moduleLogic, false, 0);
+    m_thirdEpoxyPlacement        = new G4PVPlacement(0, G4ThreeVector(0,0,-0.5*m_epoxyThickness),
+                                                     epoxyLogic, "moduleEpoxy", moduleLogic, false, 0);
+    m_thirdCarbonFiberPlacement  = new G4PVPlacement(0, G4ThreeVector(0,0,-m_epoxyThickness - 0.5*m_carbonFiberThickness),
+                                                     carbonFiberLogic, "moduleCarbonFiber", moduleLogic, false, 2);
+    m_lowerFoamPlacement         = new G4PVPlacement(0, G4ThreeVector(0,0,-m_epoxyThickness - m_carbonFiberThickness - 0.5*m_foamThickness),
+                                                     foamLogic, "moduleFoam", moduleLogic, false, 1);
+    m_fourthCarbonFiberPlacement = new G4PVPlacement(0, G4ThreeVector(0,0,-m_epoxyThickness - m_carbonFiberThickness - m_foamThickness - 0.5*m_carbonFiberThickness),
+                                                     carbonFiberLogic, "moduleCarbonFiber", moduleLogic, false, 3);
+    m_fourthEpoxyPlacement       = new G4PVPlacement(0, G4ThreeVector(0,0,-m_epoxyThickness - m_carbonFiberThickness - m_foamThickness - m_carbonFiberThickness - 0.5*m_epoxyThickness),
+                                                     epoxyLogic, "moduleEpoxy", moduleLogic, false, 0);
+    m_lowerFiberPlacement        = new G4PVPlacement(0, G4ThreeVector(0,0,-m_epoxyThickness - m_carbonFiberThickness - m_foamThickness - m_carbonFiberThickness - m_epoxyThickness - 0.5*m_fiberThickness),
+                                                     fiberLogic, "moduleFiber", moduleLogic, false, 1);
   }
   else if (m_type == silicon) {
     G4Box* siliconSolid = new G4Box("moduleSilicon", 0.5*m_length, 0.5*m_width, 0.5*m_siliconThickness);
@@ -233,13 +270,13 @@ void RES_Module::SetVisibility()
     //    visAtt = new G4VisAttributes(G4Colour(0.0, 0.0, 0.0)); // black
     m_upperFoamPlacement->GetLogicalVolume()->SetVisAttributes(visAtt);
 
-    visAtt = new G4VisAttributes(G4Colour(0.0, 0.0, 1.0)); // green
+    visAtt = new G4VisAttributes(G4Colour(1.0, 1.0, 0.0)); // yellow
     //visAtt = new G4VisAttributes(G4Colour(0.0, 0.0, 0.0)); // black
     m_firstCarbonFiberPlacement->GetLogicalVolume()->SetVisAttributes(visAtt);
 
-    visAtt = new G4VisAttributes(G4Colour(0.0, 0.0, 1.0)); // green
+    visAtt = new G4VisAttributes(G4Colour(0.0, 0.0, 1.0)); // blue
     //visAtt = new G4VisAttributes(G4Colour(0.0, 0.0, 0.0)); // black
-    m_epoxyPlacement->GetLogicalVolume()->SetVisAttributes(visAtt);
+    m_firstEpoxyPlacement->GetLogicalVolume()->SetVisAttributes(visAtt);
   }
   else if (m_type == silicon) {
     visAtt = new G4VisAttributes(G4Colour(0.0, 0.0, 1.0)); // blue
