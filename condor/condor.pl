@@ -35,7 +35,7 @@ for (my $nIter = 0; $nIter < $numberOfIterations; $nIter += 1) {
     for (my $angle = $minAngle; $angle <= $maxAngle; $angle += $angleStep) {
         for (my $momentum = $minMomentum; $momentum <= $maxMomentum; $momentum += $momentumStep) {
 
-            my $momentumString = sprintf("%.1f", $momentum);
+            my $momentumString = sprintf("%.2f", $momentum);
             my $angleString = sprintf("%.2f", $angle);
             my $iterString = sprintf("%03d", $nIter);
             my $filename = "${result_dir}/perdaix_${momentumString}_GeV_${angleString}_deg_msc_inhom_${iterString}.root";
