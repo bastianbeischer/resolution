@@ -1,4 +1,4 @@
-.// $Id: res_vs_mom.cc,v 1.17 2010/07/01 14:26:31 beischer Exp $
+// $Id: res_vs_mom.cc,v 1.18 2010/07/01 20:56:57 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -51,10 +51,10 @@ int main(int argc, char** argv)
   graph4.SetMarkerColor(kViolet);
 
   double momMin = 0.25;
-  double momMax = 9.0;
+  double momMax = 10.0;
   double momStep = 0.25;
-  fillGraph(graph1, "../results/perdaix_%.2f_GeV_1.00_deg_msc_inhom.root", momMin, momMax, momStep, 0.08, 0.3);
-  fillGraph(graph2, "../results/perdaix_%.2f_GeV_1.00_deg_msc_inhom_protons.root", momMin, momMax, momStep, 0.08, 0.3);
+  fillGraph(graph1, "../results/perdaix_%.2f_GeV_1.00_deg_msc_inhom_electrons.root", momMin, momMax, momStep, 0.077, 0.23);
+  fillGraph(graph2, "../results/perdaix_%.2f_GeV_1.00_deg_msc_inhom_protons.root", momMin, momMax, momStep, 0.077, 0.23);
   // fillGraph(graph3, "../results/perdaix_%.2f_GeV_1.00_deg_nomsc_inhom.root", momMin, momMax, momStep, 0.08, 0.0);
   // fillGraph(graph4, "../results/perdaix_%.2f_GeV_1.00_deg_nomsc_hom.root", momMin, momMax, momStep, 0.08, 0.0);
 

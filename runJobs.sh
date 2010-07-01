@@ -17,7 +17,7 @@ for (( i=0; i<${#HOM[*]}; i++ )); do
             for (( l=0; l<${#E[*]}; )); do
                 N=`ps axu | grep resolution | grep -v grep | wc -l`;
                 if [[ N -lt NTHREADS ]]; then
-                    filestem=perdaix_${E[l]}_GeV_${D[k]}_deg_${MSC[j]}_${HOM[i]}_protons;
+                    filestem=perdaix_${E[l]}_GeV_${D[k]}_deg_${MSC[j]}_${HOM[i]};
                     resolution mac/${filestem}.mac >& out/${filestem}.out&
                     l=$(expr $l + 1);
                 fi;
