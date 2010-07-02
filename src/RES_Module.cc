@@ -63,13 +63,19 @@ void RES_Module::InitializeCommonValues()
   Epoxy->AddElement(C,natoms=15);
   Epoxy->AddElement(O,natoms=7);
 
-  // Carbon Fiber Layer with Epoxy (60% C, 40% Epoxy)
-  G4Material* CarbonFiber = new G4Material("Carbon Fibre", 1.8*g/cm3, components=2);
-  CarbonFiber->AddElement(C,fraction=0.6);
-  CarbonFiber->AddMaterial(Epoxy,fraction=0.4);
+  // Carbon Fiber Layer
+  G4Material* CarbonFiber = new G4Material("Carbon Fibre", z=6., a=12.01*g/mole, density=1.8*g/cm3);
+
+  // Polystyrene
+  G4Material* Polystyrene = G4NistManager::Instance()->FindOrBuildMaterial( "G4_POLYSTYRENE" );
+  
+  // Fiber with Epoxy (60% Fiber, 40% Epoxy)
+  G4Material* Fiber = new G4Material("Fiber", density=0.6*Polystyrene->GetDensity() + 0.4*Epoxy->GetDensity(), components=2);
+  Fiber->AddMaterial(Polystyrene,fraction=0.6);
+  Fiber->AddMaterial(Epoxy,fraction=0.4);
 
   // Rohacell
-  G4Material* Rohacell = new G4Material( "rohacell", density = 32.*kg/m3, components = 4 );
+  G4Material* Rohacell = new G4Material( "rohacell", density=32.*kg/m3, components = 4 );
   Rohacell->AddElement(H, natoms=5); // ???
   Rohacell->AddElement(C, natoms=3); // ???
   Rohacell->AddElement(N, natoms=1); // ???
@@ -83,7 +89,7 @@ void RES_Module::InitializeCommonValues()
   m_carbonFiberMaterial = CarbonFiber;
   m_epoxyMaterial = Epoxy;
   m_foamMaterial = Rohacell;
-  m_fiberMaterial = G4NistManager::Instance()->FindOrBuildMaterial( "G4_POLYSTYRENE" );
+  m_fiberMaterial = Fiber;
   m_siliconMaterial = Si;
   m_kaptonMaterial = G4NistManager::Instance()->FindOrBuildMaterial( "G4_KAPTON" );
 }
@@ -265,6 +271,7 @@ void RES_Module::SetVisibility()
   if (m_type == fiber) {
     visAtt = new G4VisAttributes(G4Colour(1.0, 0.0, 0.0)); // red
     m_upperFiberPlacement->GetLogicalVolume()->SetVisAttributes(visAtt);
+    //m_upperFiberPlacement->GetLogicalVolume()->SetVisAttributes(G4VisAttributes::Invisible);
 
     visAtt = new G4VisAttributes(G4Colour(0.0, 1.0, 0.0)); // green
     //    visAtt = new G4VisAttributes(G4Colour(0.0, 0.0, 0.0)); // black
@@ -285,4 +292,19 @@ void RES_Module::SetVisibility()
     visAtt = new G4VisAttributes(G4Colour(0.0, 1.0, 0.0)); // green
     m_upperKaptonPlacement->GetLogicalVolume()->SetVisAttributes(visAtt);
   }
+}
+
+void RES_Module::PrintMaterials()
+{
+  G4cout << " <------------------------ MATERIALS --------------------------> " << G4endl;
+  G4cout << "  Module: " << G4endl;
+  G4cout << *m_moduleMaterial << G4endl;
+  G4cout << "  Carbon Fiber: " << G4endl;
+  G4cout << *m_carbonFiberMaterial << G4endl;
+  G4cout << "  Epoxy: " << G4endl;
+  G4cout << *m_epoxyMaterial << G4endl;
+  G4cout << "  Foam: " << G4endl;
+  G4cout << *m_foamMaterial << G4endl;
+  G4cout << "  Fiber: " << G4endl;
+  G4cout << *m_fiberMaterial << G4endl;
 }

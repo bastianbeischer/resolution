@@ -9,7 +9,7 @@ use strict;
 # RUN script
 #
 
-my $firstRunNumber = 1400;
+my $firstRunNumber = 1000;
 
 my $numberOfIterations = 10;
 my $numberOfEventsPerRun = 1000;
@@ -38,7 +38,7 @@ for (my $nIter = 0; $nIter < $numberOfIterations; $nIter += 1) {
             my $momentumString = sprintf("%.2f", $momentum);
             my $angleString = sprintf("%.2f", $angle);
             my $iterString = sprintf("%03d", $nIter);
-            my $filename = "${result_dir}/perdaix_${momentumString}_GeV_${angleString}_deg_msc_inhom_protons_${iterString}.root";
+            my $filename = "${result_dir}/perdaix_${momentumString}_GeV_${angleString}_deg_msc_inhom_electrons_${iterString}.root";
 
             print "Run $currentRun:\n";
             my $condorfile = &make_condor_file($currentRun);
@@ -77,7 +77,7 @@ sub make_macro_file{
 /RES/Gun/RandomOrigin
 /RES/Gun/RandomDirection
 /gun/momentumAmp ${momentum} GeV
-/gun/particle proton
+/gun/particle e-
 #/gun/position 0 0 50 cm
 #/gun/direction 0 0 -1
 

@@ -1,4 +1,4 @@
-// $Id: RES_DetectorConstruction.hh,v 1.20 2010/04/25 19:25:27 beischer Exp $
+// $Id: RES_DetectorConstruction.hh,v 1.21 2010/07/02 11:13:31 beischer Exp $
 
 #ifndef RES_DetectorConstruction_hh
 #define RES_DetectorConstruction_hh
@@ -36,6 +36,8 @@ public:
 
   G4VPhysicalVolume* Construct();
   G4bool TrackInAcceptance(G4ThreeVector position, G4ThreeVector direction);
+
+  void PrintMaterials();
 
 private:
   void SortModules();

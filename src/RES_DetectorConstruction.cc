@@ -1,4 +1,4 @@
-// $Id: RES_DetectorConstruction.cc,v 1.28 2010/05/12 01:56:31 beischer Exp $
+// $Id: RES_DetectorConstruction.cc,v 1.29 2010/07/02 11:13:30 beischer Exp $
 
 #include "RES_DetectorConstruction.hh"
 
@@ -125,4 +125,9 @@ G4bool RES_DetectorConstruction::TrackInAcceptance(G4ThreeVector position, G4Thr
   delete[] z;
 
   return retVal;
+}
+
+void RES_DetectorConstruction::PrintMaterials()
+{
+  m_modules.front()->PrintMaterials();
 }

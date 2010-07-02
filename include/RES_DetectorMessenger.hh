@@ -1,4 +1,4 @@
-// $Id: RES_DetectorMessenger.hh,v 1.16 2010/07/01 18:37:19 beischer Exp $
+// $Id: RES_DetectorMessenger.hh,v 1.17 2010/07/02 11:13:31 beischer Exp $
 
 #ifndef RES_DetectorMessenger_hh
 #define RES_DetectorMessenger_hh
@@ -13,6 +13,7 @@ class G4UIdirectory;
 class G4UIcmdWith3VectorAndUnit;
 class G4UIcmdWithAString;
 class G4UIcmdWithADoubleAndUnit;
+class G4UIcmdWithoutParameter;
 
 class RES_DetectorMessenger : public G4UImessenger
 {
@@ -32,6 +33,7 @@ private:
   G4UIcmdWithADoubleAndUnit* m_setWorldYCmd;
   G4UIcmdWithADoubleAndUnit* m_setWorldZCmd;
   G4UIcmdWith3VectorAndUnit* m_addModulePlacementCmd;
+  G4UIcmdWithoutParameter*   m_printMaterialsCmd;
   G4UIcmdWithAString*        m_setModuleSubtractHolesCmd;
   G4UIcmdWithAString*        m_setModuleTypeCmd;
   G4UIcmdWithAString*        m_setModuleRotationCmd;

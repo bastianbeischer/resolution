@@ -1,4 +1,4 @@
-// $Id: RES_DetectorMessenger.cc,v 1.19 2010/07/01 18:41:26 beischer Exp $
+// $Id: RES_DetectorMessenger.cc,v 1.20 2010/07/02 11:13:30 beischer Exp $
 
 #include "RES_DetectorMessenger.hh"
 
@@ -9,6 +9,7 @@
 #include "G4UIcmdWith3VectorAndUnit.hh"
 #include "G4UIcmdWithAString.hh"
 #include "G4UIcmdWithADoubleAndUnit.hh"
+#include "G4UIcmdWithoutParameter.hh"
 #include "G4String.hh"
 
 RES_DetectorMessenger::RES_DetectorMessenger(RES_DetectorConstruction* detector)
@@ -45,6 +46,10 @@ RES_DetectorMessenger::RES_DetectorMessenger(RES_DetectorConstruction* detector)
   m_addModulePlacementCmd->SetDefaultUnit("cm");
   m_addModulePlacementCmd->SetUnitCategory("Length");
   m_addModulePlacementCmd->AvailableForStates(G4State_PreInit);
+
+  m_printMaterialsCmd = new G4UIcmdWithoutParameter("/RES/Det/PrintMaterials", this);
+  m_printMaterialsCmd->SetGuidance("Print the materials used in this geometry");
+  m_printMaterialsCmd->AvailableForStates(G4State_Idle);
 
   m_setModuleSubtractHolesCmd = new G4UIcmdWithAString("/RES/Det/SetModuleSubtractHoles", this);
   m_setModuleSubtractHolesCmd->SetGuidance("Choose whether to subtract holes in the module");
@@ -125,6 +130,7 @@ RES_DetectorMessenger::~RES_DetectorMessenger()
   delete m_setWorldYCmd;
   delete m_setWorldZCmd;
   delete m_addModulePlacementCmd;
+  delete m_printMaterialsCmd;
   delete m_setModuleSubtractHolesCmd;
   delete m_setModuleTypeCmd;
   delete m_setModuleRotationCmd;
@@ -145,6 +151,10 @@ void RES_DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
 {
   if (command == m_addModulePlacementCmd) {
     m_detector->AddModulePlacement(m_addModulePlacementCmd->GetNew3VectorValue(newValue));
+  }
+
+  if (command == m_printMaterialsCmd) {
+    m_detector->PrintMaterials();
   }
 
   if (command == m_setWorldXCmd) {

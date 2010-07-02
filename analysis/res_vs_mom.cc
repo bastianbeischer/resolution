@@ -1,4 +1,4 @@
-// $Id: res_vs_mom.cc,v 1.18 2010/07/01 20:56:57 beischer Exp $
+// $Id: res_vs_mom.cc,v 1.19 2010/07/02 11:13:31 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -120,14 +120,14 @@ int main(int argc, char** argv)
   for (int i = 0; i < 2; i++) {
     pt[i]->SetX1NDC(0.7);
     pt[i]->SetX2NDC(0.95);
-    pt[i]->SetY1NDC(0.5 - i*0.12);
-    pt[i]->SetY2NDC(0.6 - i*0.12);
+    pt[i]->SetY1NDC(0.3 - i*0.12);
+    pt[i]->SetY2NDC(0.4 - i*0.12);
   }
 
   TLatex text(3.1, 0.13, "#sigma_{p} / p = #sqrt{(ap)^{2} + (b/#beta)^{2}}");
   text.Draw("SAME");
 
-  TLegend legend(0.12, 0.68, 0.6, 0.88);
+  TLegend legend(0.25, 0.75, 0.45, 0.88);
   legend.AddEntry(&graph1, "electrons", "P");
   legend.AddEntry(&graph2, "protons", "P");
   // legend.AddEntry(&graph3, "Multiple Scattering deactivated + Measured inhom. field", "P");

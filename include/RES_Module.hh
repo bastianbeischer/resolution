@@ -65,6 +65,8 @@ public:
   void SetSD(G4VSensitiveDetector* aSD);
   void SetVisibility();
 
+  void PrintMaterials();
+
 private:
   void InitializeCommonValues();
 
