@@ -36,7 +36,7 @@ void RES_Module::InitializeCommonValues()
   // Thickness
   m_fiberThickness = 1.15*mm;
   m_carbonFiberThickness = 0.25*mm;
-  m_epoxyThickness = 0.4*mm;
+  m_epoxyThickness = 0.5*mm;
   m_foamThickness = 7.6*mm - 2*m_epoxyThickness;
 
   m_subtractHoles = false;
@@ -86,10 +86,13 @@ void RES_Module::InitializeCommonValues()
 
   // Define materials
   m_moduleMaterial = G4NistManager::Instance()->FindOrBuildMaterial( "G4_AIR" );
-  m_carbonFiberMaterial = CarbonFiber;
-  m_epoxyMaterial = Epoxy;
-  m_foamMaterial = Rohacell;
+  // m_carbonFiberMaterial = CarbonFiber;
+  // m_epoxyMaterial = Epoxy;
+  // m_foamMaterial = Rohacell;
   m_fiberMaterial = Fiber;
+  m_carbonFiberMaterial = m_moduleMaterial;
+  m_epoxyMaterial = m_moduleMaterial;
+  m_foamMaterial = m_moduleMaterial;
   m_siliconMaterial = Si;
   m_kaptonMaterial = G4NistManager::Instance()->FindOrBuildMaterial( "G4_KAPTON" );
 }

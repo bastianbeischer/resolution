@@ -9,7 +9,7 @@ use strict;
 # RUN script
 #
 
-my $firstRunNumber = 1000;
+my $firstRunNumber = 2000;
 
 my $numberOfIterations = 10;
 my $numberOfEventsPerRun = 1000;
