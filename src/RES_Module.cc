@@ -64,15 +64,17 @@ void RES_Module::InitializeCommonValues()
   Epoxy->AddElement(O,natoms=7);
 
   // Carbon Fiber Layer
-  G4Material* CarbonFiber = new G4Material("Carbon Fibre", z=6., a=12.01*g/mole, density=1.8*g/cm3);
+  G4Material* CarbonFiber = new G4Material("Carbon Fibre", density=1.8*g/cm3, components = 2);
+  CarbonFiber->AddElement(C, fraction=0.6);
+  CarbonFiber->AddMaterial(Epoxy, fraction=0.4);
 
   // Polystyrene
   G4Material* Polystyrene = G4NistManager::Instance()->FindOrBuildMaterial( "G4_POLYSTYRENE" );
   
-  // Fiber with Epoxy (60% Fiber, 40% Epoxy)
-  G4Material* Fiber = new G4Material("Fiber", density=0.6*Polystyrene->GetDensity() + 0.4*Epoxy->GetDensity(), components=2);
-  Fiber->AddMaterial(Polystyrene,fraction=0.6);
-  Fiber->AddMaterial(Epoxy,fraction=0.4);
+  // Fiber with Epoxy (80% Fiber, 20% Epoxy) (amount of glue derived from measured mass of a mat)
+  G4Material* Fiber = new G4Material("Fiber", density=0.8*Polystyrene->GetDensity() + 0.2*Epoxy->GetDensity(), components=2);
+  Fiber->AddMaterial(Polystyrene,fraction=0.8);
+  Fiber->AddMaterial(Epoxy,fraction=0.2);
 
   // Rohacell
   G4Material* Rohacell = new G4Material( "rohacell", density=32.*kg/m3, components = 4 );
@@ -86,13 +88,16 @@ void RES_Module::InitializeCommonValues()
 
   // Define materials
   m_moduleMaterial = G4NistManager::Instance()->FindOrBuildMaterial( "G4_AIR" );
+
   // m_carbonFiberMaterial = CarbonFiber;
   // m_epoxyMaterial = Epoxy;
   // m_foamMaterial = Rohacell;
-  m_fiberMaterial = Fiber;
   m_carbonFiberMaterial = m_moduleMaterial;
   m_epoxyMaterial = m_moduleMaterial;
   m_foamMaterial = m_moduleMaterial;
+
+  m_fiberMaterial = Fiber;
+
   m_siliconMaterial = Si;
   m_kaptonMaterial = G4NistManager::Instance()->FindOrBuildMaterial( "G4_KAPTON" );
 }
@@ -310,4 +315,8 @@ void RES_Module::PrintMaterials()
   G4cout << *m_foamMaterial << G4endl;
   G4cout << "  Fiber: " << G4endl;
   G4cout << *m_fiberMaterial << G4endl;
+
+  G4cout << (1./3.)* m_modulePlacement->GetLogicalVolume()->GetMass() / g << " g" << G4endl;
+  //  G4cout << (1./3.)* m_upperFiberPlacement->GetLogicalVolume()->GetMass() / g << " g" << G4endl;
+
 }
