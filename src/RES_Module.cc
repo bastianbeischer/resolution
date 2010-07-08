@@ -89,12 +89,12 @@ void RES_Module::InitializeCommonValues()
   // Define materials
   m_moduleMaterial = G4NistManager::Instance()->FindOrBuildMaterial( "G4_AIR" );
 
-  // m_carbonFiberMaterial = CarbonFiber;
-  // m_epoxyMaterial = Epoxy;
-  // m_foamMaterial = Rohacell;
-  m_carbonFiberMaterial = m_moduleMaterial;
-  m_epoxyMaterial = m_moduleMaterial;
-  m_foamMaterial = m_moduleMaterial;
+  m_carbonFiberMaterial = CarbonFiber;
+  m_epoxyMaterial = Epoxy;
+  m_foamMaterial = Rohacell;
+  // m_carbonFiberMaterial = m_moduleMaterial;
+  // m_epoxyMaterial = m_moduleMaterial;
+  // m_foamMaterial = m_moduleMaterial;
 
   m_fiberMaterial = Fiber;
 
@@ -105,8 +105,8 @@ void RES_Module::InitializeCommonValues()
 void RES_Module::ComputeParameters()
 {
   if (m_type == fiber) {
-    m_height = 2*m_foamThickness + 4*m_carbonFiberThickness + 2*m_fiberThickness + m_epoxyThickness;
-    G4double zInModule = 0.5*m_epoxyThickness + m_carbonFiberThickness + m_foamThickness + m_carbonFiberThickness + 0.5*m_fiberThickness;
+    m_height = 2*m_foamThickness + 4*m_carbonFiberThickness + 2*m_fiberThickness + 4*m_epoxyThickness;
+    G4double zInModule = m_epoxyThickness + m_carbonFiberThickness + m_foamThickness + m_carbonFiberThickness + m_epoxyThickness + 0.5*m_fiberThickness;
     m_upperZ = m_placement.z() + zInModule + 0.5*m_fiberThickness;
     m_lowerZ = m_placement.z() - zInModule + 0.5*m_fiberThickness;
   }
