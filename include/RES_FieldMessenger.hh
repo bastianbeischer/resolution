@@ -1,4 +1,4 @@
-// $Id: RES_FieldMessenger.hh,v 1.6 2010/07/14 12:17:35 beischer Exp $
+// $Id: RES_FieldMessenger.hh,v 1.7 2010/07/14 13:57:01 beischer Exp $
 
 #ifndef RES_FieldMessenger_hh
 #define RES_FieldMessenger_hh
@@ -8,6 +8,7 @@
 class RES_FieldManager;
 class G4UIdirectory;
 class G4UIcmdWithAString;
+class G4UIcmdWithADoubleAndUnit;
 class G4UIcmdWith3VectorAndUnit;
 class G4UIcommand;
 
@@ -29,6 +30,9 @@ private:
   G4UIcmdWithAString*        m_setAMS02FieldFromFileCmd;
   G4UIcmdWith3VectorAndUnit* m_setUniformFieldCmd;
   G4UIcmdWith3VectorAndUnit* m_setDisplacementCmd;
+  G4UIcmdWithADoubleAndUnit* m_setZ0Cmd;
+  G4UIcmdWithADoubleAndUnit* m_setZ1Cmd;
+  G4UIcmdWithADoubleAndUnit* m_setFieldEstimateCmd;
 
 };
 

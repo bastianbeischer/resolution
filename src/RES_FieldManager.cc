@@ -1,4 +1,4 @@
-// $Id: RES_FieldManager.cc,v 1.6 2010/07/14 12:17:38 beischer Exp $
+// $Id: RES_FieldManager.cc,v 1.7 2010/07/14 13:57:00 beischer Exp $
 
 #include "RES_FieldManager.hh"
 
@@ -66,4 +66,22 @@ void RES_FieldManager::ActivateMyStepper()
 void RES_FieldManager::DeactivateMyStepper()
 {
   CreateChordFinder((G4MagneticField*) GetDetectorField());
+}
+
+void RES_FieldManager::SetZ0(G4double z0)
+{
+  RES_MagneticField* field = (RES_MagneticField*)GetDetectorField();
+  field->SetZ0(z0);
+}
+
+void RES_FieldManager::SetZ1(G4double z1)
+{
+  RES_MagneticField* field = (RES_MagneticField*)GetDetectorField();
+  field->SetZ1(z1);
+}
+
+void RES_FieldManager::SetFieldEstimate(G4double estimate)
+{
+  RES_MagneticField* field = (RES_MagneticField*)GetDetectorField();
+  field->SetFieldEstimate(estimate);
 }

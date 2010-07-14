@@ -1,4 +1,4 @@
-// $Id: RES_FieldManager.hh,v 1.6 2010/07/14 12:17:35 beischer Exp $
+// $Id: RES_FieldManager.hh,v 1.7 2010/07/14 13:57:01 beischer Exp $
 
 #ifndef RES_FieldManager_hh
 #define RES_FieldManager_hh
@@ -27,6 +27,10 @@ public:
 
   void ActivateMyStepper();
   void DeactivateMyStepper();
+
+  void SetZ0(G4double z0);
+  void SetZ1(G4double z1);
+  void SetFieldEstimate(G4double estimate);
 
 private:
   RES_FieldMessenger*     m_fieldMessenger;

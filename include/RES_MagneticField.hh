@@ -1,4 +1,4 @@
-// $Id: RES_MagneticField.hh,v 1.1 2010/07/14 12:17:36 beischer Exp $
+// $Id: RES_MagneticField.hh,v 1.2 2010/07/14 13:57:01 beischer Exp $
 
 #ifndef RES_MagneticField_hh
 #define RES_MagneticField_hh
@@ -20,6 +20,10 @@ public:
   G4double      GetZ1()            const {return m_z1;}
   G4double      GetFieldEstimate() const {return m_fieldEstimate;}
   G4ThreeVector GetDisplacement()  const {return m_displacement;}
+
+  void SetZ0(G4double z0)                  {m_z0 = z0;}
+  void SetZ1(G4double z1)                  {m_z1 = z1;}
+  void SetFieldEstimate(G4double estimate) {m_fieldEstimate = estimate;}
 
   G4double MeanFieldAlongTrack(G4ThreeVector startPoint, G4ThreeVector endPoint);
   G4bool   CheckIfTrackIsInsideMagnet(G4ThreeVector position, G4ThreeVector direction);
