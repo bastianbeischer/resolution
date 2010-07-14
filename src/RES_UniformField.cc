@@ -1,4 +1,4 @@
-// $Id: RES_UniformField.cc,v 1.1 2010/07/14 12:17:39 beischer Exp $
+// $Id: RES_UniformField.cc,v 1.2 2010/07/14 12:36:53 beischer Exp $
 
 #include "RES_UniformField.hh"
 
@@ -7,6 +7,9 @@
 RES_UniformField::RES_UniformField(G4ThreeVector fieldVector) :
   RES_MagneticField()
 {
+  m_z0 = -4.;
+  m_z1 = 4.;
+  m_fieldEstimate = fieldVector.x();
   m_fieldVector = fieldVector;
 }
 

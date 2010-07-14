@@ -1,4 +1,4 @@
-// $Id: RES_InhomField.cc,v 1.15 2010/07/14 12:17:38 beischer Exp $
+// $Id: RES_InhomField.cc,v 1.16 2010/07/14 12:36:52 beischer Exp $
 
 #include "RES_InhomField.hh"
 
@@ -111,7 +111,8 @@ void RES_InhomField::ReadData()
 
   G4double x0,x1,y0,y1,z0,z1;
   G4int nBins_x, nBins_y, nBins_z;
-  file >> x0 >> x1 >> y0 >> y1 >> z0 >> z1 >> nBins_x >> nBins_y >> nBins_z;
+  G4int mirror;
+  file >> x0 >> x1 >> y0 >> y1 >> z0 >> z1 >> nBins_x >> nBins_y >> nBins_z >> mirror;
 
   x0 /= 10.;
   x1 /= 10.;
@@ -162,30 +163,32 @@ void RES_InhomField::ReadData()
     m_field_y[nX][nY][nZ] = f_y;
     m_field_z[nX][nY][nZ] = f_z;
 
-    // // mirror to get the full world
-    // if (y != 0.0) {
-    //   nX = m_axis_x->GetBin(x);
-    //   nY = m_axis_y->GetBin(-y);
-    //   nZ = m_axis_z->GetBin(z);
-    //   m_field_x[nX][nY][nZ] = f_x;
-    //   m_field_y[nX][nY][nZ] = -f_y;
-    //   m_field_z[nX][nY][nZ] = f_z;
-    // }
-    // if (z != 0.0) {
-    //   nX = m_axis_x->GetBin(x);
-    //   nY = m_axis_y->GetBin(y);
-    //   nZ = m_axis_z->GetBin(-z);
-    //   m_field_x[nX][nY][nZ] = f_x;
-    //   m_field_y[nX][nY][nZ] = f_y;
-    //   m_field_z[nX][nY][nZ] = -f_z;
-    // }
-    // if ( (y != 0.0) && (z != 0) ) {
-    //   nX = m_axis_x->GetBin(x);
-    //   nY = m_axis_y->GetBin(-y);
-    //   nZ = m_axis_z->GetBin(-z);
-    //   m_field_x[nX][nY][nZ] = f_x;
-    //   m_field_y[nX][nY][nZ] = -f_y;
-    //   m_field_z[nX][nY][nZ] = -f_z;
-    // }
+    // mirror to get the full world
+    if (mirror) {
+      if (y != 0.0) {
+        nX = m_axis_x->GetBin(x);
+        nY = m_axis_y->GetBin(-y);
+        nZ = m_axis_z->GetBin(z);
+        m_field_x[nX][nY][nZ] = f_x;
+        m_field_y[nX][nY][nZ] = -f_y;
+        m_field_z[nX][nY][nZ] = f_z;
+      }
+      if (z != 0.0) {
+        nX = m_axis_x->GetBin(x);
+        nY = m_axis_y->GetBin(y);
+        nZ = m_axis_z->GetBin(-z);
+        m_field_x[nX][nY][nZ] = f_x;
+        m_field_y[nX][nY][nZ] = f_y;
+        m_field_z[nX][nY][nZ] = -f_z;
+      }
+      if ( (y != 0.0) && (z != 0) ) {
+        nX = m_axis_x->GetBin(x);
+        nY = m_axis_y->GetBin(-y);
+        nZ = m_axis_z->GetBin(-z);
+        m_field_x[nX][nY][nZ] = f_x;
+        m_field_y[nX][nY][nZ] = -f_y;
+        m_field_z[nX][nY][nZ] = -f_z;
+      }
+    }
   }
 }
