@@ -10,14 +10,15 @@
               (copy-file filename new-file t)
               (find-file new-file)
               (beginning-of-buffer)
-              (if (re-search-forward "\\(moduleRot -\\)\\([0-9]+\\.[0-9]+\\)" nil t)
-                  (replace-match (format "\\1%.2f" (/ angle 2.0))))
-              (beginning-of-buffer)
-              (if (re-search-forward "\\(moduleInternalRot \\)\\([0-9]+\\.[0-9]+\\)" nil t)
-                  (replace-match (format "\\1%.2f" angle)))
-              (beginning-of-buffer)
-              (if (re-search-forward "\\(SetFileName .*\\)\\([0-9]+\\.[0-9]+\\)\\(_deg.*\\)" nil t)
-                  (replace-match (format "\\1%.2f\\3" angle)))
+              (save-excursion
+                (if (re-search-forward "\\(moduleRot -\\)\\([0-9]+\\.[0-9]+\\)" nil t)
+                    (replace-match (format "\\1%.2f" (/ angle 2.0)))))
+              (save-excursion
+                (if (re-search-forward "\\(moduleInternalRot \\)\\([0-9]+\\.[0-9]+\\)" nil t)
+                    (replace-match (format "\\1%.2f" angle))))
+              (save-excursion
+                (if (re-search-forward "\\(SetFileName .*\\)\\([0-9]+\\.[0-9]+\\)\\(_deg.*\\)" nil t)
+                    (replace-match (format "\\1%.2f\\3" angle))))
               (save-buffer)
               (kill-buffer)))))
       (setq angle (+ angle 0.1)))))

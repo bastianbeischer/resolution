@@ -1,4 +1,4 @@
-// $Id: RES_FieldManager.cc,v 1.5 2010/04/19 13:40:22 beischer Exp $
+// $Id: RES_FieldManager.cc,v 1.6 2010/07/14 12:17:38 beischer Exp $
 
 #include "RES_FieldManager.hh"
 
@@ -6,11 +6,10 @@
 #include "RES_StepperMessenger.hh"
 #include "RES_InhomField.hh"
 #include "RES_AMS02Field.hh"
-#include "RES_DummyField.hh"
+#include "RES_UniformField.hh"
 
 #include "G4ChordFinder.hh"
 #include "G4MagIntegratorDriver.hh"
-#include "G4UniformMagField.hh"
 
 RES_FieldManager::RES_FieldManager() :
   m_myStepper(0)
@@ -37,24 +36,18 @@ void RES_FieldManager::SwitchOnAMS02Field(G4String dataFileName)
   CreateChordFinder((G4MagneticField*) GetDetectorField());
 }
 
-void RES_FieldManager::SwitchOnDummyField(G4ThreeVector fieldVector)
-{
-  SetDetectorField(new RES_DummyField(fieldVector));
-  CreateChordFinder((G4MagneticField*) GetDetectorField());
-}
-
 void RES_FieldManager::SwitchOnUniformField(G4ThreeVector fieldVector)
 {
-  SetDetectorField(new G4UniformMagField(fieldVector));
+  SetDetectorField(new RES_UniformField(fieldVector));
   CreateChordFinder((G4MagneticField*) GetDetectorField());
 }
 
 void RES_FieldManager::SetDisplacement(G4ThreeVector displacement)
 {
   G4Field* field = (G4Field*)GetDetectorField();
-  if (dynamic_cast<RES_DummyField*>(field)) {
-    RES_DummyField* dummyField = (RES_DummyField*)field;
-    dummyField->SetDisplacement(displacement);
+  if (dynamic_cast<RES_UniformField*>(field)) {
+    RES_UniformField* uniformField = (RES_UniformField*)field;
+    uniformField->SetDisplacement(displacement);
   }
   else if (dynamic_cast<RES_InhomField*>(field)) {
     RES_InhomField* inhomField = (RES_InhomField*)field;

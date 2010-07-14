@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitter.hh,v 1.21 2010/03/03 19:03:53 beischer Exp $
+// $Id: RES_TrackFitter.hh,v 1.22 2010/07/14 12:17:36 beischer Exp $
 
 #ifndef RES_TrackFitter_hh
 #define RES_TrackFitter_hh
@@ -50,7 +50,6 @@ private:
   void     CalculateStartParameters();
   G4int    DoBlobelFit(G4int npar);
   G4int    DoMinuitFit(G4int npar);
-  G4double Chi2InDetFrame();
   G4double Chi2InModuleFrame();
 
 private:

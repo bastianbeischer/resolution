@@ -250,15 +250,13 @@ G4PVPlacement* RES_Module::Construct(G4VPhysicalVolume* mother, G4int copyNumber
 
 G4bool RES_Module::CheckIfTrackPassesThrough(G4ThreeVector position, G4ThreeVector direction)
 {
-  G4bool retVal = true;
-
   G4double dz = m_placement.z() - position.z();
   G4double l = dz / direction.z();
   G4ThreeVector currentPosition = position + l*direction;
-  if (fabs(currentPosition.x() - m_placement.x()) > 0.5*m_length)   {retVal = false;}
-  if (fabs(currentPosition.y() - m_placement.y()) > 0.5*m_width) {retVal = false;}
+  if (fabs(currentPosition.x() - m_placement.x()) > 0.5*m_length)   {return false;}
+  if (fabs(currentPosition.y() - m_placement.y()) > 0.5*m_width) {return false;}
 
-  return retVal;
+  return true;
 }
 
 void RES_Module::SetSD(G4VSensitiveDetector* aSD)

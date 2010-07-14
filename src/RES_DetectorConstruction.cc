@@ -1,7 +1,8 @@
-// $Id: RES_DetectorConstruction.cc,v 1.30 2010/07/06 14:09:18 beischer Exp $
+// $Id: RES_DetectorConstruction.cc,v 1.31 2010/07/14 12:17:37 beischer Exp $
 
 #include "RES_DetectorConstruction.hh"
 
+#include "RES_MagneticField.hh"
 #include "RES_DetectorMessenger.hh"
 #include "RES_Module.hh"
 #include "RES_SD.hh"
@@ -15,6 +16,8 @@
 #include "G4VisAttributes.hh"
 #include "G4SDManager.hh"
 #include "G4RotationMatrix.hh"
+#include "G4TransportationManager.hh"
+#include "G4FieldManager.hh"
 #include "globals.hh"
 
 RES_DetectorConstruction::RES_DetectorConstruction() :
@@ -103,28 +106,16 @@ void RES_DetectorConstruction::SetVisibility()
 
 G4bool RES_DetectorConstruction::TrackInAcceptance(G4ThreeVector position, G4ThreeVector direction)
 {
-  G4bool retVal = true;
-
   for (unsigned int i = 0; i < m_modules.size(); i++)
     if (!m_modules.at(i)->CheckIfTrackPassesThrough(position, direction))
-      retVal = false;
+      return false;
 
+  G4FieldManager* fieldMgr = G4TransportationManager::GetTransportationManager()->GetFieldManager();
+  RES_MagneticField* field = (RES_MagneticField*) fieldMgr->GetDetectorField();
+  if (field && !field->CheckIfTrackIsInsideMagnet(position, direction))
+    return false;
 
-  G4int nMustPass = 2;
-  G4double* z = new G4double[nMustPass];
-  z[0] = 4*cm;
-  z[1] = -4*cm;
-  
-  for (int i = 0; i < nMustPass; i++) {
-    G4double dz = z[i] - position.z();
-    G4double l = dz / direction.z();
-    G4ThreeVector currentPosition = position + l*direction;
-    if (sqrt(pow(currentPosition.x(),2.) + pow(currentPosition.y(),2.)) > 7.5*cm)   {retVal = false;}
-  }
-
-  delete[] z;
-
-  return retVal;
+  return true;
 }
 
 void RES_DetectorConstruction::PrintMaterials()

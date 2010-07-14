@@ -1,4 +1,4 @@
-// $Id: RES_InhomField.cc,v 1.14 2010/04/23 01:07:09 beischer Exp $
+// $Id: RES_InhomField.cc,v 1.15 2010/07/14 12:17:38 beischer Exp $
 
 #include "RES_InhomField.hh"
 
@@ -6,9 +6,9 @@
 
 #include <fstream>
 
-RES_InhomField::RES_InhomField(G4String dataFileName) :
+RES_InhomField::RES_InhomField(G4String dataFileName) : 
+  RES_MagneticField(),
   m_dataFileName(dataFileName),
-  m_displacement(G4ThreeVector(0,0,0)),
   m_axis_x(0),
   m_axis_y(0),
   m_axis_z(0),
@@ -100,6 +100,15 @@ void RES_InhomField::ReadData()
     return;
   }
   
+  G4double disX, disY, disZ;
+  file >> m_z0 >> m_z1 >> m_radius >> m_fieldEstimate >> disX >> disY >> disZ;
+  
+  m_z0 *= cm;
+  m_z1 *= cm;
+  m_radius *= cm;
+  m_fieldEstimate *= tesla;
+  m_displacement = G4ThreeVector(disX*cm, disY*cm, disZ*cm);
+
   G4double x0,x1,y0,y1,z0,z1;
   G4int nBins_x, nBins_y, nBins_z;
   file >> x0 >> x1 >> y0 >> y1 >> z0 >> z1 >> nBins_x >> nBins_y >> nBins_z;

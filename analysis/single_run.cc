@@ -1,4 +1,4 @@
-// $Id: single_run.cc,v 1.36 2010/06/29 15:09:21 beischer Exp $
+// $Id: single_run.cc,v 1.37 2010/07/14 12:17:33 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -151,8 +151,8 @@ int main(int argc, char** argv)
   for (int i = 0;i < nHits; i++) {
     char title[256];
     sprintf(title, "Layer %d", i+1);
-    if (i == 0 || i == nHits - 2) yDeltaGenHist[i] = new TH1D(title,title, 100, -0.2, 0.2);
-    else yDeltaGenHist[i] = new TH1D(title,title, 100, -0.2, 0.2);
+    if (i == 0 || i == nHits - 2) yDeltaGenHist[i] = new TH1D(title,title, 100, -0.5, 0.5);
+    else yDeltaGenHist[i] = new TH1D(title,title, 100, -0.5, 0.5);
   }
   TH1D** xDeltaSmearedHist = new TH1D*[nHits];
   for (int i = 0;i < nHits; i++) {
@@ -177,6 +177,7 @@ int main(int argc, char** argv)
   TH1D angleHist("angleHist", "angleHist", 500, -100e-3, 100e-3);
   TH1D lHist("lHist", "lHist", 100, 0.07, 0.11);
   TH1D lOverAngleHist("lOverAngleHist", "lOverAngleHist", 100, -5., -1.);
+  TH1I innerOrOuterHist("innerOrOuterHist", "innerOrOuterHist", 2, 0, 2);
 
   int total = 0;
   int chi2Passed = 0;
@@ -221,13 +222,33 @@ int main(int argc, char** argv)
       unsigned int iRec = genUniqueLayer;
       xDeltaGenHist[genUniqueLayer]->Fill(genEvent->GetHitPosition(i).x() - recEvent->GetHitPosition(iRec).x());
       yDeltaGenHist[genUniqueLayer]->Fill(genEvent->GetHitPosition(i).y() - recEvent->GetHitPosition(iRec).y());
-      xDeltaGenHist[genUniqueLayer]->Fill(genEvent->GetHitPosition(i).x());
-      yDeltaGenHist[genUniqueLayer]->Fill(genEvent->GetHitPosition(i).y());
+      // xDeltaGenHist[genUniqueLayer]->Fill(genEvent->GetHitPosition(i).x());
+      // yDeltaGenHist[genUniqueLayer]->Fill(genEvent->GetHitPosition(i).y());
       xDeltaSmearedHist[genUniqueLayer]->Fill(genEvent->GetSmearedHitPosition(i).x() - recEvent->GetHitPosition(iRec).x());
       yDeltaSmearedHist[genUniqueLayer]->Fill(genEvent->GetSmearedHitPosition(i).y() - recEvent->GetHitPosition(iRec).y());
       totalXhist.Fill(genEvent->GetHitPosition(i).x() - recEvent->GetHitPosition(iRec).x());
       totalYhist.Fill(genEvent->GetHitPosition(i).y() - recEvent->GetHitPosition(iRec).y());
+      //  std::cout << genUniqueLayer << "  --> " <<genEvent->GetHitPosition(i).z() << std::endl;
     }
+
+    TVector3 direction = genEvent->GetHitPosition(nHitsGen-1) - genEvent->GetHitPosition(0);
+    direction = 1./direction.Mag() * direction;
+    TVector3 start = genEvent->GetHitPosition(0);
+    
+    double l = 35 - genEvent->GetHitPosition(0).z();
+    TVector3 currentPos = start + l*direction;
+    double r1 = sqrt(pow(currentPos.x(), 2.) + pow(currentPos.y(), 2.))/10.;
+
+    l = -35 - genEvent->GetHitPosition(0).z();
+    currentPos = start + l*direction;
+    double r2 = sqrt(pow(currentPos.x(), 2.) + pow(currentPos.y(), 2.))/10.;
+
+
+    std::cout << "r1: " << r1 << "  ---- r2: " << r2 << std::endl;
+    if (r1 < 7.5 && r2 < 7.5)
+      innerOrOuterHist.Fill(1);
+    else
+      innerOrOuterHist.Fill(0);
 
 
     initialP.Fill(recEvent->GetInitialParameter(0) * genEvent->GetMomentum());
@@ -434,6 +455,17 @@ int main(int argc, char** argv)
   //  canvas9.SaveAs(saveName);
   sprintf(saveName, "%s_initial.%s", stem, "root");
   //  canvas9.SaveAs(saveName);
+
+  TCanvas canvas10("canvas10", "innerOuter", 1024, 768);
+  canvas10.Draw();
+  innerOrOuterHist.Draw();
+  // innerOrOuterHist.Fit("gaus", "EQ");
+  // innerOrOuterHist.GetFunction("gaus")->SetParName(2, "#sigma_{p}/p");
+  sprintf(saveName, "%s_initial.%s", stem, "pdf");
+  //  canvas10.SaveAs(saveName);
+  sprintf(saveName, "%s_initial.%s", stem, "root");
+  //  canvas10.SaveAs(saveName);
+
 
   std::cout << (double)(chi2Passed) / (double)total << std::endl;
   std::cout << genTree->GetEntries() << std::endl;

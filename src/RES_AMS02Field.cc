@@ -1,13 +1,17 @@
-// $Id: RES_AMS02Field.cc,v 1.3 2010/06/21 20:53:15 beischer Exp $
+// $Id: RES_AMS02Field.cc,v 1.4 2010/07/14 12:17:37 beischer Exp $
 
 #include "RES_AMS02Field.hh"
 
 #include "MagField.hh"
 
 RES_AMS02Field::RES_AMS02Field(G4String fileName) : 
-  G4MagneticField(),
+  RES_MagneticField(),
   field(MagField::GetPtr())
 {
+  m_z0 = 0;
+  m_z1 = 0;
+  m_fieldEstimate = 0;
+
   //set scale because fld07 map is at 460 A and we want 400 A
   field->SetScale(400./460.);
   field->Read(fileName);

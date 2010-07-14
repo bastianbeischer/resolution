@@ -1,14 +1,14 @@
-// $Id: RES_AMS02Field.hh,v 1.2 2010/06/21 20:53:16 beischer Exp $
+// $Id: RES_AMS02Field.hh,v 1.3 2010/07/14 12:17:34 beischer Exp $
 
 #ifndef RES_AMS02Field_hh
 #define RES_AMS02Field_hh
 
-#include "G4MagneticField.hh"
+#include "RES_MagneticField.hh"
 #include "globals.hh"
 
 class MagField;
 
-class RES_AMS02Field : public G4MagneticField
+class RES_AMS02Field : public RES_MagneticField
 {
 
 public:
