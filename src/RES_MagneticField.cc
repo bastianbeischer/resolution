@@ -1,4 +1,4 @@
-// $Id: RES_MagneticField.cc,v 1.1 2010/07/14 12:17:38 beischer Exp $
+// $Id: RES_MagneticField.cc,v 1.2 2010/07/16 12:51:52 beischer Exp $
 
 #include "RES_MagneticField.hh"
 
@@ -43,7 +43,7 @@ G4double RES_MagneticField::MeanFieldAlongTrack(G4ThreeVector startPoint, G4Thre
 
 G4bool RES_MagneticField::CheckIfTrackIsInsideMagnet(G4ThreeVector position, G4ThreeVector direction)
 {
-  G4double z[2] = {m_z0, m_z1};
+  G4double z[2] = {m_z0 + m_displacement.z(), m_z1 + m_displacement.z()};
 
   if (m_radius == 0.) return true;
 
@@ -51,7 +51,8 @@ G4bool RES_MagneticField::CheckIfTrackIsInsideMagnet(G4ThreeVector position, G4T
     G4double dz = z[i] - position.z();
     G4double l = dz / direction.z();
     G4ThreeVector currentPosition = position + l*direction;
-    if (sqrt(pow(currentPosition.x(),2.) + pow(currentPosition.y(),2.)) > m_radius)   {return false;}
+    if (sqrt(pow(currentPosition.x(),2.) + pow(currentPosition.y(),2.)) > m_radius)
+      return false;
   }
 
   return true;

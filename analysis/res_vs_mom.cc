@@ -1,4 +1,4 @@
-// $Id: res_vs_mom.cc,v 1.20 2010/07/14 12:17:33 beischer Exp $
+// $Id: res_vs_mom.cc,v 1.21 2010/07/16 12:51:53 beischer Exp $
 
 #include <iostream>
 #include <cmath>
@@ -53,8 +53,8 @@ int main(int argc, char** argv)
   double momMin = 0.25;
   double momMax = 10.0;
   double momStep = 0.25;
-  fillGraph(graph1, "../results/perdaix_%.2f_GeV_1.00_deg_msc_inhom_electrons_windows.root", momMin, momMax, momStep, 0.077, 0.18);
-  fillGraph(graph2, "../results/perdaix_%.2f_GeV_1.00_deg_msc_inhom_protons_windows.root", momMin, momMax, momStep, 0.077, 0.23);
+  fillGraph(graph1, "../results/perdaix_%.2f_GeV_1.00_deg_msc_inhom_electrons_newfield.root", momMin, momMax, momStep, 0.077, 0.18);
+  fillGraph(graph2, "../results/perdaix_%.2f_GeV_1.00_deg_msc_inhom_electrons_consistency.root", momMin, momMax, momStep, 0.077, 0.23);
   //  fillGraph(graph3, "../results/perdaix_%.2f_GeV_1.00_deg_msc_inhom_protons_nowindows.root", momMin, momMax, momStep, 0.08, 0.30);
   // fillGraph(graph4, "../results/perdaix_%.2f_GeV_1.00_deg_nomsc_hom.root", momMin, momMax, momStep, 0.08, 0.0);
 
@@ -82,7 +82,7 @@ int main(int argc, char** argv)
   graph1.GetFunction("fitMSC")->SetLineColor(kRed);
   graph1.PaintStats(graph1.GetFunction("fitMSC"));
   graph2.Draw("P");
-  fitMSC.FixParameter(2, m_proton);
+  //  fitMSC.FixParameter(2, m_proton);
   graph2.Fit("fitMSC", "E");
   graph2.SetMarkerSize(1.5);
   graph2.GetFunction("fitMSC")->SetLineColor(kBlue);
@@ -116,7 +116,7 @@ int main(int argc, char** argv)
   // pt3->SetTextColor(kBlack);
   // TPaveStats* pt4 = (TPaveStats*) graph4.GetListOfFunctions()->FindObject("stats");
   // pt4->SetTextColor(kViolet);
-  TPaveStats* pt[2] = {pt1, pt2};//pt3, pt4};
+  TPaveStats* pt[2] = {pt1, pt2};//, pt3, pt4};
   for (int i = 0; i < 2; i++) {
     pt[i]->SetX1NDC(0.7);
     pt[i]->SetX2NDC(0.95);
@@ -127,12 +127,12 @@ int main(int argc, char** argv)
   TLatex text(3.1, 0.13, "#sigma_{p} / p = #sqrt{(ap)^{2} + (b/#beta)^{2}}");
   text.Draw("SAME");
 
-  TLegend legend(0.25, 0.75, 0.45, 0.88);
-  legend.AddEntry(&graph1, "electrons", "P");
-  legend.AddEntry(&graph2, "protons", "P");
-  //  legend.AddEntry(&graph3, "module without windows", "P");
+   TLegend legend(0.25, 0.75, 0.45, 0.88);
+   legend.AddEntry(&graph1, "electrons", "P");
+   legend.AddEntry(&graph2, "protons", "P");
+  // legend.AddEntry(&graph3, "module without windows", "P");
   // legend.AddEntry(&graph4, "Multiple Scattering deactivated + Hom. approximation in center", "P");
-  legend.Draw("SAME");
+   legend.Draw("SAME");
 
   canvas.SaveAs("perdaix_1_deg.pdf");
   canvas.SaveAs("perdaix_1_deg.root");
