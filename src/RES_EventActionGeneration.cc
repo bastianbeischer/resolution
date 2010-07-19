@@ -1,4 +1,4 @@
-// $Id: RES_EventActionGeneration.cc,v 1.25 2010/05/12 01:56:31 beischer Exp $
+// $Id: RES_EventActionGeneration.cc,v 1.26 2010/07/19 20:20:13 beischer Exp $
 
 #include "RES_EventActionGeneration.hh"
 
@@ -12,6 +12,11 @@
 #include "G4SDManager.hh"
 #include "G4PrimaryVertex.hh"
 #include "G4PrimaryParticle.hh"
+#include "G4VVisManager.hh"
+#include "G4Circle.hh"
+#include "G4Colour.hh"
+#include "G4VisAttributes.hh"
+
 
 RES_EventActionGeneration::RES_EventActionGeneration()
 {
@@ -80,6 +85,7 @@ void RES_EventActionGeneration::EndOfEventAction(const G4Event* event)
     newEvent.SetEventType(generated);
 
     SmearHits(&newEvent);
+    // AddNoiseHits(&newEvent);
 
     G4PrimaryParticle* primary = event->GetPrimaryVertex()->GetPrimary();
     G4ThreeVector momentum = primary->GetMomentum();
@@ -160,5 +166,37 @@ void RES_EventActionGeneration::SmearHits(RES_Event* event)
     hit.setY(hit.y() + alignMgr->GetYshift(iModule));
 
     event->AddSmearedHit(hit.x(), hit.y(), hit.z());
+  }
+}
+
+void RES_EventActionGeneration::AddNoiseHits(RES_Event* event)
+{
+  //  RES_RunManager* mgr = (RES_RunManager*) G4RunManager::GetRunManager();
+  //  G4int meanNoiseHits = mgr->GetAverageNoiseHits();
+  RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();  
+  unsigned int nModules = det->GetNumberOfModules();
+
+  for (unsigned int i = 0; i < nModules; i++) {
+    RES_Module* module = det->GetModule(i);
+
+    unsigned int nMeanNoiseClusters = module->GetFractionOfNoiseClusters() * module->GetNumberOfChannels();
+    unsigned int nNoiseClusters = CLHEP::RandPoisson::shoot(nMeanNoiseClusters);
+    for (unsigned int j = 0; j < nNoiseClusters; j++) {
+      G4ThreeVector position = module->GenerateNoiseCluster();
+
+      G4VVisManager* pVVisManager = G4VVisManager::GetConcreteInstance();
+      if(pVVisManager)
+        {
+          G4Circle circle(position);
+          circle.SetScreenSize(6.);
+          circle.SetFillStyle(G4Circle::filled);
+          G4Colour colour(0.,1.,0.);
+          G4VisAttributes attribs(colour);
+          circle.SetVisAttributes(attribs);
+          pVVisManager->Draw(circle);
+        }
+
+      event->AddSmearedHit(position.x(), position.y(), position.z());
+    }
   }
 }

@@ -1,4 +1,4 @@
-// $Id: RES_EventActionGeneration.hh,v 1.3 2009/10/14 16:51:35 beischer Exp $
+// $Id: RES_EventActionGeneration.hh,v 1.4 2010/07/19 20:20:09 beischer Exp $
 
 #ifndef RES_EventActionGeneration_hh
 #define RES_EventActionGeneration_hh
@@ -19,6 +19,7 @@ public:
 
 private:
   void SmearHits(RES_Event* event);
+  void AddNoiseHits(RES_Event* event);
 
 };
 

@@ -11,6 +11,8 @@
 #include "G4VisAttributes.hh"
 #include "G4VSensitiveDetector.hh"
 
+#include "CLHEP/Random/RandFlat.h"
+
 #include <cmath>
 
 RES_Module::RES_Module()
@@ -33,6 +35,8 @@ RES_Module::~RES_Module()
 
 void RES_Module::InitializeCommonValues()
 {
+  m_fractionOfNoiseClusters = 0.01;
+
   // Thickness
   m_fiberThickness = 1.15*mm;
   m_carbonFiberThickness = 0.25*mm;
@@ -102,10 +106,47 @@ void RES_Module::InitializeCommonValues()
   m_kaptonMaterial = G4NistManager::Instance()->FindOrBuildMaterial( "G4_KAPTON" );
 }
 
+G4int RES_Module::GetNumberOfChannels()
+{
+  G4int nChannels = 0;
+  switch(m_type) {
+  case fiber:
+    nChannels = 512;
+    break;
+  case silicon:
+    nChannels = 1024;
+    break;
+  default:
+    nChannels = 512;
+    break;
+  }
+  return nChannels;
+}
+
+G4ThreeVector RES_Module::GenerateNoiseCluster()
+{
+  double randPosition = CLHEP::RandFlat::shoot();
+  G4bool onUpperLayer = CLHEP::RandFlat::shoot() < 0.5 ? true : false;
+  
+  G4double x = 0;
+  G4double y = (randPosition - 0.5) * m_width;
+  G4double z = onUpperLayer ? m_upperZ : m_lowerZ;
+  z -= m_placement.z();
+
+  G4ThreeVector position(x,y,z);
+  G4double angle = m_angle;
+  if (!onUpperLayer)
+    angle += m_internalAngle;
+
+  G4RotationMatrix matrix(angle, 0., 0.);
+
+  return m_placement + matrix*position;
+}
+
 void RES_Module::ComputeParameters()
 {
   if (m_type == fiber) {
-    m_height = 2*m_foamThickness + 4*m_carbonFiberThickness + 2*m_fiberThickness + 4*m_epoxyThickness;
+    m_height = 2*(m_foamThickness + 2*m_carbonFiberThickness + m_fiberThickness + 2*m_epoxyThickness);
     G4double zInModule = m_epoxyThickness + m_carbonFiberThickness + m_foamThickness + m_carbonFiberThickness + m_epoxyThickness + 0.5*m_fiberThickness;
     m_upperZ = m_placement.z() + zInModule + 0.5*m_fiberThickness;
     m_lowerZ = m_placement.z() - zInModule + 0.5*m_fiberThickness;
@@ -122,8 +163,8 @@ void RES_Module::ComputeParameters()
 void RES_Module::SetDefaultValuesForFiber()
 {
   m_type            = fiber;
-  m_angle           = 0.;
-  m_internalAngle   = 0.;
+  m_angle           = -0.5;
+  m_internalAngle   = 1.0;
   m_length          = 40.*cm;
   m_width           = 6.912*cm;
   m_upperSigmaU     = m_length/sqrt(12);
@@ -160,7 +201,8 @@ G4PVPlacement* RES_Module::Construct(G4VPhysicalVolume* mother, G4int copyNumber
 
   G4Box* moduleSolid = new G4Box("module", 0.5*m_length, 0.5*m_width, 0.5*m_height);
   G4LogicalVolume* moduleLogic = new G4LogicalVolume(moduleSolid, m_moduleMaterial, "module", 0, 0, 0); // CHANGE MATERIAL HERE
-  G4RotationMatrix* moduleRotation = new G4RotationMatrix(m_angle, 0., 0.);
+  //  G4RotationMatrix* moduleRotation = new G4RotationMatrix(m_angle, 0., 0.);
+  G4RotationMatrix* moduleRotation = new G4RotationMatrix(0., 0., 0.);
   m_modulePlacement = new G4PVPlacement(moduleRotation, m_placement, moduleLogic, "module", mother->GetLogicalVolume(), false, copyNumber);
 
   // interior of modules
@@ -175,27 +217,21 @@ G4PVPlacement* RES_Module::Construct(G4VPhysicalVolume* mother, G4int copyNumber
       G4double holeSideLength = 4.5*cm;
       
       G4Box* hole = new G4Box("hole", 0.5*holeSideLength, 0.5*holeSideLength, 0.51*m_carbonFiberThickness);
-      G4SubtractionSolid* carbonFiberSubSolid = new G4SubtractionSolid("carbonFiberSubSolid", carbonFiberSolid, hole, 0, G4ThreeVector(holePositions[0], 0.25*m_width, 0));
+      G4SubtractionSolid* carbonFiberSubSolid = new G4SubtractionSolid("carbonFiberSubSolid", carbonFiberSolid, hole, 0, G4ThreeVector(holePositions[0], 0, 0));
       for (int i = 1; i < 7; i++)
-        carbonFiberSubSolid = new G4SubtractionSolid("carbonFiberSubSolid", carbonFiberSubSolid, hole, 0, G4ThreeVector(holePositions[i], 0.25*m_width, 0));
-      for (int i = 0; i < 7; i++)
-        carbonFiberSubSolid = new G4SubtractionSolid("carbonFiberSubSolid", carbonFiberSubSolid, hole, 0, G4ThreeVector(holePositions[i], -0.25*m_width, 0));
+        carbonFiberSubSolid = new G4SubtractionSolid("carbonFiberSubSolid", carbonFiberSubSolid, hole, 0, G4ThreeVector(holePositions[i], 0, 0));
       carbonFiberSolid = carbonFiberSubSolid;
 
       hole = new G4Box("hole", 0.5*holeSideLength, 0.5*holeSideLength, 0.51*m_epoxyThickness);
-      G4SubtractionSolid* epoxySubSolid = new G4SubtractionSolid("epoxySubSolid", epoxySolid, hole, 0, G4ThreeVector(holePositions[0], 0.25*m_width, 0));
+      G4SubtractionSolid* epoxySubSolid = new G4SubtractionSolid("epoxySubSolid", epoxySolid, hole, 0, G4ThreeVector(holePositions[0], 0, 0));
       for (int i = 1; i < 7; i++)
-        epoxySubSolid = new G4SubtractionSolid("epoxySubSolid", epoxySubSolid, hole, 0, G4ThreeVector(holePositions[i], 0.25*m_width, 0));
-      for (int i = 0; i < 7; i++)
-        epoxySubSolid = new G4SubtractionSolid("epoxySubSolid", epoxySubSolid, hole, 0, G4ThreeVector(holePositions[i], -0.25*m_width, 0));
+        epoxySubSolid = new G4SubtractionSolid("epoxySubSolid", epoxySubSolid, hole, 0, G4ThreeVector(holePositions[i], 0, 0));
       epoxySolid = epoxySubSolid;
 
       hole = new G4Box("hole", 0.5*holeSideLength, 0.5*holeSideLength, 0.51*m_foamThickness);
-      G4SubtractionSolid* foamSubSolid = new G4SubtractionSolid("foamSubSolid", foamSolid, hole, 0, G4ThreeVector(holePositions[0], 0.25*m_width, 0));
+      G4SubtractionSolid* foamSubSolid = new G4SubtractionSolid("foamSubSolid", foamSolid, hole, 0, G4ThreeVector(holePositions[0], 0, 0));
       for (int i = 1; i < 7; i++)
-        foamSubSolid = new G4SubtractionSolid("foamSubSolid", foamSubSolid, hole, 0, G4ThreeVector(holePositions[i], 0.25*m_width, 0));
-      for (int i = 0; i < 7; i++)
-        foamSubSolid = new G4SubtractionSolid("foamSubSolid", foamSubSolid, hole, 0, G4ThreeVector(holePositions[i], -0.25*m_width, 0));
+        foamSubSolid = new G4SubtractionSolid("foamSubSolid", foamSubSolid, hole, 0, G4ThreeVector(holePositions[i], 0, 0));
       foamSolid = foamSubSolid;
     }
 
