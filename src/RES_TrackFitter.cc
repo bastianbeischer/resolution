@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitter.cc,v 1.64 2010/07/14 12:17:39 beischer Exp $
+// $Id: RES_TrackFitter.cc,v 1.65 2010/07/21 15:14:36 beischer Exp $
 
 #include <cmath>
 #include <fstream>
@@ -293,6 +293,7 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
   vecTrans.Transpose(vec);
   G4double chi2 = (vecTrans * Uinv * vec)(0,0);
 
+  // WRONG WRONG WRONG WRONG
   // SolutionToPositions is the linear transformation that maps the solution to positions
   for (unsigned int i = 0; i < 4*nModules; i++){
     G4double z;

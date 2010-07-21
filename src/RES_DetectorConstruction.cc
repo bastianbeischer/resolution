@@ -1,4 +1,4 @@
-// $Id: RES_DetectorConstruction.cc,v 1.32 2010/07/19 20:20:13 beischer Exp $
+// $Id: RES_DetectorConstruction.cc,v 1.33 2010/07/21 15:14:35 beischer Exp $
 
 #include "RES_DetectorConstruction.hh"
 
@@ -110,10 +110,8 @@ G4bool RES_DetectorConstruction::TrackInAcceptance(G4ThreeVector position, G4Thr
   G4double currentZ = DBL_MAX;
   G4int nLayers = 0;
   for (unsigned int i = 0; i < m_modules.size(); i++) {
-    if (currentZ != m_modules.at(i)->GetPlacement().z()) {
-      nLayers++;
-      currentZ = m_modules.at(i)->GetPlacement().z();
-    }
+    if (currentZ != m_modules.at(i)->GetPlacement().z()) nLayers++;
+    currentZ = m_modules.at(i)->GetPlacement().z();
   }
 
   // fill the vector with passed modules
@@ -130,10 +128,8 @@ G4bool RES_DetectorConstruction::TrackInAcceptance(G4ThreeVector position, G4Thr
   G4int nPassed = 0;
   currentZ = DBL_MAX;
   for (unsigned int i = 0; i < modulesPassed.size(); i++) {
-    if (currentZ != modulesPassed.at(i)->GetPlacement().z()) {
-      nPassed++;
-      currentZ = modulesPassed.at(i)->GetPlacement().z();
-    }
+    if (currentZ != modulesPassed.at(i)->GetPlacement().z()) nPassed++;
+    currentZ = modulesPassed.at(i)->GetPlacement().z();
   }
 
   // we require passage through all layers

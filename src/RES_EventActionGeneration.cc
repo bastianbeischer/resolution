@@ -1,4 +1,4 @@
-// $Id: RES_EventActionGeneration.cc,v 1.26 2010/07/19 20:20:13 beischer Exp $
+// $Id: RES_EventActionGeneration.cc,v 1.27 2010/07/21 15:14:36 beischer Exp $
 
 #include "RES_EventActionGeneration.hh"
 
@@ -85,7 +85,7 @@ void RES_EventActionGeneration::EndOfEventAction(const G4Event* event)
     newEvent.SetEventType(generated);
 
     SmearHits(&newEvent);
-    // AddNoiseHits(&newEvent);
+    AddNoiseHits(&newEvent);
 
     G4PrimaryParticle* primary = event->GetPrimaryVertex()->GetPrimary();
     G4ThreeVector momentum = primary->GetMomentum();
@@ -179,7 +179,7 @@ void RES_EventActionGeneration::AddNoiseHits(RES_Event* event)
   for (unsigned int i = 0; i < nModules; i++) {
     RES_Module* module = det->GetModule(i);
 
-    unsigned int nMeanNoiseClusters = module->GetFractionOfNoiseClusters() * module->GetNumberOfChannels();
+    double nMeanNoiseClusters = module->GetFractionOfNoiseClusters() * module->GetNumberOfChannels();
     unsigned int nNoiseClusters = CLHEP::RandPoisson::shoot(nMeanNoiseClusters);
     for (unsigned int j = 0; j < nNoiseClusters; j++) {
       G4ThreeVector position = module->GenerateNoiseCluster();

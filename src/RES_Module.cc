@@ -35,7 +35,7 @@ RES_Module::~RES_Module()
 
 void RES_Module::InitializeCommonValues()
 {
-  m_fractionOfNoiseClusters = 0.01;
+  m_fractionOfNoiseClusters = 1e-3;
 
   // Thickness
   m_fiberThickness = 1.15*mm;

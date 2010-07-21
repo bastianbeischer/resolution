@@ -41,7 +41,8 @@ all: TAGS lib bin
 include $(G4INSTALL)/config/binmake.gmk
 
 TAGS: $(G4TARGET).cc src/*.cc include/*.hh $(RES_EventDir)/*.cc $(RES_EventDir)/*.hh \
-	$(BlobelDir)/*.h $(BlobelDir)/*.f $(AMS02_MagnetDir)/*.hh $(AMS02_MagnetDir)/*.h $(AMS02_MagnetDir)/*.cc $(MillepedeDir)/*.h $(MillepedeDir)/*.f \
+	$(BlobelDir)/*.h $(BlobelDir)/*.f $(AMS02_MagnetDir)/*.hh $(AMS02_MagnetDir)/*.h\
+	$(AMS02_MagnetDir)/*.cc $(MillepedeDir)/*.h $(MillepedeDir)/*.f \
 	analysis/*.hh analysis/*.cc
 	@rm -f TAGS;
 	@etags $^

@@ -76,7 +76,7 @@ int RES_ApplicationManager::RunBatchScript(G4String scriptName)
 
 void RES_ApplicationManager::CreateSession()
 {
-  // G4UIsession * session = new G4UIterminal(new G4UItcsh);
+  //G4UIsession * session = new G4UIterminal(new G4UItcsh);
   G4UIQt* session = new G4UIQt(m_argc, m_argv);
   session->AddMenu("macs", "Macros");
   session->AddButton("macs", "vis.ogl.mac", "/control/execute mac/vis.ogl.mac");
