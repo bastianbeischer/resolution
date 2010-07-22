@@ -1,4 +1,4 @@
-// $Id: RES_DetectorConstruction.cc,v 1.33 2010/07/21 15:14:35 beischer Exp $
+// $Id: RES_DetectorConstruction.cc,v 1.34 2010/07/22 15:49:05 beischer Exp $
 
 #include "RES_DetectorConstruction.hh"
 
@@ -53,7 +53,7 @@ G4VPhysicalVolume* RES_DetectorConstruction::Construct()
   m_world                   = new G4PVPlacement(0, G4ThreeVector(), worldLog, "world", 0, false, 0);
 
   // detector modules
-  SortModules();
+  SortModules(m_modules);
   int copyNumber = 0;
   for (std::vector<RES_Module*>::iterator it = m_modules.begin(); it != m_modules.end(); it++) {
     RES_Module* module = *it;
@@ -73,12 +73,6 @@ G4VPhysicalVolume* RES_DetectorConstruction::Construct()
 
   // return world
   return m_world;
-}
-
-void RES_DetectorConstruction::SortModules()
-{
-  module_less module_comp;
-  std::sort(m_modules.begin(), m_modules.end(), module_comp);
 }
 
 void RES_DetectorConstruction::SetSensitiveDetectors()
@@ -104,33 +98,46 @@ void RES_DetectorConstruction::SetVisibility()
   }  
 }  
 
-G4bool RES_DetectorConstruction::TrackInAcceptance(G4ThreeVector position, G4ThreeVector direction)
+void RES_DetectorConstruction::SortModules()
 {
+  SortModules(m_modules);
+}
+
+void RES_DetectorConstruction::SortModules(std::vector<RES_Module*>& modules)
+{
+  module_less module_comp;
+  std::sort(modules.begin(), modules.end(), module_comp);
+}
+
+unsigned int RES_DetectorConstruction::GetNumberOfLayers()
+{
+  return GetNumberOfLayers(m_modules);
+}
+
+unsigned int RES_DetectorConstruction::GetNumberOfLayers(std::vector<RES_Module*>& modules)
+{
+  SortModules(modules);
+
   // count the number of distinct layers in the setup
   G4double currentZ = DBL_MAX;
-  G4int nLayers = 0;
-  for (unsigned int i = 0; i < m_modules.size(); i++) {
-    if (currentZ != m_modules.at(i)->GetPlacement().z()) nLayers++;
-    currentZ = m_modules.at(i)->GetPlacement().z();
+  unsigned int nLayers = 0;
+  for (unsigned int i = 0; i < modules.size(); i++) {
+    if (currentZ != modules.at(i)->GetPlacement().z()) nLayers++;
+    currentZ = modules.at(i)->GetPlacement().z();
   }
+  return nLayers;
+}
 
+G4bool RES_DetectorConstruction::TrackInAcceptance(G4ThreeVector position, G4ThreeVector direction)
+{
   // fill the vector with passed modules
   std::vector<RES_Module*> modulesPassed;
   for (unsigned int i = 0; i < m_modules.size(); i++)
     if (m_modules.at(i)->CheckIfTrackPassesThrough(position, direction))
       modulesPassed.push_back(m_modules.at(i));
 
-  // sort passed modules by placement.z()
-  module_less module_comp;
-  std::sort(modulesPassed.begin(), modulesPassed.end(), module_comp);
-
-  // count the number of distinct layers in passed modules
-  G4int nPassed = 0;
-  currentZ = DBL_MAX;
-  for (unsigned int i = 0; i < modulesPassed.size(); i++) {
-    if (currentZ != modulesPassed.at(i)->GetPlacement().z()) nPassed++;
-    currentZ = modulesPassed.at(i)->GetPlacement().z();
-  }
+  unsigned int nLayers = GetNumberOfLayers(m_modules);
+  unsigned int nPassed = GetNumberOfLayers(modulesPassed);
 
   // we require passage through all layers
   if (nLayers != nPassed)

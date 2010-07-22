@@ -1,4 +1,4 @@
-// $Id: RES_Event.cc,v 1.11 2010/03/03 19:03:52 beischer Exp $
+// $Id: RES_Event.cc,v 1.12 2010/07/22 15:49:03 beischer Exp $
 
 #include "RES_Event.hh"
 
@@ -12,7 +12,7 @@ RES_Event::RES_Event() :
   m_smearedHits(0),
   m_transverseMomentum(0.),
   m_momentum(0.),
-  m_eventType(generated),
+  m_eventType(dummy),
   m_chi2(0.),
   m_dof(0),
   m_initialParameters(0),

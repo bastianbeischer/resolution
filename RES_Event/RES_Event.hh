@@ -1,4 +1,4 @@
-// $Id: RES_Event.hh,v 1.10 2010/03/03 19:03:52 beischer Exp $
+// $Id: RES_Event.hh,v 1.11 2010/07/22 15:49:04 beischer Exp $
 
 #ifndef RES_Event_hh
 #define RES_Event_hh
@@ -10,7 +10,7 @@
 #include <TVector3.h>
 
 enum EventType {
-  generated, reconstructed
+  dummy, generated, reconstructed
 };
 
 class RES_Event : public TObject
@@ -41,6 +41,7 @@ public:
   inline double       GetChi2()                             {return m_chi2;}
   inline int          GetDof()                              {return m_dof;}
   inline unsigned int GetNbOfHits()                         {return m_hits.size();}
+  inline unsigned int GetNbOfSmearedHits()                  {return m_smearedHits.size();}
   inline TVector3     GetHitPosition(unsigned int i)        {assert(i < m_hits.size()); return m_hits.at(i);}
   inline TVector3     GetSmearedHitPosition(unsigned int i) {assert(i < m_smearedHits.size()); return m_smearedHits.at(i);}
   inline double       GetInitialParameter(unsigned int i)   {assert(i < m_initialParameters.size()); return m_initialParameters.at(i);}
@@ -64,7 +65,7 @@ private:
   std::vector<double>   m_initialParameters;
   std::vector<double>   m_finalParameters;
 
-  ClassDef( RES_Event, 2 );
+  ClassDef( RES_Event, 3 );
 
 };
 

@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitter.cc,v 1.65 2010/07/21 15:14:36 beischer Exp $
+// $Id: RES_TrackFitter.cc,v 1.66 2010/07/22 15:49:05 beischer Exp $
 
 #include <cmath>
 #include <fstream>
@@ -119,8 +119,6 @@ RES_Event RES_TrackFitter::Fit()
     m_currentRecEvent.SetTransverseMomentum(-m_currentRecEvent.GetTransverseMomentum());
   }
   gun->SetParticleCharge(m_initialCharge);
-
-  //std::cout << "p: " << m_currentRecEvent.GetMomentum()/GeV << std::endl;
 
   return m_currentRecEvent;
 }
@@ -355,6 +353,8 @@ void RES_TrackFitter::CalculateStartParameters()
   RES_MagneticField* field = (RES_MagneticField*) fieldMgr->GetDetectorField();
   G4double B_estimate  = field->GetFieldEstimate();
   G4double magnetHeight = fabs(field->GetZ1() - field->GetZ0());
+  G4double z0_magnet = -magnetHeight/2. + field->GetDisplacement().z();
+  G4double z1_magnet =  magnetHeight/2. + field->GetDisplacement().z();
 
   if (m_fitMethod == transverse) {
 
@@ -374,104 +374,38 @@ void RES_TrackFitter::CalculateStartParameters()
     m_initialParameter[3] = 0.;
     m_initialParameter[4] = 0.;
 
-    for (int i = 0; i < 5; i++) {
-      m_parameter[i] = m_initialParameter[i];
-      m_step[i] = 0.1*m_parameter[i];
-    }
-
   } // if (method == transverse)
 
   if (m_fitMethod == blobel || m_fitMethod == minuit || m_fitMethod == oneline || m_fitMethod == twolines) {
     G4int nHits = m_currentGenEvent.GetNbOfHits();
-
-    G4double z0 = 0.;
-
-    G4double* k = new G4double[nHits];
-    G4double* x = new G4double[nHits];
-    G4double* y = new G4double[nHits];
-    G4double* z = new G4double[nHits];
-
-    for (int i = 0; i < nHits; i++)
-      k[i] = m_smearedHits[i].z() - z0;
 
     G4double x0_top,y0_top;
     FitStraightLine(0, nHits/2, x0_top, y0_top, lambda_x_top, lambda_y_top);
     G4double x0_bottom,y0_bottom;
     FitStraightLine(nHits/2, nHits, x0_bottom, y0_bottom, lambda_x_bottom, lambda_y_bottom);
 
-    for (int i = 0; i < nHits; i++) {
-      if (i < nHits/2) {
-        x[i] = x0_top + k[i] * lambda_x_top;
-        y[i] = y0_top + k[i] * lambda_y_top;
-        z[i] = z0 + k[i];
-      }
-      else {
-        x[i] = x0_bottom + k[i] * lambda_x_bottom;
-        y[i] = y0_bottom + k[i] * lambda_y_bottom;
-        z[i] = z0 + k[i];
-      }
-    }
-
-    G4double phi = atan(lambda_y_top);
-    G4double theta = atan(-lambda_x_top*cos(phi));
-
-    if (m_verbose > 2) {
-      G4cout << "straight line fit:" << G4endl;
-      for (int i = 0; i < nHits; i++) {
-        G4cout << "i: " << i << " x: " << x[i] << " y: " << y[i] << " z: " << z[i] << G4endl;
-      }
-    }
-
     G4double deltaTheta = lambda_y_top - lambda_y_bottom;
-
-    G4double z0_magnet = -magnetHeight/2. + field->GetDisplacement().z();
-    G4double z1_magnet =  magnetHeight/2. + field->GetDisplacement().z();
     G4double y0_magnet = y0_bottom + z0_magnet*lambda_y_bottom;
     G4double y1_magnet = y0_top    + z1_magnet*lambda_y_top;
-
-    //G4double magnetHeight = 8*cm; // PERDAIX MAGNET HERE
-    //G4double magnetHeight = 50*cm; // PEBS01 MAGNET HERE
-    //G4double magnetHeight = 100*cm; // PEBS02 MAGNET HERE
-    //G4double B  = 0.27; // PERDAIX MAGNET HERE
-    //G4double B  = 0.385; // PEBS01 MAGNET HERE
-    //G4double B  = 0.8; // PEBS02 MAGNET HERE
     G4double L  = sqrt(pow(y1_magnet - y0_magnet, 2.) + pow(z1_magnet - z0_magnet,2.));
     G4double pt = 0.3*(B_estimate/tesla)*(L/m)/deltaTheta*GeV;
-
-    //    std::cout << m_currentGenEvent.GetMomentum() / GeV / (0.3*L/deltaTheta) << std::endl;
 
     // pt is by definition positive for electrons
     if (m_initialCharge > 0)
       pt = -pt;
 
+    G4double phi = atan(lambda_y_top);
+    G4double theta = atan(-lambda_x_top*cos(phi));
+    G4double z0 = 0.;
+    G4double k0 = m_smearedHits[0].z() - z0;
+    G4double x0 = x0_top + k0*lambda_x_top;
+    G4double y0 = y0_top + k0*lambda_y_top;
+
     m_initialParameter[0] = 1./pt;
-    m_initialParameter[1] = y[0];
+    m_initialParameter[1] = y0;
     m_initialParameter[2] = phi;
-    m_initialParameter[3] = x[0];
+    m_initialParameter[3] = x0;
     m_initialParameter[4] = theta;
-
-    // RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
-    // RES_Module* firstModule = det->GetModule(0);
-    // G4double sigmaV = firstModule->GetUpperSigmaV();
-
-    // G4double sigmaEllipsis = 1.*mm;
-    // G4double sigmaPhi   = sqrt(2) * sigmaV      / ((z[1]-z[0])*(1 + pow((y[1]-y[0])/(z[1]-z[0]),2.0)));
-    // G4double sigmaTheta = sqrt(2) * sigmaEllipsis / ((z[1]-z[0])*(1 + pow((x[1]-x[0])/(z[1]-z[0]),2.0)));
-    // m_step[0] = 0.1*m_parameter[0];
-    // m_step[1] = sigmaV;
-    // m_step[2] = sigmaPhi;
-    // m_step[3] = sigmaEllipsis;
-    // m_step[4] = sigmaTheta;
-
-    for (int i = 0; i < 5; i++) {
-      m_parameter[i] = m_initialParameter[i];
-      m_step[i] = 0.1*m_parameter[i];
-    }
-
-    delete[] x;
-    delete[] y;
-    delete[] z;
-    delete[] k;
 
   } // if (method == blobel,minuit,oneline,twolines)
 
@@ -479,9 +413,6 @@ void RES_TrackFitter::CalculateStartParameters()
 
     G4int nHits = m_currentGenEvent.GetNbOfHits();
     double x0,y0_top,y0_bottom,lambda_x,lambda_y_top,lambda_y_bottom;
-
-    G4double z0 = 0;
-    G4double k0 = m_smearedHits[0].z() - z0;
 
     G4double dummy1,dummy2;
 
@@ -505,22 +436,16 @@ void RES_TrackFitter::CalculateStartParameters()
       if ((i != 1) && (std::find(alreadyInToBeSkipped.begin(), alreadyInToBeSkipped.end(), i) == alreadyInToBeSkipped.end()))
         RemoveLayerToBeSkipped(i);
 
-    G4double phi   = atan(lambda_y_top);
-    G4double theta = atan(-lambda_x*cos(phi));
-
     G4double deltaTheta = lambda_y_top - lambda_y_bottom;
-
-    G4double z0_magnet = -magnetHeight/2. + field->GetDisplacement().z();
-    G4double z1_magnet =  magnetHeight/2. + field->GetDisplacement().z();
     G4double y0_magnet = y0_bottom + z0_magnet*lambda_y_bottom;
     G4double y1_magnet = y0_top    + z1_magnet*lambda_y_top;
-
-    // G4ThreeVector startPoint(x0 + lambda_x*z1_magnet, y0_top + lambda_y_top*z1_magnet, z1_magnet);
-    // G4ThreeVector endPoint(x0 + lambda_x*z0_magnet, y0_bottom + lambda_y_bottom*z0_magnet, z0_magnet);
-    // G4double B = field->MeanFieldAlongTrack(startPoint, endPoint);
-    // G4double B = 0.246*tesla;
     G4double L  = sqrt(pow(y1_magnet - y0_magnet, 2.) + pow(z1_magnet - z0_magnet,2.));
     G4double pt = (0.3*(B_estimate/tesla)*(L/m)/deltaTheta)*GeV;
+
+    G4double phi   = atan(lambda_y_top);
+    G4double theta = atan(-lambda_x*cos(phi));
+    G4double z0 = 0;
+    G4double k0 = m_smearedHits[0].z() - z0;
 
     m_initialParameter[0] = 1./pt;
     m_initialParameter[1] = y0_top + k0*lambda_y_top;
@@ -528,16 +453,11 @@ void RES_TrackFitter::CalculateStartParameters()
     m_initialParameter[3] = x0 + k0*lambda_x;
     m_initialParameter[4] = theta;
 
-    for (int i = 0; i < 5; i++) {
-      m_parameter[i] = m_initialParameter[i];
-      m_step[i] = 0.1*m_parameter[i];
-    }
-
   } // if (method == testbeam)
   
   for (int i = 0; i < 5; i++) {
-    // m_lowerBound[i] = m_parameter[i] - 10.*fabs(m_step[i]);
-    // m_upperBound[i] = m_parameter[i] + 10.*fabs(m_step[i]);
+    m_parameter[i] = m_initialParameter[i];
+    m_step[i] = 0.1*m_parameter[i];
     m_lowerBound[i] = 0.;
     m_upperBound[i] = 0.;
   }
@@ -665,12 +585,13 @@ G4double RES_TrackFitter::Chi2InModuleFrame()
   gun->SetParticleEnergy(energy);
   runManager->BeamOn(1);
 
-  if (m_currentRecEvent.GetNbOfHits() != 2*det->GetNumberOfModules())
+  if (m_currentRecEvent.GetNbOfHits() != 2*det->GetNumberOfLayers())
     return DBL_MAX;
 
   G4int nHits = m_currentGenEvent.GetNbOfHits();
 
   for( G4int i = 0 ; i < nHits ; i++ ) {
+
     G4int iModule = m_currentGenEvent.GetModuleID(i);
     G4int iLayer  = m_currentGenEvent.GetLayerID(i);
     unsigned int uniqueLayer = 2*iModule + iLayer;
@@ -684,7 +605,15 @@ G4double RES_TrackFitter::Chi2InModuleFrame()
     if (iLayer > 0) angle += module->GetInternalAngle();
     G4RotationMatrix forwardRotation(angle, 0, 0);
     G4RotationMatrix backwardRotation(-angle, 0, 0);
-    G4ThreeVector hit(m_currentRecEvent.GetHitPosition(uniqueLayer).x(),m_currentRecEvent.GetHitPosition(uniqueLayer).y(),m_currentRecEvent.GetHitPosition(uniqueLayer).z());
+
+    unsigned int j = 0;
+    for (; j < m_currentRecEvent.GetNbOfHits(); j++)
+      if (m_currentRecEvent.GetHitPosition(j).z() == m_smearedHits[i].z())
+        break;
+    if (j == m_currentRecEvent.GetNbOfHits()) // this should not be necessary, it is however?!...
+      continue;
+
+    G4ThreeVector hit(m_currentRecEvent.GetHitPosition(j).x(),m_currentRecEvent.GetHitPosition(j).y(),m_currentRecEvent.GetHitPosition(j).z());
 
     hit = forwardRotation*hit;
     m_smearedHits[i] = forwardRotation*m_smearedHits[i];
@@ -706,6 +635,7 @@ G4double RES_TrackFitter::Chi2InModuleFrame()
     chi2 += pow(dv/sigmaV,2.);
 
     m_smearedHits[i] = backwardRotation*m_smearedHits[i];
+
   }
     
   return chi2;

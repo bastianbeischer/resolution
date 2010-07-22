@@ -20,27 +20,27 @@ public:
   RES_Module(G4ThreeVector placement);
   ~RES_Module();
 
-  void SetType(ModuleType type)                   {type == fiber ? SetDefaultValuesForFiber() : SetDefaultValuesForSilicon();}
-  void SetAngle(G4double angle)                   {m_angle = angle;}
-  void SetInternalAngle(G4double internalAngle)   {m_internalAngle = internalAngle;}
-  void SetLength(G4double length)                 {m_length = length;}
-  void SetWidth(G4double width)                   {m_width = width;}
-  void SetUpperSigmaU(G4double upperSigmaU)       {m_upperSigmaU = upperSigmaU;}
-  void SetUpperSigmaV(G4double upperSigmaV)       {m_upperSigmaV = upperSigmaV;}
-  void SetUpperSigmaZ(G4double upperSigmaZ)       {m_upperSigmaZ = upperSigmaZ;}
-  void SetLowerSigmaU(G4double lowerSigmaU)       {m_lowerSigmaU = lowerSigmaU;}
-  void SetLowerSigmaV(G4double lowerSigmaV)       {m_lowerSigmaV = lowerSigmaV;}
-  void SetLowerSigmaZ(G4double lowerSigmaZ)       {m_lowerSigmaZ = lowerSigmaZ;}
-  void SetUpperEfficiency(G4double efficiency)    {m_upperEfficiency = efficiency;}
-  void SetLowerEfficiency(G4double efficiency)    {m_lowerEfficiency = efficiency;}
-  void SetFoamThickness(G4double thickness)       {m_foamThickness = thickness;}
-  void SetCarbonFiberThickness(G4double thickness)    {m_carbonFiberThickness = thickness;}
-  void SetFiberThickness(G4double thickness)      {m_fiberThickness = thickness;}
-  void SetKaptonThickness(G4double thickness)     {m_kaptonThickness = thickness;}
-  void SetSiliconThickness(G4double thickness)    {m_siliconThickness = thickness;}
-  void SetGapSiliconThickness(G4double thickness) {m_gapSiliconThickness = thickness;}
-  void SetSubtractHoles(G4bool value)             {m_subtractHoles = value;}
-  void SetFractionOfNoiseClusters(G4double frac)  {m_fractionOfNoiseClusters = frac;}
+  void SetType(ModuleType type)                    {type == fiber ? SetDefaultValuesForFiber() : SetDefaultValuesForSilicon();}
+  void SetAngle(G4double angle)                    {m_angle = angle;}
+  void SetInternalAngle(G4double internalAngle)    {m_internalAngle = internalAngle;}
+  void SetLength(G4double length)                  {m_length = length;}
+  void SetWidth(G4double width)                    {m_width = width;}
+  void SetUpperSigmaU(G4double upperSigmaU)        {m_upperSigmaU = upperSigmaU;}
+  void SetUpperSigmaV(G4double upperSigmaV)        {m_upperSigmaV = upperSigmaV;}
+  void SetUpperSigmaZ(G4double upperSigmaZ)        {m_upperSigmaZ = upperSigmaZ;}
+  void SetLowerSigmaU(G4double lowerSigmaU)        {m_lowerSigmaU = lowerSigmaU;}
+  void SetLowerSigmaV(G4double lowerSigmaV)        {m_lowerSigmaV = lowerSigmaV;}
+  void SetLowerSigmaZ(G4double lowerSigmaZ)        {m_lowerSigmaZ = lowerSigmaZ;}
+  void SetUpperEfficiency(G4double efficiency)     {m_upperEfficiency = efficiency;}
+  void SetLowerEfficiency(G4double efficiency)     {m_lowerEfficiency = efficiency;}
+  void SetFoamThickness(G4double thickness)        {m_foamThickness = thickness;}
+  void SetCarbonFiberThickness(G4double thickness) {m_carbonFiberThickness = thickness;}
+  void SetFiberThickness(G4double thickness)       {m_fiberThickness = thickness;}
+  void SetKaptonThickness(G4double thickness)      {m_kaptonThickness = thickness;}
+  void SetSiliconThickness(G4double thickness)     {m_siliconThickness = thickness;}
+  void SetGapSiliconThickness(G4double thickness)  {m_gapSiliconThickness = thickness;}
+  void SetSubtractHoles(G4bool value)              {m_subtractHoles = value;}
+  void SetFractionOfNoiseClusters(G4double frac)   {m_fractionOfNoiseClusters = frac;}
 
   ModuleType    GetType()                    {return m_type;}
   G4ThreeVector GetPlacement()               {return m_placement;}

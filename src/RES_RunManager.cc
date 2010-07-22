@@ -1,4 +1,4 @@
-// $Id: RES_RunManager.cc,v 1.20 2010/03/03 19:03:53 beischer Exp $
+// $Id: RES_RunManager.cc,v 1.21 2010/07/22 15:49:05 beischer Exp $
 
 #include "RES_RunManager.hh"
 
@@ -110,7 +110,7 @@ void RES_RunManager::StartReconstructionRun()
   primaryGeneratorAction->SetRandomOrigin(randOriginValue);  
   primaryGeneratorAction->SetRandomDirection(randDirectionValue);  
 
-  G4int nEvents = m_dataHandler->GetNumberOfGeneratedEvents();
+  G4int nEvents = m_dataHandler->GetNumberOfReconstructedEvents();
   G4cout << G4endl
          << " -------------------------------------------------- " << G4endl
          << " Successfully reconstructed " << nEvents << " events" << G4endl

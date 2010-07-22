@@ -1,4 +1,4 @@
-// $Id: RES_DetectorConstruction.hh,v 1.21 2010/07/02 11:13:31 beischer Exp $
+// $Id: RES_DetectorConstruction.hh,v 1.22 2010/07/22 15:49:04 beischer Exp $
 
 #ifndef RES_DetectorConstruction_hh
 #define RES_DetectorConstruction_hh
@@ -27,6 +27,8 @@ public:
   G4double GetWorldY() {return m_worldY;}
   G4double GetWorldZ() {return m_worldZ;}
   unsigned int GetNumberOfModules() {return m_modules.size();}
+  unsigned int GetNumberOfLayers();
+  unsigned int GetNumberOfLayers(std::vector<RES_Module*>& modules);
   RES_Module* GetModule(unsigned int i) {assert(i < m_modules.size()); return m_modules.at(i);}
 
   void SetWorldX(G4double x) {m_worldX = x;}
@@ -41,6 +43,7 @@ public:
 
 private:
   void SortModules();
+  void SortModules(std::vector<RES_Module*>& modules);
 
   void SetSensitiveDetectors();
   void SetVisibility();

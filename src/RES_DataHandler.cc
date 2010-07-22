@@ -1,4 +1,4 @@
-// $Id: RES_DataHandler.cc,v 1.11 2010/01/28 13:43:37 beischer Exp $
+// $Id: RES_DataHandler.cc,v 1.12 2010/07/22 15:49:05 beischer Exp $
 
 #include "RES_DataHandler.hh"
 
@@ -70,8 +70,12 @@ void RES_DataHandler::Initialize()
 
 G4int RES_DataHandler::GetNumberOfGeneratedEvents()
 {
-  G4int nEntries = m_genTree->GetEntries();
-  return nEntries;
+  return m_genTree->GetEntries();
+}
+
+G4int RES_DataHandler::GetNumberOfReconstructedEvents()
+{
+  return m_recTree->GetEntries();
 }
 
 void RES_DataHandler::LoadGeneratedEntry(G4int i)
@@ -98,7 +102,8 @@ void RES_DataHandler::AddEvent(RES_Event event)
       m_event->SetID(m_genTree->GetEntries());
       m_genTree->Fill();
     }
-    else if (m_event->GetEventType() == reconstructed) {
+    // eventType == dummy means that the fit was not successful
+    else if (m_event->GetEventType() == reconstructed || m_event->GetEventType() == dummy) {
       m_event->SetID(m_recTree->GetEntries());
       m_recTree->Fill();
     }

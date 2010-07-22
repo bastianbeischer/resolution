@@ -1,4 +1,4 @@
-// $Id: RES_DataHandler.hh,v 1.6 2009/10/14 09:24:32 beischer Exp $
+// $Id: RES_DataHandler.hh,v 1.7 2010/07/22 15:49:04 beischer Exp $
 
 #ifndef RES_DataHandler_hh
 #define RES_DataHandler_hh
@@ -26,6 +26,7 @@ public:
   void SetFileName(G4String fileName) {m_fileName = fileName;}
 
   G4int GetNumberOfGeneratedEvents();
+  G4int GetNumberOfReconstructedEvents();
   void LoadGeneratedEntry(G4int i);
   RES_Event GetCurrentEvent();
 

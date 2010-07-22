@@ -1,4 +1,4 @@
-// $Id: RES_EventActionGeneration.cc,v 1.27 2010/07/21 15:14:36 beischer Exp $
+// $Id: RES_EventActionGeneration.cc,v 1.28 2010/07/22 15:49:05 beischer Exp $
 
 #include "RES_EventActionGeneration.hh"
 
@@ -83,9 +83,13 @@ void RES_EventActionGeneration::EndOfEventAction(const G4Event* event)
     }
 
     newEvent.SetEventType(generated);
-
+     
+    std::cout << "hi" << std::endl;
+    std::cout << newEvent.GetNbOfSmearedHits() << std::endl;
     SmearHits(&newEvent);
+    std::cout << newEvent.GetNbOfSmearedHits() << std::endl;
     AddNoiseHits(&newEvent);
+    std::cout << newEvent.GetNbOfSmearedHits() << std::endl;
 
     G4PrimaryParticle* primary = event->GetPrimaryVertex()->GetPrimary();
     G4ThreeVector momentum = primary->GetMomentum();
