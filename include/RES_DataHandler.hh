@@ -1,4 +1,4 @@
-// $Id: RES_DataHandler.hh,v 1.7 2010/07/22 15:49:04 beischer Exp $
+// $Id: RES_DataHandler.hh,v 1.6.2.1 2010/09/08 17:44:59 beischer Exp $
 
 #ifndef RES_DataHandler_hh
 #define RES_DataHandler_hh

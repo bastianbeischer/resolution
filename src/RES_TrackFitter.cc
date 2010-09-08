@@ -1,4 +1,4 @@
-// $Id: RES_TrackFitter.cc,v 1.66 2010/07/22 15:49:05 beischer Exp $
+// $Id: RES_TrackFitter.cc,v 1.64.2.1 2010/09/08 17:45:00 beischer Exp $
 
 #include <cmath>
 #include <fstream>
@@ -119,6 +119,8 @@ RES_Event RES_TrackFitter::Fit()
     m_currentRecEvent.SetTransverseMomentum(-m_currentRecEvent.GetTransverseMomentum());
   }
   gun->SetParticleCharge(m_initialCharge);
+
+  //std::cout << "p: " << m_currentRecEvent.GetMomentum()/GeV << std::endl;
 
   return m_currentRecEvent;
 }

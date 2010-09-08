@@ -11,8 +11,6 @@
 #include "G4VisAttributes.hh"
 #include "G4VSensitiveDetector.hh"
 
-#include "CLHEP/Random/RandFlat.h"
-
 #include <cmath>
 
 RES_Module::RES_Module()
@@ -35,8 +33,6 @@ RES_Module::~RES_Module()
 
 void RES_Module::InitializeCommonValues()
 {
-  m_fractionOfNoiseClusters = 1e-3;
-
   // Thickness
   m_fiberThickness = 1.15*mm;
   m_carbonFiberThickness = 0.25*mm;
@@ -106,43 +102,6 @@ void RES_Module::InitializeCommonValues()
   m_kaptonMaterial = G4NistManager::Instance()->FindOrBuildMaterial( "G4_KAPTON" );
 }
 
-G4int RES_Module::GetNumberOfChannels()
-{
-  G4int nChannels = 0;
-  switch(m_type) {
-  case fiber:
-    nChannels = 512;
-    break;
-  case silicon:
-    nChannels = 1024;
-    break;
-  default:
-    nChannels = 512;
-    break;
-  }
-  return nChannels;
-}
-
-G4ThreeVector RES_Module::GenerateNoiseCluster()
-{
-  double randPosition = CLHEP::RandFlat::shoot();
-  G4bool onUpperLayer = CLHEP::RandFlat::shoot() < 0.5 ? true : false;
-  
-  G4double x = 0;
-  G4double y = (randPosition - 0.5) * m_width;
-  G4double z = onUpperLayer ? m_upperZ : m_lowerZ;
-  z -= m_placement.z();
-
-  G4ThreeVector position(x,y,z);
-  G4double angle = m_angle;
-  if (!onUpperLayer)
-    angle += m_internalAngle;
-
-  G4RotationMatrix matrix(angle, 0., 0.);
-
-  return m_placement + matrix*position;
-}
-
 void RES_Module::ComputeParameters()
 {
   if (m_type == fiber) {
@@ -166,7 +125,7 @@ void RES_Module::SetDefaultValuesForFiber()
   m_angle           = -0.5;
   m_internalAngle   = 1.0;
   m_length          = 40.*cm;
-  m_width           = 6.912*cm;
+  m_width           = 6.5*cm;
   m_upperSigmaU     = m_length/sqrt(12);
   m_upperSigmaV     = 50.*um;
   m_upperSigmaZ     = 0.*cm;

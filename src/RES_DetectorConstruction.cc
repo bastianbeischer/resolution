@@ -1,4 +1,4 @@
-// $Id: RES_DetectorConstruction.cc,v 1.34 2010/07/22 15:49:05 beischer Exp $
+// $Id: RES_DetectorConstruction.cc,v 1.31.2.1 2010/09/08 17:45:00 beischer Exp $
 
 #include "RES_DetectorConstruction.hh"
 

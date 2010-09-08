@@ -1,4 +1,4 @@
-// $Id: RES_DetectorConstruction.hh,v 1.22 2010/07/22 15:49:04 beischer Exp $
+// $Id: RES_DetectorConstruction.hh,v 1.21.2.1 2010/09/08 17:44:59 beischer Exp $
 
 #ifndef RES_DetectorConstruction_hh
 #define RES_DetectorConstruction_hh

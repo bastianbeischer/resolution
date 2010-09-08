@@ -2,7 +2,7 @@ LIB = libAMS02_Magnet.so
 
 LD = g++
 
-CXXFLAGS += -fPIC -I. -I$(ROOTSYS)/include -D_PGTRACK_
+CXXFLAGS += -fPIC -I. -I$(shell root-config --incdir) -D_PGTRACK_
 
 all: $(LIB)
 

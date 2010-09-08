@@ -3,7 +3,7 @@ DICT = RES_EventDict
 
 LD = g++
 
-CXXFLAGS += -fPIC -I. -I$(ROOTSYS)/include
+CXXFLAGS += -fPIC -I. -I$(shell root-config --incdir)
 
 all: $(LIB)
 

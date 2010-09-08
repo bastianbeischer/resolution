@@ -1,4 +1,4 @@
-// $Id: RES_Event.cc,v 1.12 2010/07/22 15:49:03 beischer Exp $
+// $Id: RES_Event.cc,v 1.11.2.1 2010/09/08 17:44:57 beischer Exp $
 
 #include "RES_Event.hh"
 
