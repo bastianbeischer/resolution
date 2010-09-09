@@ -9,7 +9,7 @@ use strict;
 # RUN script
 #
 
-my $firstRunNumber = 5000;
+my $firstRunNumber = 1000;
 
 my $numberOfIterations = 20;
 my $numberOfEventsPerRun = 500;
@@ -21,7 +21,7 @@ my $minAngle = 1.0;
 my $maxAngle = 1.0;
 my $angleStep = 0.1;
 
-my $project_dir = "/home/home4/institut_1b/beischer/src/geant4/resolution";
+my $project_dir = "/home/home4/institut_1b/beischer/src/geant4/before_track_finding/resolution";
 my $condor_dir  = "${project_dir}/condor";
 my $table_dir   = "${project_dir}/tables";
 my $result_dir  = "${project_dir}/results";
@@ -38,7 +38,7 @@ for (my $nIter = 0; $nIter < $numberOfIterations; $nIter += 1) {
             my $momentumString = sprintf("%.2f", $momentum);
             my $angleString = sprintf("%.2f", $angle);
             my $iterString = sprintf("%03d", $nIter);
-            my $filename = "${result_dir}/perdaix_${momentumString}_GeV_${angleString}_deg_msc_inhom_electrons_consistency_${iterString}.root";
+            my $filename = "${result_dir}/perdaix_${momentumString}_GeV_${angleString}_deg_msc_inhom_electrons_${iterString}.root";
 
             print "Run $currentRun:\n";
             my $condorfile = &make_condor_file($currentRun);
@@ -86,7 +86,7 @@ sub make_macro_file{
 
 /control/execute ${project_dir}/mac/geometry_perdaix.mac
 
-/RES/Field/SetInhomFieldFrom ${table_dir}/perdaix_measured.table
+/RES/Field/SetInhomFieldFrom ${table_dir}/perdaix_measured_15_jul_2010.table
 #/RES/Field/SetDummyField 0.27 0.0 0.0 tesla
 #/RES/Field/SetUniformField 0.3 0.0 0.0 tesla
 
