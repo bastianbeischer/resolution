@@ -9,14 +9,14 @@ EXE          := analysis
 # Specify the input files
 MAIN         := main
 SOURCES      := Analysis.cc
-HEADERS      := Analysis.hh
+HEADERS      := Analysis.hh Helpers.hh
 OBJECTS      := $(TEMPDIR)/$(MAIN).o $(addprefix $(TEMPDIR)/,$(SOURCES:.cc=.o))
 
 # Compilers and Flags
 CC           := gcc
 CXX          := g++
-INCLUDEFLAGS := -I$(INCLUDEDIR) -I$(shell root-config --incdir)
-LIBS         := $(shell root-config --libs)
+INCLUDEFLAGS := -I$(INCLUDEDIR) -I$(shell root-config --incdir) -I$(MY_INCLUDES) -I../RES_Event
+LIBS         := $(shell root-config --libs) -L../RES_Event -lRES_Event
 CCFLAGS      := -Wall -fPIC $(INCLUDEFLAGS) -MMD
 CXXFLAGS     := -Wall -fPIC $(INCLUDEFLAGS) -MMD
 
