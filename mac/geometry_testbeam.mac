@@ -1,0 +1,54 @@
+/control/alias thinModuleWidth 3.456
+/control/alias wideModuleWidth 6.912
+/control/alias fiberEfficiency 1.0
+/control/alias ladderResolution 20
+/control/alias newFiberResolution 55
+/control/alias oldFiberResolution 95
+
+#/RES/Run/SetFixedDof 6
+
+/RES/Det/SetWorldX 50 cm
+/RES/Det/SetWorldY 10 cm
+/RES/Det/SetWorldZ 110 cm
+
+# ladder one
+/RES/Det/AddModule 0. -0.36 41.8 cm
+/RES/Det/SetModuleType 0 silicon
+/RES/Det/SetModuleUpperSigmaV 0 {ladderResolution}
+
+# wide fiber module 1
+/RES/Det/AddModule 0. 0.9 31.1 cm
+/RES/Det/SetModuleWidth 1 {wideModuleWidth}
+/RES/Det/SetModuleUpperSigmaV 1 {newFiberResolution}
+/RES/Det/SetModuleLowerSigmaV 1 {newFiberResolution}
+/RES/Det/SetModuleUpperEfficiency 1 {fiberEfficiency}
+/RES/Det/SetModuleLowerEfficiency 1 {fiberEfficiency}
+
+# thin fiber module 1
+/RES/Det/AddModule 0. -0.4 15.0 cm
+/RES/Det/SetModuleWidth 2 {thinModuleWidth}
+/RES/Det/SetModuleUpperSigmaV 2 {oldFiberResolution}
+/RES/Det/SetModuleLowerSigmaV 2 {oldFiberResolution}
+/RES/Det/SetModuleUpperEfficiency 2 {fiberEfficiency}
+/RES/Det/SetModuleLowerEfficiency 2 {fiberEfficiency}
+
+# thin fiber module 2
+/RES/Det/AddModule 0. -0.4 -5.0 cm
+/RES/Det/SetModuleWidth 3 {thinModuleWidth}
+/RES/Det/SetModuleUpperSigmaV 3 {newFiberResolution}
+/RES/Det/SetModuleLowerSigmaV 3 {newFiberResolution}
+/RES/Det/SetModuleUpperEfficiency 3 {fiberEfficiency}
+/RES/Det/SetModuleLowerEfficiency 3 {fiberEfficiency}
+
+# wide fiber module 2
+/RES/Det/AddModule 0. 0.4 -21.2 cm
+/RES/Det/SetModuleWidth 4 {wideModuleWidth}
+/RES/Det/SetModuleUpperSigmaV 4 {newFiberResolution}
+/RES/Det/SetModuleLowerSigmaV 4 {newFiberResolution}
+/RES/Det/SetModuleUpperEfficiency 4 {fiberEfficiency}
+/RES/Det/SetModuleLowerEfficiency 4 {fiberEfficiency}
+
+# ladder two
+/RES/Det/AddModule 0. -0.38 -28.0 cm
+/RES/Det/SetModuleType 5 silicon
+/RES/Det/SetModuleUpperSigmaV 5 {ladderResolution}

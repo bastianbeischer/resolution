@@ -1,0 +1,72 @@
+/control/alias fiberEfficiency 1.0
+/control/alias fiberResolution 50
+
+/RES/Det/SetWorldX 50 cm
+/RES/Det/SetWorldY 50 cm
+/RES/Det/SetWorldZ 50 cm 
+
+/RES/Gun/StartZ 20 cm
+
+# # wide fiber module 1
+# /RES/Det/AddModule 0. 0. 18.5 cm
+# /RES/Det/SetModuleRotation 0 {moduleRot}
+# /RES/Det/SetModuleInternalRotation 0 {moduleInternalRot}
+# /RES/Det/SetModuleWidth 0 20.736
+# /RES/Det/SetModuleUpperSigmaV 0 {fiberResolution}
+# /RES/Det/SetModuleLowerSigmaV 0 {fiberResolution}
+# /RES/Det/SetModuleUpperEfficiency 0 {fiberEfficiency}
+# /RES/Det/SetModuleLowerEfficiency 0 {fiberEfficiency}
+
+# # thin fiber module 2
+# /RES/Det/AddModule 0. 0. 4.5 cm
+# /RES/Det/SetModuleRotation 1 {moduleRot}
+# /RES/Det/SetModuleInternalRotation 1 {moduleInternalRot}
+# /RES/Det/SetModuleWidth 1 13.824
+# /RES/Det/SetModuleUpperSigmaV 1 {fiberResolution}
+# /RES/Det/SetModuleLowerSigmaV 1 {fiberResolution}
+# /RES/Det/SetModuleUpperEfficiency 1 {fiberEfficiency}
+# /RES/Det/SetModuleLowerEfficiency 1 {fiberEfficiency}
+# /RES/Det/SetModuleSubtractHoles 1 true
+
+# # thin fiber module 3
+# /RES/Det/AddModule 0. 0. -4.5 cm
+# /RES/Det/SetModuleRotation 2 {moduleRot}
+# /RES/Det/SetModuleInternalRotation 2 {moduleInternalRot}
+# /RES/Det/SetModuleWidth 2 13.824
+# /RES/Det/SetModuleUpperSigmaV 2 {fiberResolution}
+# /RES/Det/SetModuleLowerSigmaV 2 {fiberResolution}
+# /RES/Det/SetModuleUpperEfficiency 2 {fiberEfficiency}
+# /RES/Det/SetModuleLowerEfficiency 2 {fiberEfficiency}
+# /RES/Det/SetModuleSubtractHoles 2 true
+
+# # wide fiber module 4
+# /RES/Det/AddModule 0. 0. -18.5 cm
+# /RES/Det/SetModuleRotation 3 {moduleRot}
+# /RES/Det/SetModuleInternalRotation 3 {moduleInternalRot}
+# /RES/Det/SetModuleWidth 3 20.736
+# /RES/Det/SetModuleUpperSigmaV 3 {fiberResolution}
+# /RES/Det/SetModuleLowerSigmaV 3 {fiberResolution}
+# /RES/Det/SetModuleUpperEfficiency 3 {fiberEfficiency}
+# /RES/Det/SetModuleLowerEfficiency 3 {fiberEfficiency}
+
+# upper fiber layer
+/RES/Det/AddModule 0. -6.912  18.5 cm
+/RES/Det/AddModule 0.  0.     18.5 cm
+/RES/Det/AddModule 0.  6.912  18.5 cm
+
+# middle fiber layer 1
+/RES/Det/AddModule 0. -3.456  4.5 cm
+/RES/Det/AddModule 0.  3.456  4.5 cm
+/RES/Det/SetModuleSubtractHoles 3 true
+/RES/Det/SetModuleSubtractHoles 4 true
+
+# middle fiber layer 2
+/RES/Det/AddModule 0. -3.456  -4.5 cm
+/RES/Det/AddModule 0.  3.456  -4.5 cm
+/RES/Det/SetModuleSubtractHoles 5 true
+/RES/Det/SetModuleSubtractHoles 6 true
+
+# lower fiber layer
+/RES/Det/AddModule 0. -6.912  -18.5 cm
+/RES/Det/AddModule 0.  0.     -18.5 cm
+/RES/Det/AddModule 0.  6.912  -18.5 cm

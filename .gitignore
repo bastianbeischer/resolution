@@ -4,3 +4,4 @@ macros.tar.gz
 *.so
 *Dict*
 TAGS
+/output.root
