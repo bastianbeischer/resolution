@@ -40,7 +40,6 @@ public:
   void SetSiliconThickness(G4double thickness)     {m_siliconThickness = thickness;}
   void SetGapSiliconThickness(G4double thickness)  {m_gapSiliconThickness = thickness;}
   void SetSubtractHoles(G4bool value)              {m_subtractHoles = value;}
-  void SetFractionOfNoiseClusters(G4double frac)   {m_fractionOfNoiseClusters = frac;}
 
   ModuleType    GetType()                    {return m_type;}
   G4ThreeVector GetPlacement()               {return m_placement;}
@@ -59,7 +58,6 @@ public:
   G4double      GetLowerSigmaZ()             {return m_lowerSigmaZ;}
   G4double      GetUpperEfficiency()         {return m_upperEfficiency;}
   G4double      GetLowerEfficiency()         {return m_lowerEfficiency;}
-  G4double      GetFractionOfNoiseClusters() {return m_fractionOfNoiseClusters;}
 
   G4int         GetNumberOfChannels();
 
@@ -84,7 +82,6 @@ private:
 private:
   ModuleType    m_type;
   G4ThreeVector m_placement;
-  G4double      m_fractionOfNoiseClusters;
   G4double      m_angle;
   G4double      m_internalAngle;
   G4double      m_length;

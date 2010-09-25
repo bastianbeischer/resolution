@@ -19,7 +19,6 @@ public:
 
 private:
   void SmearHits(RES_Event* event);
-  void AddNoiseHits(RES_Event* event);
 
 };
 
