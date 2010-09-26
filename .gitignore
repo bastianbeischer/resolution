@@ -1,0 +1,6 @@
+plots
+macros.tar.gz
+*.o
+*.so
+*Dict*
+TAGS

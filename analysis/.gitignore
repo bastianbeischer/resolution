@@ -1,3 +1,4 @@
+analysis
 single_run
 res_vs_mom
 res_vs_mom_pebs
@@ -10,3 +11,4 @@ compare_msc
 *.pdf
 *.root
 *.png
+*.d
