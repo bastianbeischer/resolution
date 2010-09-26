@@ -21,7 +21,7 @@ my $minAngle = 1.0;
 my $maxAngle = 1.0;
 my $angleStep = 0.1;
 
-my $project_dir = "/home/home4/institut_1b/beischer/src/geant4/before_track_finding/resolution";
+my $project_dir = "/home/home4/institut_1b/beischer/src/geant4/resolution";
 my $condor_dir  = "${project_dir}/condor";
 my $table_dir   = "${project_dir}/tables";
 my $result_dir  = "${project_dir}/results";
