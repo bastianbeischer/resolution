@@ -8,8 +8,8 @@ EXE          := analysis
 
 # Specify the input files
 MAIN         := main
-SOURCES      := Analysis.cc
-HEADERS      := Analysis.hh Helpers.hh
+SOURCES      := SingleFile.cc
+HEADERS      := SingleFile.hh Helpers.hh
 OBJECTS      := $(TEMPDIR)/$(MAIN).o $(addprefix $(TEMPDIR)/,$(SOURCES:.cc=.o))
 
 # Compilers and Flags

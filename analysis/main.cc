@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "Analysis.hh"
+#include "SingleFile.hh"
 
 
 int main(int argc, char* argv[])
@@ -15,8 +15,8 @@ int main(int argc, char* argv[])
 
   TApplication app("app", &argc, argv);
 
-  Analysis ana;
-  ana.processFile(filename);
+  SingleFile singleFile;
+  singleFile.processFile(filename);
 
   app.Run();
 
