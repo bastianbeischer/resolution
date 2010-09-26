@@ -7,12 +7,12 @@ class RES_Event;
 class TH1D;
 class TH1I;
 
-class Analysis
+class SingleFile
 {
   
 public:
-  Analysis();
-  ~Analysis();
+  SingleFile();
+  ~SingleFile();
   
 public:
   void processFile(const char* filename);

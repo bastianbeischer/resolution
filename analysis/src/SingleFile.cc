@@ -1,4 +1,4 @@
-#include "Analysis.hh"
+#include "SingleFile.hh"
 
 #include <cmath>
 
@@ -17,7 +17,7 @@
 #include "Helpers.hh"
 #include "RES_Event.hh"
 
-Analysis::Analysis() :
+SingleFile::SingleFile() :
   m_nHits(0),
   m_genMom(0),
   m_file(0),
@@ -45,7 +45,7 @@ Analysis::Analysis() :
   myStyle.cd();
 }
 
-Analysis::~Analysis()
+SingleFile::~SingleFile()
 {
   delete m_file;
   delete m_genTree;
@@ -56,7 +56,7 @@ Analysis::~Analysis()
   deleteHistograms();
 }
 
-void Analysis::processFile(const char* filename)
+void SingleFile::processFile(const char* filename)
 {
   openFile(filename);
   setupHistograms();
@@ -64,7 +64,7 @@ void Analysis::processFile(const char* filename)
   draw();
 }
 
-void Analysis::openFile(const char* filename)
+void SingleFile::openFile(const char* filename)
 {
   m_file = new TFile(filename, "READ");
   m_genTree = (TTree*) m_file->Get("resolution_gen_tree");
@@ -79,7 +79,7 @@ void Analysis::openFile(const char* filename)
   m_recTree->GetEntry(0);
 }
 
-void Analysis::deleteHistograms()
+void SingleFile::deleteHistograms()
 {
   if (m_resHist) delete m_resHist;
   if (m_initialPHist) delete m_initialPHist;
@@ -104,7 +104,7 @@ void Analysis::deleteHistograms()
   if (m_innerOrOuterHist) delete m_innerOrOuterHist;
 }
 
-void Analysis::setupHistograms()
+void SingleFile::setupHistograms()
 {
   deleteHistograms();
 
@@ -163,7 +163,7 @@ void Analysis::setupHistograms()
   m_innerOrOuterHist = new TH1I("innerOrOuterHist", "innerOrOuterHist", 2, 0, 2);
 }
 
-void Analysis::fillData()
+void SingleFile::fillData()
 {
   int total = 0;
   int chi2Passed = 0;
@@ -258,7 +258,7 @@ void Analysis::fillData()
   }
 }
 
-void Analysis::draw()
+void SingleFile::draw()
 {
   for (int i = 0; i < m_nHits; i++) {
     m_yDeltaGenHist[i]->Fit("gaus", "Q0");
