@@ -19,13 +19,13 @@ public:
   
 private:
   void openFile(const char* filename);
+  void deleteHistograms();
   void setupHistograms();
   void fillData();
-  void fit();
   void draw();
 
 private:
-  unsigned int m_nHits;
+  int        m_nHits;
   double     m_genMom;
 
   TFile*     m_file;

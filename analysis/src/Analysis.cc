@@ -24,7 +24,22 @@ Analysis::Analysis() :
   m_genTree(0),
   m_recTree(0),
   m_genEvent(0),
-  m_recEvent(0)
+  m_recEvent(0),
+  m_resHist(0),
+  m_initialPHist(0),
+  m_ptHist(0),
+  m_xDeltaGenHist(0),
+  m_yDeltaGenHist(0),
+  m_xDeltaSmearedHist(0),
+  m_yDeltaSmearedHist(0),
+  m_xTotalHist(0),
+  m_yTotalHist(0),
+  m_chi2Hist(0),
+  m_dofHist(0),
+  m_angleHist(0),
+  m_lHist(0),
+  m_lOverAngleHist(0),
+  m_innerOrOuterHist(0)
 {
   MyROOTStyle myStyle("myStyle");
   myStyle.cd();
@@ -38,21 +53,7 @@ Analysis::~Analysis()
   delete m_genEvent;
   delete m_recEvent;
 
-  delete m_resHist;
-  delete m_initialPHist;
-  delete m_ptHist;
-  delete [] m_xDeltaGenHist;
-  delete [] m_yDeltaGenHist;
-  delete [] m_xDeltaSmearedHist;
-  delete [] m_yDeltaSmearedHist;
-  delete m_xTotalHist;
-  delete m_yTotalHist;
-  delete m_chi2Hist;
-  delete m_dofHist;
-  delete m_angleHist;
-  delete m_lHist;
-  delete m_lOverAngleHist;
-  delete m_innerOrOuterHist;
+  deleteHistograms();
 }
 
 void Analysis::processFile(const char* filename)
@@ -78,24 +79,49 @@ void Analysis::openFile(const char* filename)
   m_recTree->GetEntry(0);
 }
 
+void Analysis::deleteHistograms()
+{
+  if (m_resHist) delete m_resHist;
+  if (m_initialPHist) delete m_initialPHist;
+  if (m_ptHist) delete m_ptHist;
+  for (int i = 0; i < m_nHits; i++) {
+    if (m_xDeltaGenHist && m_xDeltaGenHist[i]) delete m_xDeltaGenHist[i];
+    if (m_yDeltaGenHist && m_yDeltaGenHist[i]) delete m_yDeltaGenHist[i];
+    if (m_xDeltaSmearedHist && m_xDeltaSmearedHist[i]) delete m_xDeltaSmearedHist[i];
+    if (m_yDeltaSmearedHist && m_yDeltaSmearedHist[i]) delete m_yDeltaSmearedHist[i];
+  }
+  delete [] m_xDeltaGenHist;
+  delete [] m_yDeltaGenHist;
+  delete [] m_xDeltaSmearedHist;
+  delete [] m_yDeltaSmearedHist;
+  if (m_xTotalHist) delete m_xTotalHist;
+  if (m_yTotalHist) delete m_yTotalHist;
+  if (m_chi2Hist) delete m_chi2Hist;
+  if (m_dofHist) delete m_dofHist;
+  if (m_angleHist) delete m_angleHist;
+  if (m_lHist) delete m_lHist;
+  if (m_lOverAngleHist) delete m_lOverAngleHist;
+  if (m_innerOrOuterHist) delete m_innerOrOuterHist;
+}
+
 void Analysis::setupHistograms()
 {
+  deleteHistograms();
+
   m_genMom = m_genEvent->GetMomentum()/1000.;
   double momRes = sqrt(pow(m_genMom*0.08, 2.) + pow(0.21,2.));
   //double momRes = 0.8;
-  //  double momRes = sqrt(pow(genMom*.8e-3, 2.) + pow(0.04,2.));
+  //double momRes = sqrt(pow(genMom*.8e-3, 2.) + pow(0.04,2.));
 
   char title[256];
   sprintf(title, "Data with nominal energy of %.2f GeV", m_genMom);
   m_resHist = new TH1D("Mom. Resolution", title, 100, 1-10*momRes, 1+10*momRes);
-  //TH1D resHist("Mom. Resolution", title, 100, -2.5, 3.0);
+  m_ptHist = new TH1D("ptHist", "ptHist", 50, 1-5*momRes, 1+5*momRes);
   
   sprintf(title, "Initial values for %.2f GeV", m_genMom);
   m_initialPHist = new TH1D("Inital values", title, 100, 1-10*momRes, 1+10*momRes);
 
-  m_ptHist = new TH1D("ptHist", "ptHist", 50, 1-5*momRes, 1+5*momRes);
-
-  m_nHits = m_recEvent->GetNbOfHits();
+  m_nHits = m_genEvent->GetNbOfHits();
   //int m_nHits = 12;
   int nBins = 300;
   m_xDeltaGenHist = new TH1D*[m_nHits];
@@ -129,7 +155,6 @@ void Analysis::setupHistograms()
   m_xTotalHist = new TH1D("totalXhist", "totalXhist", 500, -20, 20);
   m_yTotalHist = new TH1D("totalYhist", "totalYhist", 500, -1.0, 1.0);
   sprintf(title, "#chi^{2} Distribution (dof = %d)", m_recEvent->GetDof());
-  //sprintf(title, "#chi^{2} Distribution (dof = %d)", 11);
   m_chi2Hist = new TH1D("#chi^{2} Distribution", title, 200, 0.0, 200.0);
   m_dofHist = new TH1D("n_{dof} Disribution", title, 8, 0, 8);
   m_angleHist = new TH1D("angleHist", "angleHist", 500, -100e-3, 100e-3);
@@ -143,20 +168,18 @@ void Analysis::fillData()
   int total = 0;
   int chi2Passed = 0;
   for(int iEvent = 0; iEvent < m_genTree->GetEntries(); iEvent++) {
-    //  for(int i = 0; i < 90; i++) {
     m_genTree->GetEntry(iEvent);
     m_recTree->GetEntry(iEvent);
     int nHitsGen = m_genEvent->GetNbOfHits();
     int nHitsRec = m_recEvent->GetNbOfHits();
 
-    double chi2Cut = 200;
     double chi2 = m_recEvent->GetChi2();
     total++;
+    // double chi2Cut = 200;
     // if (chi2 > chi2Cut)
     //   continue;
     chi2Passed++;
     
-    //if (nHitsGen < 8 || nHitsRec == 0 || nHitsGen > nHitsRec || chi2 > chi2Cut) continue;
     if (nHitsGen < 8 || nHitsRec == 0 || nHitsGen > nHitsRec) continue;
 
     // double angle1 = (m_genEvent->GetHitPosition(3).y() - m_genEvent->GetHitPosition(0).y())/(m_genEvent->GetHitPosition(3).z() - m_genEvent->GetHitPosition(0).z());
@@ -226,7 +249,7 @@ void Analysis::fillData()
     m_initialPHist->Fill(m_recEvent->GetInitialParameter(0) * m_genEvent->GetMomentum());
 
     double dof = m_genEvent->GetNbOfHits() - 5;
-     m_dofHist->Fill(dof);
+    m_dofHist->Fill(dof);
     // if (dof == 5)
     m_chi2Hist->Fill(chi2);
     char title[256];
@@ -255,7 +278,7 @@ void Analysis::draw()
   // double rangeUpper = 1+2*momRes;
   // double rangeLower = 0.25;
   // double rangeUpper = 1.25;
-  double sigma, error;
+  //double sigma, error;
   //fitInChi2Range(&resHist, sigma, error);
   // resHist.Fit("gaus", "EQR", "", rangeLower, rangeUpper);
   m_resHist->Fit("gaus", "EQ");
