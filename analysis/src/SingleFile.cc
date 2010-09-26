@@ -14,8 +14,50 @@
 #include <TMath.h>
 
 #include <MyROOTStyle.h>
-#include "Helpers.hh"
 #include "RES_Event.hh"
+
+double chi2dist(double*x, double*p)
+{
+  double amplitude = p[0];
+  double ndf = p[1];
+  double nom = pow(x[0],ndf/2. - 1.) * exp(-x[0]/2.);
+  double denom = pow(2., ndf/2.) * TMath::Gamma(ndf/2.);
+  return amplitude*nom/denom;
+}
+
+double MS(double p, double m, double L, double X0) 
+{
+  double beta = p / sqrt(p*p + m*m);
+  return 13.6e-3/(beta*p) * sqrt(X0) * L;
+}
+
+void fitInChi2Range(TH1D* hist, double& sigma, double& error)
+{
+  if ( hist ) {
+    double chi2 = DBL_MAX;
+    double ndf = 1;
+    int iBin = 1;
+    int nBins = hist->GetNbinsX();
+    TF1* function;
+    while(chi2/ndf > 1 && iBin < nBins/2) {
+      double center = hist->GetBinCenter(nBins/2); 
+      double range = center - hist->GetBinLowEdge(iBin);
+      hist->Fit("gaus", "QR", "", center-range, center+range);
+      function = hist->GetFunction("gaus");
+      if (function) {
+        chi2 = function->GetChisquare();
+        ndf = function->GetNDF();
+      }
+      iBin++;
+    }
+    if (function) {
+      sigma = function->GetParameter(2);
+      error = function->GetParError(2);
+    }
+    return;
+  }
+  return;
+}
 
 SingleFile::SingleFile() :
   m_nHits(0),
@@ -262,7 +304,7 @@ void SingleFile::draw()
 {
   for (int i = 0; i < m_nHits; i++) {
     m_yDeltaGenHist[i]->Fit("gaus", "Q0");
-    TF1* fitFunc = m_yDeltaGenHist[i]->GetFunction("gaus");
+    //TF1* fitFunc = m_yDeltaGenHist[i]->GetFunction("gaus");
     //if (fitFunc)
       //      std::cout << "y" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
   }
@@ -376,7 +418,7 @@ void SingleFile::draw()
     m_xDeltaSmearedHist[i]->GetXaxis()->SetTitle(xtitle);
     m_xDeltaSmearedHist[i]->GetYaxis()->SetTitle("N");
     m_xDeltaSmearedHist[i]->Fit("gaus", "Q");
-    TF1* fitFunc = m_xDeltaSmearedHist[i]->GetFunction("gaus");
+    // TF1* fitFunc = m_xDeltaSmearedHist[i]->GetFunction("gaus");
     // if (fitFunc)
       //      std::cout << "x" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
    }
@@ -392,7 +434,7 @@ void SingleFile::draw()
     m_yDeltaSmearedHist[i]->GetXaxis()->SetTitle(ytitle);
     m_yDeltaSmearedHist[i]->GetYaxis()->SetTitle("N");
     m_yDeltaSmearedHist[i]->Fit("gaus", "Q");
-    TF1* fitFunc = m_yDeltaSmearedHist[i]->GetFunction("gaus");
+    //TF1* fitFunc = m_yDeltaSmearedHist[i]->GetFunction("gaus");
     //if (fitFunc)
       //      std::cout << "y" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
   }
