@@ -1,12 +1,4 @@
-single_run
-res_vs_mom
-res_vs_mom_pebs
-res_vs_mom_testbeam
-res_vs_angle
-plot_testbeam_reco
-charge_id
-chi2_dist
-compare_msc
 *.pdf
 *.root
 *.png
+analysis
