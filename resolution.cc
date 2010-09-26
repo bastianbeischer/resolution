@@ -1,3 +1,4 @@
+//test
 // $Id: resolution.cc,v 1.14 2010/06/29 13:26:14 beischer Exp $
 
 #include "RES_ApplicationManager.hh"
