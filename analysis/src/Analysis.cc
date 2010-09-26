@@ -240,7 +240,7 @@ void Analysis::fillData()
     currentPos = start + l*direction;
     double r2 = sqrt(pow(currentPos.x(), 2.) + pow(currentPos.y(), 2.))/10.;
 
-    std::cout << "r1: " << r1 << "  ---- r2: " << r2 << std::endl;
+    //    std::cout << "r1: " << r1 << "  ---- r2: " << r2 << std::endl;
     if (r1 < 7.5 && r2 < 7.5)
       m_innerOrOuterHist->Fill(1);
     else
@@ -263,8 +263,8 @@ void Analysis::draw()
   for (int i = 0; i < m_nHits; i++) {
     m_yDeltaGenHist[i]->Fit("gaus", "Q0");
     TF1* fitFunc = m_yDeltaGenHist[i]->GetFunction("gaus");
-    if (fitFunc)
-      std::cout << "y" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
+    //if (fitFunc)
+      //      std::cout << "y" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
   }
 
   gStyle->SetOptFit(11111);
@@ -314,13 +314,13 @@ void Analysis::draw()
   // ptHist.Fit("gaus", "EQR", "", 0.1, 1.+5*momRes);
   // ptHist.GetXaxis()->SetTitle("pt_{gen}/pt_{rec}");
   // ptHist.GetYaxis()->SetTitle("N");
-  char stem[256];
-  sprintf(stem,"neg_%.0fGeV", m_genMom);
-  char saveName[256];
-  sprintf(saveName, "%s_resolution.%s", stem, "pdf");
-  canvas->SaveAs(saveName);
-  sprintf(saveName, "%s_resolution.%s", stem, "root");
-  canvas->SaveAs(saveName);
+  // char stem[256];
+  // sprintf(stem,"neg_%.0fGeV", m_genMom);
+  // char saveName[256];
+  // sprintf(saveName, "%s_resolution.%s", stem, "pdf");
+  // canvas->SaveAs(saveName);
+  // sprintf(saveName, "%s_resolution.%s", stem, "root");
+  // canvas->SaveAs(saveName);
 
 
   // TCanvas* canvas2 = new TCanvas("canvas2", "x: Reconstructed vs generated position", 1024, 768);
@@ -360,8 +360,8 @@ void Analysis::draw()
     painter->PaintStat(1, fitFunc);
     TPaveStats* pt = (TPaveStats*) m_yDeltaGenHist[i]->GetListOfFunctions()->FindObject("stats");
     pt->SetY1NDC(0.45);
-    if (fitFunc)
-      std::cout << "y" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
+    //  if (fitFunc)
+      //      std::cout << "y" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
   }
 
   TCanvas* canvas4 = new TCanvas("canvas4", "x: Reconstructed vs measured position", 1024, 768);
@@ -377,8 +377,8 @@ void Analysis::draw()
     m_xDeltaSmearedHist[i]->GetYaxis()->SetTitle("N");
     m_xDeltaSmearedHist[i]->Fit("gaus", "Q");
     TF1* fitFunc = m_xDeltaSmearedHist[i]->GetFunction("gaus");
-    if (fitFunc)
-      std::cout << "x" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
+    // if (fitFunc)
+      //      std::cout << "x" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
    }
 
   TCanvas* canvas5 = new TCanvas("canvas5", "y: Reconstructed vs measured Position", 1024, 768);
@@ -393,8 +393,8 @@ void Analysis::draw()
     m_yDeltaSmearedHist[i]->GetYaxis()->SetTitle("N");
     m_yDeltaSmearedHist[i]->Fit("gaus", "Q");
     TF1* fitFunc = m_yDeltaSmearedHist[i]->GetFunction("gaus");
-    if (fitFunc)
-      std::cout << "y" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
+    //if (fitFunc)
+      //      std::cout << "y" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
   }
 
   TCanvas* canvas6 = new TCanvas("canvas6", "Sum of reconstructed vs generated position histograms", 1024, 768);
@@ -425,9 +425,9 @@ void Analysis::draw()
   //  chi2Hist.Fit(&chi2Dist, "E");
   chi2Dist.Draw("SAME");
   chi2Dist.SetLineColor(kRed);
-  sprintf(saveName, "%s_chi2.%s", stem, "pdf");
+  //sprintf(saveName, "%s_chi2.%s", stem, "pdf");
   //  canvas7->SaveAs(saveName);
-  sprintf(saveName, "%s_chi2.%s", stem, "root");
+  //sprintf(saveName, "%s_chi2.%s", stem, "root");
   //  canvas7->SaveAs(saveName);
 
   TCanvas* canvasDof = new TCanvas("canvasDof", "Degrees of freedom");
@@ -451,9 +451,9 @@ void Analysis::draw()
   m_initialPHist->Draw();
   m_initialPHist->Fit("gaus", "EQ");
   m_initialPHist->GetFunction("gaus")->SetParName(2, "#sigma_{p}/p");
-  sprintf(saveName, "%s_initial.%s", stem, "pdf");
+  //  sprintf(saveName, "%s_initial.%s", stem, "pdf");
   //  canvas9->SaveAs(saveName);
-  sprintf(saveName, "%s_initial.%s", stem, "root");
+  //sprintf(saveName, "%s_initial.%s", stem, "root");
   //  canvas9->uSaveAs(saveName);
 
   TCanvas* canvas10 = new TCanvas("canvas10", "innerOuter", 1024, 768);
@@ -461,9 +461,9 @@ void Analysis::draw()
   m_innerOrOuterHist->Draw();
   // innerOrOuterHist.Fit("gaus", "EQ");
   // innerOrOuterHist.GetFunction("gaus")->SetParName(2, "#sigma_{p}/p");
-  sprintf(saveName, "%s_initial.%s", stem, "pdf");
+  //  sprintf(saveName, "%s_initial.%s", stem, "pdf");
   //  canvas10.SaveAs(saveName);
-  sprintf(saveName, "%s_initial.%s", stem, "root");
+  // sprintf(saveName, "%s_initial.%s", stem, "root");
   //  canvas10.SaveAs(saveName);
 
 
