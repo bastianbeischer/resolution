@@ -13,19 +13,22 @@ int main(int argc, char* argv[])
   //   return -1;
   // }
 
+  const int nArgs = argc;
+  const char* filename = argv[1];
+
   TApplication app("app", &argc, argv);
   MyROOTStyle myStyle("myStyle");
   myStyle.cd();
 
-  if (argc == 2) {
-    const char* filename = argv[1];
-    SingleFile singleFile;
-    singleFile.processFile(filename);
-  }
-  else {
-    ResVsMom resVsMom;
-    resVsMom.processConfigFile();
-  }
+  SingleFile singleFile;
+  ResVsMom resVsMom; 
+    
+  // if (nArgs == 2) {
+  //   singleFile.processFile(filename);
+  // }
+  // else {
+  resVsMom.processConfigFile(filename);
+  // }
 
   app.Run();
 

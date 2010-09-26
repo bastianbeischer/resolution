@@ -14,31 +14,38 @@
 
 #include <cmath>
 #include <iostream>
+#include <fstream>
 
 int ResVsMom::m_markers[4] = {23, 22, 29, 27};
 int ResVsMom::m_colors[4] = {kRed, kBlue, kBlack, kViolet};
 
 double fitfunc(double* x, double* p)
 {
-  //  double m = 5.11e-4;
   double m = p[2];
   double beta = x[0] / sqrt(pow(x[0],2.) + pow(m,2.));
   return sqrt(pow(x[0]*p[0],2.) + pow(p[1]/beta, 2.));
 }
 
-ResVsMom::ResVsMom()
+ResVsMom::ResVsMom() :
+  m_canvas(0),
+  m_text(0),
+  m_legend(0)
 {
 }
 
 ResVsMom::~ResVsMom()
 {
+  delete m_canvas;
+  delete m_text;
+  delete m_legend;
+
   for (unsigned int i = 0; i < m_graphs.size(); i++) {
     delete m_graphs.at(i);
   }
   m_graphs.clear();
 }
 
-void ResVsMom::addGraph(const char* fileNameTemplate, double min, double max, double step, double guessA = 0.08, double guessB = 0.21)
+void ResVsMom::addGraph(const char* fileNameTemplate, const char* title, ParticleType type, double min, double max, double step, double guessA = 0.08, double guessB = 0.21)
 {
   TGraphErrors* graph = new TGraphErrors;
 
@@ -72,11 +79,7 @@ void ResVsMom::addGraph(const char* fileNameTemplate, double min, double max, do
       recTree->GetEntry(j);
       resHist.Fill(genEvent->GetMomentum()/recEvent->GetMomentum());
     }
-    // double sigmaLeft = 2.5;
-    // double sigmaRight = 2.5;
-    // double rangeLower = 1-sigmaLeft*momRes;
-    // double rangeUpper = 1+sigmaRight*momRes;
-    //    resHist.Fit("gaus", "EQR0", "", rangeLower, rangeUpper);
+
     resHist.Fit("gaus", "EQ0");
     double sigma = resHist.GetFunction("gaus")->GetParameter(2);
     double sigmaErr = resHist.GetFunction("gaus")->GetParError(2);
@@ -94,23 +97,28 @@ void ResVsMom::addGraph(const char* fileNameTemplate, double min, double max, do
 
   graph->SetMarkerStyle(m_markers[m_graphs.size()%4]);
   graph->SetMarkerColor(m_colors[m_graphs.size()%4]);
-  graph->SetTitle("Momentum resolution for PERDaix at 1^{o} stereo angle");
+  graph->SetMarkerSize(1.5);
+  graph->SetTitle(title);
 
   m_graphs.push_back(graph);
 
   // fit
   double m_electron = 5.11e-4;
-  //double m_proton   = 9.38e-1;
+  double m_proton   = 9.38e-1;
 
   TF1 fitMSC("fitMSC", fitfunc, min, max, 3);
   fitMSC.SetParNames("a", "b");
   fitMSC.SetParNames("a", "b", "m");
-  TF1 fitNoMSC("fitNoMSC", "[0]*x + [1]", min, max);
-  fitNoMSC.SetParNames("a", "b");
+  // TF1 fitNoMSC("fitNoMSC", "[0]*x + [1]", min, max);
+  // fitNoMSC.SetParNames("a", "b");
 
-  fitMSC.FixParameter(2, m_electron);
+  if (type == electron) {
+    fitMSC.FixParameter(2, m_electron);
+  }
+  else if (type == proton) {
+    fitMSC.FixParameter(2, m_proton);
+  }
   graph->Fit("fitMSC", "E");
-  graph->SetMarkerSize(1.5);
   graph->GetFunction("fitMSC")->SetLineColor(graph->GetMarkerColor());
   
   graph->GetXaxis()->SetTitle("p / GeV");
@@ -119,12 +127,26 @@ void ResVsMom::addGraph(const char* fileNameTemplate, double min, double max, do
 
 }
 
-void ResVsMom::processConfigFile()
+void ResVsMom::processConfigFile(const char* filename)
 {
-  double momMin = 0.25;
-  double momMax = 10.0;
-  double momStep = 0.25;
-  addGraph("../results/test.root", momMin, momMax, momStep, 0.077, 0.18);
+  ifstream infile(filename);
+  if (!infile.is_open()) {
+    std::cout << "Error opening config file: " << filename << std::endl;
+    return;
+  }
+
+  while (!infile.eof()) {
+    
+    char fileTemplate[128];
+    char title[128];
+    double momMin, momMax, momStep, guessA, guessB;
+    int typeInt;
+    infile >> fileTemplate >> title >> typeInt >> momMin >> momMax >> momStep >> guessA >> guessB;
+    ParticleType type = (ParticleType)typeInt;
+    addGraph(fileTemplate, title, type, momMin, momMax, momStep, guessA, guessB);
+
+  }
+
   // addGraph("../results/test.root", 0, 10, 1, 0.077, 0.18);
   // addGraph("../results/perdaix_%.2f_GeV_1.00_deg_msc_inhom_electrons_windows.root", momMin, momMax, momStep, 0.077, 0.18);
   // addGraph("../results/perdaix_%.2f_GeV_1.00_deg_msc_inhom_protons_windows.root", momMin, momMax, momStep, 0.077, 0.23);
@@ -136,11 +158,12 @@ void ResVsMom::processConfigFile()
 
 void ResVsMom::draw()
 {
-  TCanvas* canvas = new TCanvas("canvas", "canvas", 1024, 768);
-  canvas->Draw();
-  canvas->cd();
-  canvas->SetGridx();
-  canvas->SetGridy();
+  if (m_canvas) delete m_canvas;
+  m_canvas = new TCanvas("canvas", "canvas", 1024, 768);
+  m_canvas->Draw();
+  m_canvas->cd();
+  m_canvas->SetGridx();
+  m_canvas->SetGridy();
 
   for (unsigned int i = 0; i < m_graphs.size(); i++) {
     if (i == 0) m_graphs.at(i)->Draw("AP");
@@ -149,8 +172,12 @@ void ResVsMom::draw()
   }
 
   TPaveStats* pt[m_graphs.size()];
-  TLatex text(3.1, 0.13, "#sigma_{p} / p = #sqrt{(ap)^{2} + (b/#beta)^{2}}");
-  TLegend legend(0.25, 0.75, 0.45, 0.88);
+
+  if(m_text) delete m_text;
+  m_text = new TLatex(3.1, 0.13, "#sigma_{p} / p = #sqrt{(ap)^{2} + (b/#beta)^{2}}");
+
+  if(m_legend) delete m_legend;
+  m_legend = new TLegend(0.25, 0.75, 0.45, 0.88);
 
   for (unsigned int i = 0; i < m_graphs.size(); i++) {
     TPaveStats* stats = (TPaveStats*) m_graphs.at(i)->GetListOfFunctions()->FindObject("stats");
@@ -161,13 +188,12 @@ void ResVsMom::draw()
     pt[i]->SetY1NDC(0.38 - i*0.12);
     pt[i]->SetY2NDC(0.48 - i*0.12);
 
-    legend.AddEntry(m_graphs.at(i), "electrons", "P");
-    legend.AddEntry(m_graphs.at(i), "protons", "P");
+    m_legend->AddEntry(m_graphs.at(i), m_graphs.at(i)->GetTitle(), "P");
   }
 
-  text.Draw("SAME");
-  legend.Draw("SAME");
+  m_text->Draw("SAME");
+  m_legend->Draw("SAME");
 
-  // canvas.SaveAs("perdaix_1_deg.pdf");
-  // canvas.SaveAs("perdaix_1_deg.root");
+  // canvas->SaveAs("perdaix_1_deg.pdf");
+  // canvas->SaveAs("perdaix_1_deg.root");
 }
