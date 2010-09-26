@@ -363,26 +363,26 @@ void SingleFile::draw()
   // canvas->SaveAs(saveName);
 
 
-  // TCanvas* canvas2 = new TCanvas("canvas2", "x: Reconstructed vs generated position", 1024, 768);
-  // canvas2->Divide(2,m_nHits/2);
-  // canvas2->Draw();
+  TCanvas* canvas2 = new TCanvas("canvas2", "x: Reconstructed vs generated position", 1024, 768);
+  canvas2->Divide(2,m_nHits/2);
+  canvas2->Draw();
 
-  // for (int i = 0; i < m_nHits; i++) {
-  //   char xtitle[256];
-  //   sprintf(xtitle, "(x_{%d,gen} - x_{%d,rec}) / mm", i+1, i+1);
-  //   canvas2->cd(i+1);
-  //   xDeltaGenHist[i]->Draw();
-  //   xDeltaGenHist[i]->GetXaxis()->SetTitle(xtitle);
-  //   xDeltaGenHist[i]->GetYaxis()->SetTitle("N");
-  //   xDeltaGenHist[i]->Fit("gaus", "Q");
-  //   TF1* fitFunc = xDeltaGenHist[i]->GetFunction("gaus");
-  //   THistPainter* painter = (THistPainter*) xDeltaGenHist[i]->GetPainter();
-  //   painter->PaintStat(1, fitFunc);
-  //   TPaveStats* pt = (TPaveStats*) xDeltaGenHist[i]->GetListOfFunctions()->FindObject("stats");
-  //   pt->SetY1NDC(0.45);
-  //   if (fitFunc)
-  //     std::cout << "x" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
-  // }
+  for (int i = 0; i < m_nHits; i++) {
+    char xtitle[256];
+    sprintf(xtitle, "(x_{%d,gen} - x_{%d,rec}) / mm", i+1, i+1);
+    canvas2->cd(i+1);
+    m_xDeltaGenHist[i]->Draw();
+    m_xDeltaGenHist[i]->GetXaxis()->SetTitle(xtitle);
+    m_xDeltaGenHist[i]->GetYaxis()->SetTitle("N");
+    m_xDeltaGenHist[i]->Fit("gaus", "Q");
+    TF1* fitFunc = m_xDeltaGenHist[i]->GetFunction("gaus");
+    THistPainter* painter = (THistPainter*) m_xDeltaGenHist[i]->GetPainter();
+    painter->PaintStat(1, fitFunc);
+    TPaveStats* pt = (TPaveStats*) m_xDeltaGenHist[i]->GetListOfFunctions()->FindObject("stats");
+    pt->SetY1NDC(0.45);
+    // if (fitFunc)
+    //   std::cout << "x" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
+  }
 
   TCanvas* canvas3 = new TCanvas("canvas3", "y: Reconstructed vs generated position", 1024, 768);
   canvas3->Divide(2, m_nHits/2);
@@ -453,9 +453,9 @@ void SingleFile::draw()
   chi2Dist.SetNpx(1000);
   
   chi2Dist.FixParameter(0, 1);
-  chi2Dist.FixParameter(1, 5);
-  //chi2Dist.FixParameter(1, recEvent->GetDof());
-  //chi2Dist.FixParameter(1, 11);
+  chi2Dist.FixParameter(1, m_recEvent->GetDof());
+  // chi2Dist.FixParameter(1, 5);
+  // chi2Dist.FixParameter(1, 11);
   TCanvas* canvas7 = new TCanvas("canvas7", "Chi2 distribution", 1024, 768);
   canvas7->Draw();
   m_chi2Hist->Draw();

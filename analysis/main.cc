@@ -20,7 +20,6 @@ int main(int argc, char* argv[])
   MyROOTStyle myStyle("myStyle");
   myStyle.cd();
 
-
   if (filename.compare(filename.size()-4, 4, "root") == 0) {
     SingleFile singleFile;
     singleFile.processFile(filename.c_str());
