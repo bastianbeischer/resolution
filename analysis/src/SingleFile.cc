@@ -12,8 +12,8 @@
 #include <THistPainter.h>
 #include <TPaveStats.h>
 #include <TMath.h>
+#include <TStyle.h>
 
-#include <MyROOTStyle.h>
 #include "RES_Event.hh"
 
 double chi2dist(double*x, double*p)
@@ -83,8 +83,6 @@ SingleFile::SingleFile() :
   m_lOverAngleHist(0),
   m_innerOrOuterHist(0)
 {
-  MyROOTStyle myStyle("myStyle");
-  myStyle.cd();
 }
 
 SingleFile::~SingleFile()
