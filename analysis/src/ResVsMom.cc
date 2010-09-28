@@ -141,7 +141,7 @@ void ResVsMom::processConfigFile(const char* filename)
     char title[128];
     double momMin, momMax, momStep, guessA, guessB;
     int typeInt;
-    infile >> fileTemplate >> title >> typeInt >> momMin >> momMax >> momStep >> guessA >> guessB;
+    infile >> fileTemplate >> title >> typeInt >> momMin >> momMax >> momStep >> guessA >> guessB; 
     ParticleType type = (ParticleType)typeInt;
     addGraph(fileTemplate, title, type, momMin, momMax, momStep, guessA, guessB);
 
@@ -188,6 +188,9 @@ void ResVsMom::draw()
   m_text->Draw("SAME");
   m_legend->Draw("SAME");
 
-  // canvas->SaveAs("perdaix_1_deg.pdf");
-  // canvas->SaveAs("perdaix_1_deg.root");
+  // m_canvas->SaveAs("perdaix_1_deg.png");
+  // m_canvas->SaveAs("perdaix_1_deg.pdf");
+  // m_canvas->SaveAs("perdaix_1_deg.root");
 }
+
+
