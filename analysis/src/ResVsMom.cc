@@ -188,6 +188,6 @@ void ResVsMom::draw()
   m_text->Draw("SAME");
   m_legend->Draw("SAME");
 
-  // canvas->SaveAs("perdaix_1_deg.pdf");
-  // canvas->SaveAs("perdaix_1_deg.root");
+  m_canvas->SaveAs("perdaix_1_deg.pdf");
+  m_canvas->SaveAs("perdaix_1_deg.root");
 }

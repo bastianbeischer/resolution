@@ -323,7 +323,7 @@ void SingleFile::draw()
   // resHist.Fit("gaus", "EQR", "", rangeLower, rangeUpper);
   m_resHist->Fit("gaus", "EQ");
   TF1* gausFit = m_resHist->GetFunction("gaus");
-  //  gausFit->SetParName(2, "#sigma_{p}/p");
+  gausFit->SetParName(2, "#sigma_{p}/p");
   double muFit = gausFit->GetParameter(1);
   double muFitErr= gausFit->GetParError(1);
   double sigmaFit = gausFit->GetParameter(2);
@@ -335,17 +335,17 @@ void SingleFile::draw()
   char text1[128];
 
   double max = m_resHist->GetMaximum();
-  sprintf(text1, "#sigma_{p}/p = %.2f #pm %.2f", sigmaP_overP, sigmaP_overP_err);
-  TLatex latex1(-2, 0.7*max, text1);
-  latex1.SetTextColor(kRed);
-  latex1.SetTextFont(42);
-  latex1.Draw("SAME");
-  char text2[128];
-  sprintf(text2, "p_{rec} = (%.2f #pm %.2f) GeV", p_rec, p_rec_err);
-  TLatex latex2(-2, 0.85*max, text2);
-  latex2.SetTextColor(kRed);
-  latex2.SetTextFont(42);
-  latex2.Draw("SAME");
+  sprintf(text1, "#sigma_{p}/p = %.3f #pm %.3f", sigmaP_overP, sigmaP_overP_err);
+  TLatex* latex1 = new TLatex(-2, 0.7*max, text1);
+  latex1->SetTextColor(kRed);
+  latex1->SetTextFont(42);
+  latex1->Draw("SAME");
+  // char text2[128];
+  // sprintf(text2, "p_{rec} = (%.2f #pm %.2f) GeV", p_rec, p_rec_err);
+  // TLatex* latex2 = new TLatex(-2, 0.85*max, text2);
+  // latex2->SetTextColor(kRed);
+  // latex2->SetTextFont(42);
+  // latex2->Draw("SAME");
 
   m_resHist->GetXaxis()->SetTitle("p_{nom}/p_{rec}");
   m_resHist->GetYaxis()->SetTitle("N");
