@@ -328,8 +328,8 @@ void SingleFile::draw()
   double muFitErr= gausFit->GetParError(1);
   double sigmaFit = gausFit->GetParameter(2);
   double sigmaFitErr= gausFit->GetParError(2);
-  double p_rec = m_genMom / muFit;
-  double p_rec_err = m_genMom * muFitErr / (muFit*muFit);
+  // double p_rec = m_genMom / muFit;
+  // double p_rec_err = m_genMom * muFitErr / (muFit*muFit);
   double sigmaP_overP = sigmaFit / muFit;
   double sigmaP_overP_err = sqrt( pow(sigmaFitErr/muFit, 2.) + pow(muFitErr*sigmaFit/(muFit*muFit), 2.) );
   char text1[128];
