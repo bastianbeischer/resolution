@@ -293,7 +293,6 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
   vecTrans.Transpose(vec);
   G4double chi2 = (vecTrans * Uinv * vec)(0,0);
 
-  // WRONG WRONG WRONG WRONG
   // SolutionToPositions is the linear transformation that maps the solution to positions
   for (unsigned int i = 0; i < 4*nModules; i++){
     G4double z;
@@ -324,20 +323,20 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
 
   // print covariance matrix if the user wants to
   if (m_verbose > 1) {
-    // TMatrixD SolutionToPositionsTrans(nCol, 4*nModules);
-    // SolutionToPositionsTrans.Transpose(SolutionToPositions);
-    // TMatrixD Cov(2*nHits, 2*nHits);
-    // Cov = SolutionToPositions * Minv * SolutionToPositionsTrans;
+    TMatrixD SolutionToPositionsTrans(nCol, 4*nModules);
+    SolutionToPositionsTrans.Transpose(SolutionToPositions);
+    TMatrixD Cov(4*nModules, 4*nModules);
+    Cov = SolutionToPositions * Minv * SolutionToPositionsTrans;
 
-    // for (unsigned int i = 0; i < nHits; i++)
-    //   G4cout << "resolution in x" << i << " --> " << sqrt(Cov(2*i,2*i)) << " mm" << G4endl;
-    // for (unsigned int i = 0; i < nHits; i++)
-    //   G4cout << "resolution in y" << i << " --> " << sqrt(Cov(2*i+1,2*i+1)) << " mm" << G4endl;
+    for (unsigned int i = 0; i < 2*nModules; i++)
+      G4cout << "resolution in x" << i << " --> " << sqrt(Cov(2*i,2*i)) << " mm" << G4endl;
+    for (unsigned int i = 0; i < 2*nModules; i++)
+      G4cout << "resolution in y" << i << " --> " << sqrt(Cov(2*i+1,2*i+1)) << " mm" << G4endl;
 
-    // if (m_verbose > 2) {
-    //   G4cout << "covariance matrix for this fit:" << G4endl;
-    //   Cov.Print();
-    // }
+    if (m_verbose > 2) {
+      G4cout << "covariance matrix for this fit:" << G4endl;
+      Cov.Print();
+    }
   }
 
   // return information from the fit.

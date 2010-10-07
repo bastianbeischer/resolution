@@ -169,7 +169,7 @@ void SingleFile::setupHistograms()
     char title[256];
     sprintf(title, "xLayer %d", i+1);
     int nBins = 100;
-    m_xDeltaGenHist[i] = new TH1D(title,title, nBins, -20, 20);
+    m_xDeltaGenHist[i] = new TH1D(title,title, nBins, -10.0, 10.0);
   }
   m_yDeltaGenHist = new TH1D*[m_nHits];
   for (int i = 0;i < m_nHits; i++) {
@@ -182,14 +182,14 @@ void SingleFile::setupHistograms()
   for (int i = 0;i < m_nHits; i++) {
     char title[256];
     sprintf(title, "xDeltaSmearedHist%d", i);
-    m_xDeltaSmearedHist[i] = new TH1D(title,title, nBins, -20, 20);
+    m_xDeltaSmearedHist[i] = new TH1D(title,title, nBins, -10.0, 10.0);
   }
   m_yDeltaSmearedHist = new TH1D*[m_nHits];
   for (int i = 0;i < m_nHits; i++) {
     char title[256];
     sprintf(title, "yDeltaSmearedHist%d", i);
     //    if (i == 0 || i == m_nHits - 2) m_yDeltaSmearedHist[i] = new TH1D(title,title, 500, -1.0, 1.0);
-    m_yDeltaSmearedHist[i] = new TH1D(title,title, nBins, -1.0, 1.0);
+    m_yDeltaSmearedHist[i] = new TH1D(title,title, nBins, -0.5, 0.5);
   }
 
   m_xTotalHist = new TH1D("totalXhist", "totalXhist", 500, -20, 20);
@@ -264,10 +264,10 @@ void SingleFile::fillData()
       m_yDeltaGenHist[genUniqueLayer]->Fill(recHit.y() - genHit.y());
       // xDeltaGenHist[genUniqueLayer]->Fill(genHit.x());
       // yDeltaGenHist[genUniqueLayer]->Fill(genHit.y());
-      m_xDeltaSmearedHist[genUniqueLayer]->Fill(genHitSmeared.x() - recHit.x());
-      m_yDeltaSmearedHist[genUniqueLayer]->Fill(genHitSmeared.y() - recHit.y());
-      m_xTotalHist->Fill(genHit.x() - recHit.x());
-      m_yTotalHist->Fill(genHit.y() - recHit.y());
+      m_xDeltaSmearedHist[genUniqueLayer]->Fill(recHit.x() - (genHit+genHitSmeared).x());
+      m_yDeltaSmearedHist[genUniqueLayer]->Fill(recHit.y() - (genHit+genHitSmeared).y());
+      m_xTotalHist->Fill(recHit.x() - genHit.x());
+      m_yTotalHist->Fill(recHit.y() - genHit.y());
       //  std::cout << genUniqueLayer << "  --> " <<m_genEvent->GetHitPosition(i).z() << std::endl;
     }
 
