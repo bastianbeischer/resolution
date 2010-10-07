@@ -255,16 +255,19 @@ void SingleFile::fillData()
         genUniqueLayer  = 3;
 
       genUniqueLayer = 2*genUniqueLayer + m_genEvent->GetLayerID(i);
-      unsigned int iRec = genUniqueLayer;
 
-      m_xDeltaGenHist[genUniqueLayer]->Fill(m_genEvent->GetHitPosition(i).x() - m_recEvent->GetHitPosition(iRec).x());
-      m_yDeltaGenHist[genUniqueLayer]->Fill(m_genEvent->GetHitPosition(i).y() - m_recEvent->GetHitPosition(iRec).y());
-      // xDeltaGenHist[genUniqueLayer]->Fill(m_genEvent->GetHitPosition(i).x());
-      // yDeltaGenHist[genUniqueLayer]->Fill(m_genEvent->GetHitPosition(i).y());
-      m_xDeltaSmearedHist[genUniqueLayer]->Fill(m_genEvent->GetSmearedHitPosition(i).x() - m_recEvent->GetHitPosition(iRec).x());
-      m_yDeltaSmearedHist[genUniqueLayer]->Fill(m_genEvent->GetSmearedHitPosition(i).y() - m_recEvent->GetHitPosition(iRec).y());
-      m_xTotalHist->Fill(m_genEvent->GetHitPosition(i).x() - m_recEvent->GetHitPosition(iRec).x());
-      m_yTotalHist->Fill(m_genEvent->GetHitPosition(i).y() - m_recEvent->GetHitPosition(iRec).y());
+      TVector3 genHit        = m_genEvent->GetHitPosition(i);
+      TVector3 genHitSmeared = m_genEvent->GetSmearedHitAtZ(genHit.z());
+      TVector3 recHit        = m_recEvent->GetHitAtZ(genHit.z());
+
+      m_xDeltaGenHist[genUniqueLayer]->Fill(recHit.x() - genHit.x());
+      m_yDeltaGenHist[genUniqueLayer]->Fill(recHit.y() - genHit.y());
+      // xDeltaGenHist[genUniqueLayer]->Fill(genHit.x());
+      // yDeltaGenHist[genUniqueLayer]->Fill(genHit.y());
+      m_xDeltaSmearedHist[genUniqueLayer]->Fill(genHitSmeared.x() - recHit.x());
+      m_yDeltaSmearedHist[genUniqueLayer]->Fill(genHitSmeared.y() - recHit.y());
+      m_xTotalHist->Fill(genHit.x() - recHit.x());
+      m_yTotalHist->Fill(genHit.y() - recHit.y());
       //  std::cout << genUniqueLayer << "  --> " <<m_genEvent->GetHitPosition(i).z() << std::endl;
     }
 

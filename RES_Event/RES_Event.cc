@@ -108,3 +108,19 @@ void RES_Event::AddSmearedHit(double x, double y, double z)
 {
   m_smearedHits.push_back(TVector3(x,y,z));
 }
+
+TVector3 RES_Event::GetHitAtZ(double z)                   {
+  for (std::vector<TVector3>::iterator it = m_hits.begin(); it != m_hits.end(); it++) {
+    if (it->z() == z)
+      return *it;
+  }
+  return TVector3();
+}
+
+TVector3 RES_Event::GetSmearedHitAtZ(double z)                   {
+  for (std::vector<TVector3>::iterator it = m_smearedHits.begin(); it != m_smearedHits.end(); it++) {
+    if (it->z() == z)
+      return *it;
+  }
+  return TVector3();
+}

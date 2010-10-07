@@ -48,6 +48,8 @@ public:
 
   void AddHit(int module_ID, int layer_ID, double x, double y, double z);
   void AddSmearedHit(double x, double y, double z);
+  TVector3 GetHitAtZ(double z);
+  TVector3 GetSmearedHitAtZ(double z);
 
 private:
   int                   m_ID;

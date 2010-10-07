@@ -156,8 +156,8 @@ void RES_EventActionGeneration::SmearHits(RES_Event* event)
     hit.setZ(CLHEP::RandGauss::shoot(hit.z(), sigmaZ));
     hit = backwardRotation*hit;
 
-    hit.setX(hit.x() + alignMgr->GetXshift(iModule));
-    hit.setY(hit.y() + alignMgr->GetYshift(iModule));
+    hit.setX(hit.x() + alignMgr->GetXshift(2*iModule+iLayer));
+    hit.setY(hit.y() + alignMgr->GetYshift(2*iModule+iLayer));
 
     event->AddSmearedHit(hit.x(), hit.y(), hit.z());
   }
