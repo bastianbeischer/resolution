@@ -41,8 +41,12 @@ private:
   TH1D**     m_yDeltaGenHist;
   TH1D**     m_xDeltaSmearedHist;
   TH1D**     m_yDeltaSmearedHist;
-  TH1D*      m_xTotalHist;
-  TH1D*      m_yTotalHist;
+  TH1D**     m_uDeltaGenHist;
+  TH1D**     m_vDeltaGenHist;
+  TH1D**     m_uDeltaSmearedHist;
+  TH1D**     m_vDeltaSmearedHist;
+  TH1D*      m_uTotalHist;
+  TH1D*      m_vTotalHist;
   TH1D*      m_chi2Hist;
   TH1D*      m_dofHist;
   TH1D*      m_angleHist;

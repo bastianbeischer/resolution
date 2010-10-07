@@ -74,8 +74,12 @@ SingleFile::SingleFile() :
   m_yDeltaGenHist(0),
   m_xDeltaSmearedHist(0),
   m_yDeltaSmearedHist(0),
-  m_xTotalHist(0),
-  m_yTotalHist(0),
+  m_uDeltaGenHist(0),
+  m_vDeltaGenHist(0),
+  m_uDeltaSmearedHist(0),
+  m_vDeltaSmearedHist(0),
+  m_uTotalHist(0),
+  m_vTotalHist(0),
   m_chi2Hist(0),
   m_dofHist(0),
   m_angleHist(0),
@@ -130,12 +134,18 @@ void SingleFile::deleteHistograms()
     if (m_xDeltaSmearedHist && m_xDeltaSmearedHist[i]) delete m_xDeltaSmearedHist[i];
     if (m_yDeltaSmearedHist && m_yDeltaSmearedHist[i]) delete m_yDeltaSmearedHist[i];
   }
-  delete [] m_xDeltaGenHist;
-  delete [] m_yDeltaGenHist;
-  delete [] m_xDeltaSmearedHist;
-  delete [] m_yDeltaSmearedHist;
-  if (m_xTotalHist) delete m_xTotalHist;
-  if (m_yTotalHist) delete m_yTotalHist;
+  for (int i = 0; i < m_nHits; i++) {
+    if (m_uDeltaGenHist && m_uDeltaGenHist[i]) delete m_uDeltaGenHist[i];
+    if (m_vDeltaGenHist && m_vDeltaGenHist[i]) delete m_vDeltaGenHist[i];
+    if (m_uDeltaSmearedHist && m_uDeltaSmearedHist[i]) delete m_uDeltaSmearedHist[i];
+    if (m_vDeltaSmearedHist && m_vDeltaSmearedHist[i]) delete m_vDeltaSmearedHist[i];
+  }
+  delete [] m_uDeltaGenHist;
+  delete [] m_vDeltaGenHist;
+  delete [] m_uDeltaSmearedHist;
+  delete [] m_vDeltaSmearedHist;
+  if (m_uTotalHist) delete m_uTotalHist;
+  if (m_vTotalHist) delete m_vTotalHist;
   if (m_chi2Hist) delete m_chi2Hist;
   if (m_dofHist) delete m_dofHist;
   if (m_angleHist) delete m_angleHist;
@@ -163,7 +173,9 @@ void SingleFile::setupHistograms()
 
   m_nHits = m_genEvent->GetNbOfHits();
   //int m_nHits = 12;
-  int nBins = 300;
+  int nBins = 100;
+
+  // x and y histograms
   m_xDeltaGenHist = new TH1D*[m_nHits];
   for (int i = 0;i < m_nHits; i++) {
     char title[256];
@@ -174,9 +186,9 @@ void SingleFile::setupHistograms()
   m_yDeltaGenHist = new TH1D*[m_nHits];
   for (int i = 0;i < m_nHits; i++) {
     char title[256];
-    sprintf(title, "Layer %d", i+1);
+    sprintf(title, "yLayer %d", i+1);
     //   if (i == 0 || i == m_nHits - 2) m_yDeltaGenHist[i] = new TH1D(title,title, 100, -0.5, 0.5);
-    m_yDeltaGenHist[i] = new TH1D(title,title, 100, -0.5, 0.5);
+    m_yDeltaGenHist[i] = new TH1D(title,title, nBins, -0.5, 0.5);
   }
   m_xDeltaSmearedHist = new TH1D*[m_nHits];
   for (int i = 0;i < m_nHits; i++) {
@@ -189,11 +201,40 @@ void SingleFile::setupHistograms()
     char title[256];
     sprintf(title, "yDeltaSmearedHist%d", i);
     //    if (i == 0 || i == m_nHits - 2) m_yDeltaSmearedHist[i] = new TH1D(title,title, 500, -1.0, 1.0);
-    m_yDeltaSmearedHist[i] = new TH1D(title,title, nBins, -0.5, 0.5);
+    m_yDeltaSmearedHist[i] = new TH1D(title,title, nBins, -5.0, 5.0);
   }
 
-  m_xTotalHist = new TH1D("totalXhist", "totalXhist", 500, -20, 20);
-  m_yTotalHist = new TH1D("totalYhist", "totalYhist", 500, -1.0, 1.0);
+  // u and v histograms
+  m_uDeltaGenHist = new TH1D*[m_nHits];
+  for (int i = 0;i < m_nHits; i++) {
+    char title[256];
+    sprintf(title, "uLayer %d", i+1);
+    int nBins = 100;
+    m_uDeltaGenHist[i] = new TH1D(title,title, nBins, -10.0, 10.0);
+  }
+  m_vDeltaGenHist = new TH1D*[m_nHits];
+  for (int i = 0;i < m_nHits; i++) {
+    char title[256];
+    sprintf(title, "vLayer %d", i+1);
+    //   if (i == 0 || i == m_nHits - 2) m_vDeltaGenHist[i] = new TH1D(title,title, 100, -0.5, 0.5);
+    m_vDeltaGenHist[i] = new TH1D(title,title, nBins, -0.5, 0.5);
+  }
+  m_uDeltaSmearedHist = new TH1D*[m_nHits];
+  for (int i = 0;i < m_nHits; i++) {
+    char title[256];
+    sprintf(title, "uDeltaSmearedHist%d", i);
+    m_uDeltaSmearedHist[i] = new TH1D(title,title, nBins, -10.0, 10.0);
+  }
+  m_vDeltaSmearedHist = new TH1D*[m_nHits];
+  for (int i = 0;i < m_nHits; i++) {
+    char title[256];
+    sprintf(title, "vDeltaSmearedHist%d", i);
+    //    if (i == 0 || i == m_nHits - 2) m_vDeltaSmearedHist[i] = new TH1D(title,title, 500, -1.0, 1.0);
+    m_vDeltaSmearedHist[i] = new TH1D(title,title, nBins, -0.5, 0.5);
+  }
+
+  m_uTotalHist = new TH1D("totalUhist", "totalUhist", 500, -20, 20);
+  m_vTotalHist = new TH1D("totalYhist", "totalYhist", 500, -1.0, 1.0);
   sprintf(title, "#chi^{2} Distribution (dof = %d)", m_recEvent->GetDof());
   m_chi2Hist = new TH1D("#chi^{2} Distribution", title, 200, 0.0, 200.0);
   m_dofHist = new TH1D("n_{dof} Disribution", title, 8, 0, 8);
@@ -244,6 +285,8 @@ void SingleFile::fillData()
     for (int i = 0; i < nHitsGen; i++) {
 
       int iModule = m_genEvent->GetModuleID(i);
+      int iLayer = m_genEvent->GetLayerID(i);
+
       unsigned int genUniqueLayer;
       if (iModule >= 0 && iModule <= 2)
         genUniqueLayer  = 0;
@@ -254,21 +297,35 @@ void SingleFile::fillData()
       else if(iModule >= 7 && iModule <= 9)
         genUniqueLayer  = 3;
 
-      genUniqueLayer = 2*genUniqueLayer + m_genEvent->GetLayerID(i);
+      genUniqueLayer = 2*genUniqueLayer + iLayer;
 
       TVector3 genHit        = m_genEvent->GetHitPosition(i);
       TVector3 genHitSmeared = m_genEvent->GetSmearedHitAtZ(genHit.z());
       TVector3 recHit        = m_recEvent->GetHitAtZ(genHit.z());
 
+      // fill x and y histograms
       m_xDeltaGenHist[genUniqueLayer]->Fill(recHit.x() - genHit.x());
       m_yDeltaGenHist[genUniqueLayer]->Fill(recHit.y() - genHit.y());
-      // xDeltaGenHist[genUniqueLayer]->Fill(genHit.x());
-      // yDeltaGenHist[genUniqueLayer]->Fill(genHit.y());
       m_xDeltaSmearedHist[genUniqueLayer]->Fill(recHit.x() - (genHit+genHitSmeared).x());
-      m_yDeltaSmearedHist[genUniqueLayer]->Fill(recHit.y() - (genHit+genHitSmeared).y());
-      m_xTotalHist->Fill(recHit.x() - genHit.x());
-      m_yTotalHist->Fill(recHit.y() - genHit.y());
-      //  std::cout << genUniqueLayer << "  --> " <<m_genEvent->GetHitPosition(i).z() << std::endl;
+      m_yDeltaSmearedHist[genUniqueLayer]->Fill(recHit.y() - (genHitSmeared).y());
+
+      // calculate u and v with hardcoded angle......
+      double angle = 0.;
+      if (iLayer == 0)
+        angle = -0.5* M_PI/180.;
+      else
+        angle =  0.5* M_PI/180.;
+      recHit.RotateZ(-angle);
+      genHit.RotateZ(-angle);
+      genHitSmeared.RotateZ(-angle);
+
+      // fill u and v histograms
+      m_uDeltaGenHist[genUniqueLayer]->Fill(recHit.x() - genHit.x());
+      m_vDeltaGenHist[genUniqueLayer]->Fill(recHit.y() - genHit.y());
+      m_uDeltaSmearedHist[genUniqueLayer]->Fill(recHit.x() - (genHit+genHitSmeared).x());
+      m_vDeltaSmearedHist[genUniqueLayer]->Fill(recHit.y() - (genHitSmeared).y());
+      m_uTotalHist->Fill(recHit.x() - genHit.x());
+      m_vTotalHist->Fill(recHit.y() - genHit.y());
     }
 
     TVector3 direction = m_genEvent->GetHitPosition(nHitsGen-1) - m_genEvent->GetHitPosition(0);
@@ -303,13 +360,6 @@ void SingleFile::fillData()
 
 void SingleFile::draw()
 {
-  for (int i = 0; i < m_nHits; i++) {
-    m_yDeltaGenHist[i]->Fit("gaus", "Q0");
-    //TF1* fitFunc = m_yDeltaGenHist[i]->GetFunction("gaus");
-    //if (fitFunc)
-      //      std::cout << "y" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
-  }
-
   gStyle->SetOptFit(11111);
   TCanvas* canvas = new TCanvas("canvas", "Momentum resolution", 1024, 768);
   canvas->Draw();
@@ -365,14 +415,13 @@ void SingleFile::draw()
   // sprintf(saveName, "%s_resolution.%s", stem, "root");
   // canvas->SaveAs(saveName);
 
-
   TCanvas* canvas2 = new TCanvas("canvas2", "x: Reconstructed vs generated position", 1024, 768);
   canvas2->Divide(2,m_nHits/2);
   canvas2->Draw();
 
   for (int i = 0; i < m_nHits; i++) {
     char xtitle[256];
-    sprintf(xtitle, "(x_{%d,gen} - x_{%d,rec}) / mm", i+1, i+1);
+    sprintf(xtitle, "(x_{%d,rec} - x_{%d,gen}) / mm", i+1, i+1);
     canvas2->cd(i+1);
     m_xDeltaGenHist[i]->Draw();
     m_xDeltaGenHist[i]->GetXaxis()->SetTitle(xtitle);
@@ -392,7 +441,7 @@ void SingleFile::draw()
   canvas3->Draw();
   for (int i = 0; i < m_nHits; i++) {
     char ytitle[256];
-    sprintf(ytitle, "(y_{%d,gen} - y_{%d,rec}) / mm", i+1, i+1);
+    sprintf(ytitle, "(y_{%d,rec} - y_{%d,gen}) / mm", i+1, i+1);
     canvas3->cd(i+1);
     m_yDeltaGenHist[i]->Draw();
     m_yDeltaGenHist[i]->GetXaxis()->SetTitle(ytitle);
@@ -413,7 +462,7 @@ void SingleFile::draw()
 
   for (int i = 0; i < m_nHits; i++) {
     char xtitle[256];
-    sprintf(xtitle, "(x_{%d,meas} - x_{%d,rec}) / mm", i+1, i+1);
+    sprintf(xtitle, "(x_{%d,rec} - x_{%d,meas}) / mm", i+1, i+1);
     canvas4->cd(i+1);
     m_xDeltaSmearedHist[i]->Draw();
     m_xDeltaSmearedHist[i]->GetXaxis()->SetTitle(xtitle);
@@ -429,7 +478,7 @@ void SingleFile::draw()
   canvas5->Draw();
   for (int i = 0; i < m_nHits; i++) {
     char ytitle[256];
-    sprintf(ytitle, "(y_{%d,meas} - y_{%d,rec}) / mm", i+1, i+1);
+    sprintf(ytitle, "(y_{%d,rec} - y_{%d,meas}) / mm", i+1, i+1);
     canvas5->cd(i+1);
     m_yDeltaSmearedHist[i]->Draw();
     m_yDeltaSmearedHist[i]->GetXaxis()->SetTitle(ytitle);
@@ -440,17 +489,91 @@ void SingleFile::draw()
       //      std::cout << "y" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
   }
 
-  TCanvas* canvas6 = new TCanvas("canvas6", "Sum of reconstructed vs generated position histograms", 1024, 768);
+  TCanvas* canvas6 = new TCanvas("canvas6", "u: Reconstructed vs generated position", 1024, 768);
+  canvas6->Divide(2,m_nHits/2);
   canvas6->Draw();
-  canvas6->Divide(1,2);
-  canvas6->cd(1);
-  m_xTotalHist->Draw();
-  m_xTotalHist->GetXaxis()->SetTitle("(x_{sim,total} - x_{rec,total}) / mm");
-  m_xTotalHist->GetYaxis()->SetTitle("N");
-  canvas6->cd(2);
-  m_yTotalHist->Draw();
-  m_yTotalHist->GetXaxis()->SetTitle("(y_{sim,total} - y_{rec,total}) / mm");
-  m_yTotalHist->GetYaxis()->SetTitle("N");
+
+  for (int i = 0; i < m_nHits; i++) {
+    char xtitle[256];
+    sprintf(xtitle, "(u_{%d,rec} - u_{%d,gen}) / mm", i+1, i+1);
+    canvas6->cd(i+1);
+    m_uDeltaGenHist[i]->Draw();
+    m_uDeltaGenHist[i]->GetXaxis()->SetTitle(xtitle);
+    m_uDeltaGenHist[i]->GetYaxis()->SetTitle("N");
+    m_uDeltaGenHist[i]->Fit("gaus", "Q");
+    TF1* fitFunc = m_uDeltaGenHist[i]->GetFunction("gaus");
+    THistPainter* painter = (THistPainter*) m_uDeltaGenHist[i]->GetPainter();
+    painter->PaintStat(1, fitFunc);
+    TPaveStats* pt = (TPaveStats*) m_uDeltaGenHist[i]->GetListOfFunctions()->FindObject("stats");
+    pt->SetY1NDC(0.45);
+    // if (fitFunc)
+    //   std::cout << "x" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
+  }
+
+  TCanvas* canvas7 = new TCanvas("canvas7", "v: Reconstructed vs generated position", 1024, 768);
+  canvas7->Divide(2, m_nHits/2);
+  canvas7->Draw();
+  for (int i = 0; i < m_nHits; i++) {
+    char ytitle[256];
+    sprintf(ytitle, "(v_{%d,rec} - v_{%d,gen}) / mm", i+1, i+1);
+    canvas7->cd(i+1);
+    m_vDeltaGenHist[i]->Draw();
+    m_vDeltaGenHist[i]->GetXaxis()->SetTitle(ytitle);
+    m_vDeltaGenHist[i]->GetYaxis()->SetTitle("N");
+    m_vDeltaGenHist[i]->Fit("gaus", "Q");
+    TF1* fitFunc = m_vDeltaGenHist[i]->GetFunction("gaus");
+    THistPainter* painter = (THistPainter*) m_vDeltaGenHist[i]->GetPainter();
+    painter->PaintStat(1, fitFunc);
+    TPaveStats* pt = (TPaveStats*) m_vDeltaGenHist[i]->GetListOfFunctions()->FindObject("stats");
+    pt->SetY1NDC(0.45);
+    //  if (fitFunc)
+      //      std::cout << "y" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
+  }
+
+  TCanvas* canvas8 = new TCanvas("canvas8", "u: Reconstructed vs measured position", 1024, 768);
+  canvas8->Divide(m_nHits/2,2);
+  canvas8->Draw();
+
+  for (int i = 0; i < m_nHits; i++) {
+    char xtitle[256];
+    sprintf(xtitle, "(u_{%d,rec} - u_{%d,meas}) / mm", i+1, i+1);
+    canvas8->cd(i+1);
+    m_uDeltaSmearedHist[i]->Draw();
+    m_uDeltaSmearedHist[i]->GetXaxis()->SetTitle(xtitle);
+    m_uDeltaSmearedHist[i]->GetYaxis()->SetTitle("N");
+    m_uDeltaSmearedHist[i]->Fit("gaus", "Q");
+    // TF1* fitFunc = m_uDeltaSmearedHist[i]->GetFunction("gaus");
+    // if (fitFunc)
+      //      std::cout << "x" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
+   }
+
+  TCanvas* canvas9 = new TCanvas("canvas9", "v: Reconstructed vs measured Position", 1024, 768);
+  canvas9->Divide(m_nHits/2,2);
+  canvas9->Draw();
+  for (int i = 0; i < m_nHits; i++) {
+    char ytitle[256];
+    sprintf(ytitle, "(v_{%d,rec} - v_{%d,meas}) / mm", i+1, i+1);
+    canvas9->cd(i+1);
+    m_vDeltaSmearedHist[i]->Draw();
+    m_vDeltaSmearedHist[i]->GetXaxis()->SetTitle(ytitle);
+    m_vDeltaSmearedHist[i]->GetYaxis()->SetTitle("N");
+    m_vDeltaSmearedHist[i]->Fit("gaus", "Q");
+    //TF1* fitFunc = m_vDeltaSmearedHist[i]->GetFunction("gaus");
+    //if (fitFunc)
+      //      std::cout << "y" << i  << " --> mu = " << fitFunc->GetParameter(1) << ", rms = " << fitFunc->GetParameter(2) << std::endl;
+  }
+
+  TCanvas* canvas10 = new TCanvas("canvas10", "Sum of reconstructed vs generated position histograms", 1024, 768);
+  canvas10->Draw();
+  canvas10->Divide(1,2);
+  canvas10->cd(1);
+  m_uTotalHist->Draw();
+  m_uTotalHist->GetXaxis()->SetTitle("(u_{sim,total} - u_{rec,total}) / mm");
+  m_uTotalHist->GetYaxis()->SetTitle("N");
+  canvas10->cd(2);
+  m_vTotalHist->Draw();
+  m_vTotalHist->GetXaxis()->SetTitle("(v_{sim,total} - v_{rec,total}) / mm");
+  m_vTotalHist->GetYaxis()->SetTitle("N");
 
   TF1 chi2Dist("chi2Dist", chi2dist, 0.0, 100.0, 2);
   chi2Dist.SetNpx(1000);
@@ -459,8 +582,8 @@ void SingleFile::draw()
   chi2Dist.FixParameter(1, m_recEvent->GetDof());
   // chi2Dist.FixParameter(1, 5);
   // chi2Dist.FixParameter(1, 11);
-  TCanvas* canvas7 = new TCanvas("canvas7", "Chi2 distribution", 1024, 768);
-  canvas7->Draw();
+  TCanvas* canvas11 = new TCanvas("canvas11", "Chi2 distribution", 1024, 768);
+  canvas11->Draw();
   m_chi2Hist->Draw();
   m_chi2Hist->Scale(1./(m_chi2Hist->Integral("WIDTH")));
   m_chi2Hist->GetXaxis()->SetTitle("#chi^{2}");
@@ -469,38 +592,38 @@ void SingleFile::draw()
   chi2Dist.Draw("SAME");
   chi2Dist.SetLineColor(kRed);
   //sprintf(saveName, "%s_chi2.%s", stem, "pdf");
-  //  canvas7->SaveAs(saveName);
+  //  canvas11->SaveAs(saveName);
   //sprintf(saveName, "%s_chi2.%s", stem, "root");
-  //  canvas7->SaveAs(saveName);
+  //  canvas11->SaveAs(saveName);
 
   TCanvas* canvasDof = new TCanvas("canvasDof", "Degrees of freedom");
   canvasDof->cd();
   m_dofHist->Draw();
 
-  TCanvas* canvas8 = new TCanvas("canvas8", "Deflection angle distribution", 1024, 768);
-  canvas8->Draw();
-  canvas8->Divide(3,1);
-  canvas8->cd(1);
+  TCanvas* canvas12 = new TCanvas("canvas12", "Deflection angle distribution", 1024, 768);
+  canvas12->Draw();
+  canvas12->Divide(3,1);
+  canvas12->cd(1);
   m_angleHist->Draw();
   m_angleHist->GetXaxis()->SetTitle("#Delta #theta [rad]");
   m_angleHist->GetYaxis()->SetTitle("N");
-  canvas8->cd(2);  
+  canvas12->cd(2);  
   m_lHist->Draw();
-  canvas8->cd(3);  
+  canvas12->cd(3);  
   m_lOverAngleHist->Draw();
 
-  TCanvas* canvas9 = new TCanvas("canvas9", "initialP", 1024, 768);
-  canvas9->Draw();
+  TCanvas* canvas13 = new TCanvas("canvas13", "initialP", 1024, 768);
+  canvas13->Draw();
   m_initialPHist->Draw();
   m_initialPHist->Fit("gaus", "EQ");
   m_initialPHist->GetFunction("gaus")->SetParName(2, "#sigma_{p}/p");
   //  sprintf(saveName, "%s_initial.%s", stem, "pdf");
-  //  canvas9->SaveAs(saveName);
+  //  canvas13->SaveAs(saveName);
   //sprintf(saveName, "%s_initial.%s", stem, "root");
-  //  canvas9->uSaveAs(saveName);
+  //  canvas13->uSaveAs(saveName);
 
-  TCanvas* canvas10 = new TCanvas("canvas10", "innerOuter", 1024, 768);
-  canvas10->Draw();
+  TCanvas* canvas14 = new TCanvas("canvas14", "innerOuter", 1024, 768);
+  canvas14->Draw();
   m_innerOrOuterHist->Draw();
   // innerOrOuterHist.Fit("gaus", "EQ");
   // innerOrOuterHist.GetFunction("gaus")->SetParName(2, "#sigma_{p}/p");
