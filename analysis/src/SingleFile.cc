@@ -363,8 +363,8 @@ void SingleFile::draw()
   gStyle->SetOptFit(11111);
   TCanvas* canvas = new TCanvas("canvas", "Momentum resolution", 1024, 768);
   canvas->Draw();
-  //  canvas.Divide(1,2);
-  //  canvas.cd(1);
+  canvas->Divide(1,2);
+  canvas->cd(1);
   m_resHist->Draw();
   
   // double rangeLower = 1-2*momRes;
@@ -402,11 +402,11 @@ void SingleFile::draw()
 
   m_resHist->GetXaxis()->SetTitle("p_{nom}/p_{rec}");
   m_resHist->GetYaxis()->SetTitle("N");
-  // canvas.cd(2);
-  // ptHist.Draw();
-  // ptHist.Fit("gaus", "EQR", "", 0.1, 1.+5*momRes);
-  // ptHist.GetXaxis()->SetTitle("pt_{gen}/pt_{rec}");
-  // ptHist.GetYaxis()->SetTitle("N");
+  canvas->cd(2);
+  m_ptHist->Draw();
+  m_ptHist->Fit("gaus", "EQ");//, "", 0.1, 1.+5*momRes);
+  m_ptHist->GetXaxis()->SetTitle("pt_{gen}/pt_{rec}");
+  m_ptHist->GetYaxis()->SetTitle("N");
   // char stem[256];
   // sprintf(stem,"neg_%.0fGeV", m_genMom);
   // char saveName[256];
@@ -575,13 +575,13 @@ void SingleFile::draw()
   m_vTotalHist->GetXaxis()->SetTitle("(v_{sim,total} - v_{rec,total}) / mm");
   m_vTotalHist->GetYaxis()->SetTitle("N");
 
-  TF1 chi2Dist("chi2Dist", chi2dist, 0.0, 100.0, 2);
-  chi2Dist.SetNpx(1000);
+  TF1* chi2Dist = new TF1("chi2Dist", chi2dist, 0.0, 100.0, 2);
+  chi2Dist->SetNpx(1000);
   
-  chi2Dist.FixParameter(0, 1);
-  chi2Dist.FixParameter(1, m_recEvent->GetDof());
-  // chi2Dist.FixParameter(1, 5);
-  // chi2Dist.FixParameter(1, 11);
+  chi2Dist->FixParameter(0, 1);
+  chi2Dist->FixParameter(1, m_recEvent->GetDof());
+  // chi2Dist->FixParameter(1, 5);
+  // chi2Dist->FixParameter(1, 11);
   TCanvas* canvas11 = new TCanvas("canvas11", "Chi2 distribution", 1024, 768);
   canvas11->Draw();
   m_chi2Hist->Draw();
@@ -589,8 +589,8 @@ void SingleFile::draw()
   m_chi2Hist->GetXaxis()->SetTitle("#chi^{2}");
   m_chi2Hist->GetYaxis()->SetTitle("N");
   //  chi2Hist.Fit(&chi2Dist, "E");
-  chi2Dist.Draw("SAME");
-  chi2Dist.SetLineColor(kRed);
+  chi2Dist->Draw("SAME");
+  chi2Dist->SetLineColor(kRed);
   //sprintf(saveName, "%s_chi2.%s", stem, "pdf");
   //  canvas11->SaveAs(saveName);
   //sprintf(saveName, "%s_chi2.%s", stem, "root");
