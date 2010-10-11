@@ -1,18 +1,21 @@
-LIB = libRES_Event.so
-DICT = RES_EventDict
+STEM = RES_Event
+
+TARGET = lib$(STEM).so
+DICT = $(STEM)Dict
 
 LD = g++
 
 CXXFLAGS += -fPIC -I. -I$(shell root-config --incdir)
+LIBS += `root-config --libs`
 
-all: $(LIB)
+all: $(TARGET)
 
 clean:
-	@echo "Cleaning up RES_Event ..."
-	@rm -f *.o $(DICT).* $(LIB)
+	@echo "Cleaning up $(STEM) ..."
+	@rm -f *.o $(DICT).* $(TARGET)
 
-$(LIB): $(DICT).o RES_Event.o
-	$(LD) -o $(LIB) $(DICT).o RES_Event.o -shared `root-config --libs`
+$(TARGET): $(DICT).o $(STEM).o
+	$(LD) -o $(TARGET) $(DICT).o $(STEM).o -shared $(LIBS)
 
-$(DICT).cc: RES_Event.hh RES_Event.cc
-	rootcint -f $(DICT).cc -c -p RES_Event.hh LinkDef.h
+$(DICT).cc: $(STEM).hh $(STEM).cc
+	rootcint -f $(DICT).cc -c -p $(STEM).hh LinkDef.h
