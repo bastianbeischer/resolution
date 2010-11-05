@@ -274,14 +274,14 @@ void RES_TrackFitter::FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double
   }
   
   // calculate solution
-  U.Invert();
   TMatrixD Uinv = U;
+  Uinv.Invert();
   TMatrixD ATranspose(nCol,nRow);
   ATranspose.Transpose(A);
   TMatrixD M = ATranspose * Uinv * A;
   TVectorD c = ATranspose * Uinv * b;
-  M.Invert();
   TMatrixD Minv = M;
+  Minv.Invert();
   TVectorD solution(nCol);
   solution = Minv * c;
 
