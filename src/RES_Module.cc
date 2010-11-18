@@ -309,7 +309,11 @@ void RES_Module::PrintMaterials()
   G4cout << "  Fiber: " << G4endl;
   G4cout << *m_fiberMaterial << G4endl;
 
-  G4cout << (1./3.)* m_modulePlacement->GetLogicalVolume()->GetMass() / g << " g" << G4endl;
+  // // Polystyrene
+  // G4Material* Polystyrene = G4NistManager::Instance()->FindOrBuildMaterial( "G4_POLYSTYRENE" );
+  // G4cout << *Polystyrene << G4endl;
+
+  G4cout << m_modulePlacement->GetLogicalVolume()->GetMass() / g << " g" << G4endl;
   //  G4cout << (1./3.)* m_upperFiberPlacement->GetLogicalVolume()->GetMass() / g << " g" << G4endl;
 
 }
