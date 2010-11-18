@@ -11,6 +11,9 @@
 /RES/Det/AddModule 0. -6.5  22.7 cm
 /RES/Det/AddModule 0.  0.   22.7 cm
 /RES/Det/AddModule 0.  6.5  22.7 cm
+/RES/Det/SetModuleSubtractHoles 0 true
+/RES/Det/SetModuleSubtractHoles 1 true
+/RES/Det/SetModuleSubtractHoles 2 true
 
 # middle fiber layer 1
 /RES/Det/AddModule 0. -3.25  6.0 cm
@@ -28,3 +31,6 @@
 /RES/Det/AddModule 0. -6.5  -22.7 cm
 /RES/Det/AddModule 0.  0.   -22.7 cm
 /RES/Det/AddModule 0.  6.5  -22.7 cm
+/RES/Det/SetModuleSubtractHoles 7 true
+/RES/Det/SetModuleSubtractHoles 8 true
+/RES/Det/SetModuleSubtractHoles 9 true
