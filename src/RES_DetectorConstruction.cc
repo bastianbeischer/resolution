@@ -37,6 +37,8 @@ RES_DetectorConstruction::RES_DetectorConstruction() :
 
 RES_DetectorConstruction::~RES_DetectorConstruction()
 {
+  for(std::vector<RES_Layer*>::iterator it = m_layers.begin(); it != m_layers.end(); it++)
+    delete *it;
   for(std::vector<RES_Module*>::iterator it = m_modules.begin(); it != m_modules.end(); it++)
     delete *it;
   delete m_messenger;

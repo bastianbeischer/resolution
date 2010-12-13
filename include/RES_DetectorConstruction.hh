@@ -8,6 +8,7 @@
 
 #include "G4VUserDetectorConstruction.hh"
 #include "G4ThreeVector.hh"
+#include "RES_Layer.hh"
 #include "RES_Module.hh"
 
 class G4Material;
@@ -29,11 +30,13 @@ public:
   unsigned int GetNumberOfModules() {return m_modules.size();}
   unsigned int GetNumberOfLayers();
   unsigned int GetNumberOfLayers(std::vector<RES_Module*>& modules);
+  RES_Layer* GetLayer(unsigned int i) {assert(i < m_layers.size()); return m_layers.at(i);}
   RES_Module* GetModule(unsigned int i) {assert(i < m_modules.size()); return m_modules.at(i);}
 
   void SetWorldX(G4double x) {m_worldX = x;}
   void SetWorldY(G4double y) {m_worldY = y;}
   void SetWorldZ(G4double z) {m_worldZ = z;}
+  void AddLayer(unsigned int nModules, G4double z) {m_layers.push_back(new RES_Layer(nModules, z));}
   void AddModulePlacement(G4ThreeVector where) {m_modules.push_back(new RES_Module(where));}
 
   G4VPhysicalVolume* Construct();
@@ -56,6 +59,7 @@ private:
   G4double                        m_worldY;
   G4double                        m_worldZ;
 
+  std::vector<RES_Layer*>         m_layers;
   std::vector<RES_Module*>        m_modules;
 
   G4VPhysicalVolume*              m_world;

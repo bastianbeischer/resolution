@@ -48,6 +48,21 @@ private:
   G4UIcmdWithAString*        m_setModuleLowerSigmaZCmd;
   G4UIcmdWithAString*        m_setModuleUpperEfficiencyCmd;
   G4UIcmdWithAString*        m_setModuleLowerEfficiencyCmd;
+  G4UIcmdWithAString*        m_setLayerSubtractHolesCmd;
+  G4UIcmdWithAString*        m_setLayerTypeCmd;
+  G4UIcmdWithAString*        m_setLayerRotationCmd;
+  G4UIcmdWithAString*        m_setLayerInternalRotationCmd;
+  G4UIcmdWithAString*        m_setLayerWidthCmd;
+  G4UIcmdWithAString*        m_setLayerLengthCmd;
+  G4UIcmdWithAString*        m_setLayerUpperSigmaUCmd;
+  G4UIcmdWithAString*        m_setLayerUpperSigmaVCmd;
+  G4UIcmdWithAString*        m_setLayerUpperSigmaZCmd;
+  G4UIcmdWithAString*        m_setLayerLowerSigmaUCmd;
+  G4UIcmdWithAString*        m_setLayerLowerSigmaVCmd;
+  G4UIcmdWithAString*        m_setLayerLowerSigmaZCmd;
+  G4UIcmdWithAString*        m_setLayerUpperEfficiencyCmd;
+  G4UIcmdWithAString*        m_setLayerLowerEfficiencyCmd;
+  G4UIcmdWithAString*        m_addLayerCmd;
 };
 
 #endif /* RES_DetectorMessenger_hh */
