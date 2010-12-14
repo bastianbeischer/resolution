@@ -46,6 +46,7 @@ RES_FieldMessenger::RES_FieldMessenger(RES_FieldManager* manager)
 
   m_setFieldEstimateCmd = new G4UIcmdWithADoubleAndUnit("/RES/Field/SetFieldEstimate", this);
   m_setFieldEstimateCmd->SetGuidance("Set the area for calculation of start values. For uniform fields these values also specify the range over which the field is active.");
+  m_setFieldEstimateCmd->SetDefaultUnit("tesla");
   m_setFieldEstimateCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
 }
 
