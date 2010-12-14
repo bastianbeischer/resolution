@@ -7,30 +7,12 @@
 
 /RES/Gun/StartZ 30.0 cm
 
-# upper fiber layer
-/RES/Det/AddModule 0. -6.5  22.7 cm
-/RES/Det/AddModule 0.  0.   22.7 cm
-/RES/Det/AddModule 0.  6.5  22.7 cm
-/RES/Det/SetModuleSubtractHoles 0 true
-/RES/Det/SetModuleSubtractHoles 1 true
-/RES/Det/SetModuleSubtractHoles 2 true
+/RES/Det/AddLayer 3 22.7
+/RES/Det/AddLayer 2 6.0
+/RES/Det/AddLayer 2 -6.0
+/RES/Det/AddLayer 3 -22.7
 
-# middle fiber layer 1
-/RES/Det/AddModule 0. -3.25  6.0 cm
-/RES/Det/AddModule 0.  3.25  6.0 cm
-/RES/Det/SetModuleSubtractHoles 3 true
-/RES/Det/SetModuleSubtractHoles 4 true
-
-# middle fiber layer 2
-/RES/Det/AddModule 0. -3.25  -6.0 cm
-/RES/Det/AddModule 0.  3.25  -6.0 cm
-/RES/Det/SetModuleSubtractHoles 5 true
-/RES/Det/SetModuleSubtractHoles 6 true
-
-# lower fiber layer
-/RES/Det/AddModule 0. -6.5  -22.7 cm
-/RES/Det/AddModule 0.  0.   -22.7 cm
-/RES/Det/AddModule 0.  6.5  -22.7 cm
-/RES/Det/SetModuleSubtractHoles 7 true
-/RES/Det/SetModuleSubtractHoles 8 true
-/RES/Det/SetModuleSubtractHoles 9 true
+/RES/Det/SetLayerSubtractHoles 0 true
+/RES/Det/SetLayerSubtractHoles 1 true
+/RES/Det/SetLayerSubtractHoles 2 true
+/RES/Det/SetLayerSubtractHoles 3 true
