@@ -7,7 +7,7 @@
 #include "SingleFile.hh"
 #include <MyROOTStyle.h>
 
-int main(int argc, char* argv[])
+int main(int argc, char** argv)
 {
   if (argc != 2) {
     std::cerr << "please provide ROOT file or conf file for analysis" << std::endl;
@@ -16,7 +16,10 @@ int main(int argc, char* argv[])
 
   std::string filename = argv[1];
 
-  TApplication app("app", &argc, argv);
+  int bargc = 1;
+  char* bargv[1] = {(char*)"not_analysis"};
+  TApplication app("app", &bargc, bargv);
+
   MyROOTStyle myStyle("myStyle");
   myStyle.cd();
 
