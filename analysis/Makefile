@@ -17,8 +17,8 @@ CC           := gcc
 CXX          := g++
 INCLUDEFLAGS := -I$(INCLUDEDIR) -I$(shell root-config --incdir) -I$(MY_INCLUDES) -I../RES_Event
 LIBS         := $(shell root-config --libs) -L../RES_Event -lRES_Event
-CCFLAGS      := -Wall -fPIC $(INCLUDEFLAGS) -MMD
-CXXFLAGS     := -Wall -fPIC $(INCLUDEFLAGS) -MMD
+CCFLAGS      := -Wall -g -fPIC $(INCLUDEFLAGS) -MMD
+CXXFLAGS     := -Wall -g -fPIC $(INCLUDEFLAGS) -MMD
 
 # Documenation
 DOCDIR       := $(PWD)/doc
