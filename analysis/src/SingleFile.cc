@@ -169,7 +169,7 @@ void SingleFile::setupHistograms()
   m_ptHist = new TH1D("ptHist", "ptHist", 50, 1-5*momRes, 1+5*momRes);
   
   sprintf(title, "Initial values for %.2f GeV", m_genMom);
-  m_initialPHist = new TH1D("Inital values", title, 100, 1-10*momRes, 1+10*momRes);
+  m_initialPHist = new TH1D("Initial values", title, 100, 1-10*momRes, 1+10*momRes);
 
   m_nHits = m_genEvent->GetNbOfHits();
   //int m_nHits = 12;
