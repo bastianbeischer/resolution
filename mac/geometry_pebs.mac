@@ -1,0 +1,44 @@
+/control/alias fiberEfficiency 1.0
+/control/alias fiberResolution 30
+
+/RES/Det/SetWorldX 2.00 m
+/RES/Det/SetWorldY 2.00 m
+/RES/Det/SetWorldZ 3.30 m 
+
+/RES/Gun/StartZ 1.60 m
+
+/RES/Det/AddLayer 26 152
+/RES/Det/SetLayerLength 0 180
+/RES/Det/SetLayerUpperSigmaV 0 {fiberResolution}
+/RES/Det/SetLayerLowerSigmaV 0 {fiberResolution}
+/RES/Det/SetLayerSubtractHoles 0 true
+
+/RES/Det/AddLayer 25 144
+/RES/Det/SetLayerLength 1 180
+/RES/Det/SetLayerUpperSigmaV 1 {fiberResolution}
+/RES/Det/SetLayerLowerSigmaV 1 {fiberResolution}
+/RES/Det/SetLayerSubtractHoles 1 true
+
+/RES/Det/AddLayer 13 75
+/RES/Det/SetLayerLength 2 140
+/RES/Det/SetLayerUpperSigmaV 2 {fiberResolution}
+/RES/Det/SetLayerLowerSigmaV 2 {fiberResolution}
+/RES/Det/SetLayerSubtractHoles 2 true
+
+/RES/Det/AddLayer 12 67
+/RES/Det/SetLayerLength 3 140
+/RES/Det/SetLayerUpperSigmaV 3 {fiberResolution}
+/RES/Det/SetLayerLowerSigmaV 3 {fiberResolution}
+/RES/Det/SetLayerSubtractHoles 3 true
+
+/RES/Det/AddLayer 19 -120
+/RES/Det/SetLayerLength 4 86
+/RES/Det/SetLayerUpperSigmaV 4 {fiberResolution}
+/RES/Det/SetLayerLowerSigmaV 4 {fiberResolution}
+/RES/Det/SetLayerSubtractHoles 4 true
+
+/RES/Det/AddLayer 20 -130
+/RES/Det/SetLayerLength 5 86
+/RES/Det/SetLayerUpperSigmaV 5 {fiberResolution}
+/RES/Det/SetLayerLowerSigmaV 5 {fiberResolution}
+/RES/Det/SetLayerSubtractHoles 5 true
