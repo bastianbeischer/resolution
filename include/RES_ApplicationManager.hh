@@ -9,12 +9,15 @@ class RES_ApplicationManager
 {
 
 public:
+  enum SessionType {Terminal=0, Qt=1};
+
+public:
   RES_ApplicationManager(int argc, char** argv);
   ~RES_ApplicationManager();
 
 public:
   int RunBatchScript(G4String scriptName);
-  void CreateSession();
+  void CreateSession(SessionType = Terminal);
   void SetSeedToSystemTime();
 
 private:

@@ -4,6 +4,7 @@
 #include "G4UImessenger.hh"
 
 class RES_ApplicationManager;
+class G4UIcmdWithAString;
 class G4UIcmdWithoutParameter;
 
 class RES_ApplicationMessenger : G4UImessenger
@@ -18,7 +19,8 @@ public:
 private:
   RES_ApplicationManager* m_manager;
 
-  G4UIcmdWithoutParameter* m_createSessionCmd;
+  G4UIcmdWithAString* m_createTerminalSessionCmd;
+  G4UIcmdWithAString* m_createQtSessionCmd;
   G4UIcmdWithoutParameter* m_setSeedToSystemTimeCmd;
 
 };

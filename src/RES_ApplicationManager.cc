@@ -13,6 +13,7 @@
 
 #include "G4TransportationManager.hh"
 #include "G4UImanager.hh"
+#include "G4UIbatch.hh"
 
 #ifdef G4VIS_USE
 #include "G4VisExecutive.hh"
@@ -74,14 +75,30 @@ int RES_ApplicationManager::RunBatchScript(G4String scriptName)
   return 1;
 }
 
-void RES_ApplicationManager::CreateSession()
+void RES_ApplicationManager::CreateSession(SessionType type)
 {
-  G4UIsession * session = new G4UIterminal(new G4UItcsh);
-  // G4UIQt* session = new G4UIQt(m_argc, m_argv);
-  // session->AddMenu("macs", "Macros");
-  // session->AddButton("macs", "vis.ogl.mac", "/control/execute mac/vis.ogl.mac");
-  session->SessionStart(); 
-  delete session;
+  G4UIsession* currentSession = G4UImanager::GetUIpointer()->GetSession();
+  if (currentSession) {
+    G4UImanager::GetUIpointer()->ApplyCommand("exit");
+  }
+
+  // setup the session
+  G4UIsession* session = 0;
+  if (type == Terminal) {
+    session = new G4UIterminal(new G4UItcsh);
+  }
+  else if (type == Qt) {
+    G4UIQt* qtsession = new G4UIQt(m_argc, m_argv);
+    qtsession->AddMenu("macs", "Macros");
+    qtsession->AddButton("macs", "vis.ogl.mac", "/control/execute mac/vis.ogl.mac");
+    session = qtsession;
+  }
+  
+  // start it
+  if (session != 0) {
+    session->SessionStart();
+    delete session;
+  }
 }
 
 void RES_ApplicationManager::SetSeedToSystemTime()
