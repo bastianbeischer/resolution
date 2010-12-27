@@ -25,15 +25,15 @@ RES_ApplicationMessenger::~RES_ApplicationMessenger()
   delete m_setSeedToSystemTimeCmd;
 }
 
-void RES_ApplicationMessenger::SetNewValue(G4UIcommand* command, G4String)
+void RES_ApplicationMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
 {
   if (command == m_createTerminalSessionCmd) {
     RES_ApplicationManager::SessionType type = RES_ApplicationManager::Terminal;
-    m_manager->CreateSession(type);
+    m_manager->CreateSession(type, newValue);
   }
   if (command == m_createQtSessionCmd) {
     RES_ApplicationManager::SessionType type = RES_ApplicationManager::Qt;
-    m_manager->CreateSession(type);
+    m_manager->CreateSession(type, newValue);
   }
   if (command == m_setSeedToSystemTimeCmd) {
     m_manager->SetSeedToSystemTime();

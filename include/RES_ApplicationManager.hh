@@ -1,7 +1,8 @@
 #ifndef RES_ApplicationManager_hh
 #define RES_ApplicationManager_hh
 
-class G4String;
+#include "globals.hh"
+
 class RES_ApplicationMessenger;
 class RES_RunManager;
 
@@ -17,7 +18,7 @@ public:
 
 public:
   int RunBatchScript(G4String scriptName);
-  void CreateSession(SessionType = Terminal);
+  void CreateSession(SessionType = Terminal, G4String = "");
   void SetSeedToSystemTime();
 
 private:

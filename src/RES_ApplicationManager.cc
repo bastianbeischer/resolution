@@ -1,4 +1,3 @@
-
 #include "RES_ApplicationManager.hh"
 
 #include "RES_ApplicationMessenger.hh"
@@ -75,15 +74,16 @@ int RES_ApplicationManager::RunBatchScript(G4String scriptName)
   return 1;
 }
 
-void RES_ApplicationManager::CreateSession(SessionType type)
+void RES_ApplicationManager::CreateSession(SessionType type, G4String macro)
 {
   G4UIsession* currentSession = G4UImanager::GetUIpointer()->GetSession();
   if (currentSession) {
     G4UImanager::GetUIpointer()->ApplyCommand("exit");
   }
 
-  // setup the session
   G4UIsession* session = 0;
+
+  // setup the session
   if (type == Terminal) {
     session = new G4UIterminal(new G4UItcsh);
   }
@@ -93,8 +93,11 @@ void RES_ApplicationManager::CreateSession(SessionType type)
     qtsession->AddButton("macs", "vis.ogl.mac", "/control/execute mac/vis.ogl.mac");
     session = qtsession;
   }
-  
-  // start it
+
+  if (macro != "") {
+    G4UImanager::GetUIpointer()->ExecuteMacroFile(macro);
+  }
+
   if (session != 0) {
     session->SessionStart();
     delete session;
