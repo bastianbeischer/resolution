@@ -481,15 +481,14 @@ G4int RES_TrackFitter::DoBlobelFit(G4int npar)
   }
   DVALLIN(npar,m_step,nflim);
 
-  G4int conv = -1;
-  G4int iter = 0;
-  G4double chi2 = 0.;
-
   G4int nHits = m_currentGenEvent.GetNbOfHits();
   G4int dof =  nHits - abs(npar);
   dof += m_layersToBeSkipped.size();
   m_currentRecEvent.SetDof(dof);
 
+  G4int conv = -1;
+  G4int iter = 0;
+  G4double chi2 = 0.;
   while( conv <= 0 ) {
     ++iter;
     chi2 = Chi2InModuleFrame();
