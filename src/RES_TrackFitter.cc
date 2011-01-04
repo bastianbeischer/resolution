@@ -494,6 +494,8 @@ G4int RES_TrackFitter::DoBlobelFit(G4int npar)
     ++iter;
     chi2 = Chi2InModuleFrame();
     DVALLEY(chi2,m_parameter,conv);
+    if (chi2 == DBL_MAX)
+      break;
   }
 
   m_currentRecEvent.SetChi2(chi2);
