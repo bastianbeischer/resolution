@@ -20,8 +20,8 @@ RES_StepperMessenger::RES_StepperMessenger(RES_FieldManager* manager)
   m_activateMyStepperCmd->SetGuidance("Activate my stepper");
   m_activateMyStepperCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
 
-  m_deactivateMyStepperCmd = new G4UIcmdWithoutParameter("/RES/MyStepper/Deactivatep", this);
-  m_deactivateMyStepperCmd->SetGuidance("Deactivat my stepper");
+  m_deactivateMyStepperCmd = new G4UIcmdWithoutParameter("/RES/MyStepper/Deactivate", this);
+  m_deactivateMyStepperCmd->SetGuidance("Deactivate my stepper");
   m_deactivateMyStepperCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
 }
 
