@@ -466,8 +466,9 @@ void RES_DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
   }
 
   if (command == m_addLayerCmd) {
-    G4int nModules = m_addLayerCmd->ConvertToInt(newValue.substr(0,1).c_str());
-    G4double z = m_addLayerCmd->ConvertToDouble(newValue.substr(2,newValue.length()).c_str()) * cm;
+    int spacePos = newValue.find_first_of(" ");
+    G4int nModules = m_addLayerCmd->ConvertToInt(newValue.substr(0,spacePos).c_str());
+    G4double z = m_addLayerCmd->ConvertToDouble(newValue.substr(spacePos+1,newValue.length()).c_str()) * cm;
     m_detector->AddLayer(nModules, z);
   }
 }

@@ -15,7 +15,6 @@ RES_Layer::RES_Layer(unsigned int n, G4double z)
   RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
   m_firstModuleNumber = det->GetNumberOfModules();
   for (unsigned int i = 0; i < n; i++) {
-
     G4double x = 0 * cm;
     G4double y = (-((int)n-1)/2. + (int)i) * 6.5*cm;
     G4ThreeVector where(x, y, z);
