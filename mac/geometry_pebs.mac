@@ -1,5 +1,5 @@
 /control/alias fiberEfficiency 1.0
-/control/alias fiberResolution 30
+/control/alias fiberResolution 50
 
 /RES/Det/SetWorldX 2.00 m
 /RES/Det/SetWorldY 2.00 m
