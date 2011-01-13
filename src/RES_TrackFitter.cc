@@ -385,7 +385,7 @@ void RES_TrackFitter::CalculateStartParameters()
     G4double x0_bottom,y0_bottom;
     FitStraightLine(nHits/2, nHits, x0_bottom, y0_bottom, lambda_x_bottom, lambda_y_bottom);
 
-    G4double deltaTheta = lambda_y_top - lambda_y_bottom;
+    G4double deltaTheta = atan(lambda_y_top) - atan(lambda_y_bottom);
     G4double y0_magnet = y0_bottom + z0_magnet*lambda_y_bottom;
     G4double y1_magnet = y0_top    + z1_magnet*lambda_y_top;
     G4double L  = sqrt(pow(y1_magnet - y0_magnet, 2.) + pow(z1_magnet - z0_magnet,2.));
