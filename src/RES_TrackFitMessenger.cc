@@ -52,6 +52,8 @@ void RES_TrackFitMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
       method = twolines;
     if (newValue == "transverse")
       method = transverse;
+    if (newValue == "fullmatrix")
+      method = fullmatrix;
     if (newValue == "testbeam")
       method = testbeam;
 

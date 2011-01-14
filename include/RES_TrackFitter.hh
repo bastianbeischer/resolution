@@ -12,7 +12,7 @@
 
 enum FitMethod
 {
-  blobel, minuit, oneline, twolines, transverse, testbeam
+  blobel, minuit, oneline, twolines, transverse, fullmatrix, testbeam
 };
 
 class RES_TrackFitMessenger;
@@ -50,6 +50,7 @@ private:
   void     CalculateStartParameters();
   G4int    DoBlobelFit(G4int npar);
   G4int    DoMinuitFit(G4int npar);
+  void     DoFullFit();
   G4double Chi2InModuleFrame();
 
 private:

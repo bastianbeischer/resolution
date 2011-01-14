@@ -122,8 +122,10 @@ void RES_Module::ComputeParameters()
 void RES_Module::SetDefaultValuesForFiber()
 {
   m_type            = fiber;
-  m_angle           = -0.5 * M_PI/180.;
-  m_internalAngle   = 1.0 * M_PI/180.;
+  // m_angle           = -0.5 * M_PI/180.;
+  // m_internalAngle   = 1.0 * M_PI/180.;
+  m_angle           = 0.;
+  m_internalAngle   = 0.;
   m_length          = 40.*cm;
   m_width           = 6.5*cm;
   m_upperSigmaU     = m_length/sqrt(12);

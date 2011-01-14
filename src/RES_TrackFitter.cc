@@ -100,6 +100,9 @@ RES_Event RES_TrackFitter::Fit()
     CalculateStartParameters();
     DoBlobelFit(3);
     break;
+  case fullmatrix:
+    DoFullFit();
+    break;
   case testbeam:
     // AddLayerToBeSkipped(0);
     // AddLayerToBeSkipped(10);    
@@ -707,4 +710,72 @@ void RES_TrackFitter::RemoveLayerToBeSkipped(G4int layer)
   std::vector<G4int>::iterator it = std::find(m_layersToBeSkipped.begin(), m_layersToBeSkipped.end(), layer);
   if (it != m_layersToBeSkipped.end())
     m_layersToBeSkipped.erase(it);
+}
+
+void RES_TrackFitter::DoFullFit()
+{
+  RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
+
+  unsigned int nHits = m_currentGenEvent.GetNbOfHits();
+
+  // basic dimensions of matrices
+  unsigned int nRow = nHits;
+  unsigned int nCol = 2;
+
+  // declare matrices for the calculation
+  TMatrixD A(nRow,nCol);
+  TVectorD b(nRow);
+  TMatrixD U(nRow,nRow);
+
+  G4FieldManager* fieldMgr = G4TransportationManager::GetTransportationManager()->GetFieldManager();
+  RES_MagneticField* field = (RES_MagneticField*) fieldMgr->GetDetectorField();
+  G4double B_estimate  = field->GetFieldEstimate();
+  G4double magnetHeight = fabs(field->GetZ1() - field->GetZ0());
+  G4double z0_magnet = -magnetHeight/2. + field->GetDisplacement().z();
+  G4double z1_magnet =  magnetHeight/2. + field->GetDisplacement().z();
+  G4double L = fabs(z1_magnet - z0_magnet);
+  
+  std::cout << "--------------------------------------------------------" << std::endl;
+  for (unsigned int i = 0; i < nHits; i++) {
+    G4ThreeVector pos = m_smearedHits[i];
+
+    // get module
+    G4int iModule = m_currentGenEvent.GetModuleID(i);
+    G4int iLayer  = m_currentGenEvent.GetLayerID(i);
+    RES_Module* module = det->GetModule(iModule);
+    G4double sigmaV = iLayer==0? module->GetUpperSigmaV() : module->GetLowerSigmaV();
+    G4float k = z1_magnet - pos.z();
+
+    // fill the matrices
+    A(i,0) = 1;
+    if (k <= 0)          A(i,1) = 0.;
+    if (k > 0 && k <= L) A(i,1) = 0.5*0.3*(B_estimate/tesla)/m * pow(k,2.) * GeV;
+    if (k > L)           A(i,1) = ( 0.5*0.3*(B_estimate/tesla)/m *pow(L,2.) + 0.3*(B_estimate/tesla)/m * L*(k-L)) * GeV;
+    b(i) = pos.y();
+    // G4double zahl1 = A(i,0)*1.0*cm;
+    // G4double zahl2 = A(i,1)*1./(1.0*GeV);
+    //std::cout << k/cm  << " ----> " << pos.y()/cm << "   " << zahl1/cm << " " << zahl2/cm << "   " << (zahl1+zahl2)/cm << std::endl;
+    U(i,i) = sigmaV*sigmaV;
+  }
+  
+  // calculate solution
+  TMatrixD Uinv = U;
+  Uinv.Invert();
+  TMatrixD ATranspose(nCol,nRow);
+  ATranspose.Transpose(A);
+  TMatrixD M = ATranspose * Uinv * A;
+  TVectorD c = ATranspose * Uinv * b;
+  TMatrixD Minv = M;
+  Minv.Invert();
+  TVectorD solution(nCol);
+  solution = Minv * c;
+
+  // calculate chi2 and track positions from fit parameters
+  TMatrixD vec(nRow,1);
+  for (unsigned int i = 0; i < nRow; i++)
+    vec(i,0) = (A*solution - b)(i);
+  TMatrixD vecTrans(1,nRow);
+  vecTrans.Transpose(vec);
+  G4double chi2 = (vecTrans * Uinv * vec)(0,0);
+  //std::cout << solution(0)/cm << " " << (1./solution(1)) / GeV << " " << chi2 << std::endl;
 }
