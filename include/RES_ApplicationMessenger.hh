@@ -20,7 +20,9 @@ private:
   RES_ApplicationManager* m_manager;
 
   G4UIcmdWithAString* m_createTerminalSessionCmd;
+#ifdef G4UI_USE_QT
   G4UIcmdWithAString* m_createQtSessionCmd;
+#endif
   G4UIcmdWithoutParameter* m_setSeedToSystemTimeCmd;
 
 };

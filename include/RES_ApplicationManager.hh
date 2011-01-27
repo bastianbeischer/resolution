@@ -10,7 +10,11 @@ class RES_ApplicationManager
 {
 
 public:
-  enum SessionType {Terminal=0, Qt=1};
+  enum SessionType {Terminal=0,
+#ifdef G4UI_USE_QT                    
+                    Qt=1
+#endif
+  };
 
 public:
   RES_ApplicationManager(int argc, char** argv);

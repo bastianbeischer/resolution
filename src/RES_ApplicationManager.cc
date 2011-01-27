@@ -16,6 +16,8 @@
 
 #ifdef G4VIS_USE
 #include "G4VisExecutive.hh"
+#endif
+#ifdef G4UI_USE_QT
 #include "G4UIQt.hh"
 #endif
 
@@ -87,13 +89,14 @@ void RES_ApplicationManager::CreateSession(SessionType type, G4String macro)
   if (type == Terminal) {
     session = new G4UIterminal(new G4UItcsh);
   }
+#ifdef G4UI_USE_QT
   else if (type == Qt) {
     G4UIQt* qtsession = new G4UIQt(m_argc, m_argv);
     qtsession->AddMenu("macs", "Macros");
     qtsession->AddButton("macs", "vis.ogl.mac", "/control/execute mac/vis.ogl.mac");
     session = qtsession;
   }
-
+#endif
   if (macro != "") {
     G4UImanager::GetUIpointer()->ExecuteMacroFile(macro);
   }
