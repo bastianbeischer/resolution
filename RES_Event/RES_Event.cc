@@ -2,6 +2,9 @@
 
 #include "RES_Event.hh"
 
+#include <cmath>
+#include <iostream>
+
 ClassImp( RES_Event );
 
 RES_Event::RES_Event() :
@@ -110,8 +113,10 @@ void RES_Event::AddSmearedHit(double x, double y, double z)
 }
 
 TVector3 RES_Event::GetHitAtZ(double z)                   {
+  z = round(z*100.)/100.;
   for (std::vector<TVector3>::iterator it = m_hits.begin(); it != m_hits.end(); it++) {
-    if (it->z() == z)
+    double currentZ = round(it->z()*100.)/100.;
+    if (currentZ == z)
       return *it;
   }
   return TVector3();
