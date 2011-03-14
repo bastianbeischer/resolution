@@ -376,29 +376,31 @@ void SingleFile::draw()
   // resHist.Fit("gaus", "EQR", "", rangeLower, rangeUpper);
   m_resHist->Fit("gaus", "EQ");
   TF1* gausFit = m_resHist->GetFunction("gaus");
-  gausFit->SetParName(2, "#sigma_{p}/p");
-  double muFit = gausFit->GetParameter(1);
-  double muFitErr= gausFit->GetParError(1);
-  double sigmaFit = gausFit->GetParameter(2);
-  double sigmaFitErr= gausFit->GetParError(2);
-  // double p_rec = m_genMom / muFit;
-  // double p_rec_err = m_genMom * muFitErr / (muFit*muFit);
-  double sigmaP_overP = sigmaFit / muFit;
-  double sigmaP_overP_err = sqrt( pow(sigmaFitErr/muFit, 2.) + pow(muFitErr*sigmaFit/(muFit*muFit), 2.) );
-  char text1[128];
+  if (gausFit) {
+    gausFit->SetParName(2, "#sigma_{p}/p");
+    double muFit = gausFit->GetParameter(1);
+    double muFitErr= gausFit->GetParError(1);
+    double sigmaFit = gausFit->GetParameter(2);
+    double sigmaFitErr= gausFit->GetParError(2);
+    // double p_rec = m_genMom / muFit;
+    // double p_rec_err = m_genMom * muFitErr / (muFit*muFit);
+    double sigmaP_overP = sigmaFit / muFit;
+    double sigmaP_overP_err = sqrt( pow(sigmaFitErr/muFit, 2.) + pow(muFitErr*sigmaFit/(muFit*muFit), 2.) );
+    char text1[128];
 
-  double max = m_resHist->GetMaximum();
-  sprintf(text1, "#sigma_{p}/p = %.3f #pm %.3f", sigmaP_overP, sigmaP_overP_err);
-  TLatex* latex1 = new TLatex(-2, 0.7*max, text1);
-  latex1->SetTextColor(kRed);
-  latex1->SetTextFont(42);
-  latex1->Draw("SAME");
+    double max = m_resHist->GetMaximum();
+    sprintf(text1, "#sigma_{p}/p = %.3f #pm %.3f", sigmaP_overP, sigmaP_overP_err);
+    TLatex* latex1 = new TLatex(-2, 0.7*max, text1);
+    latex1->SetTextColor(kRed);
+    latex1->SetTextFont(42);
+    latex1->Draw("SAME");
   // char text2[128];
   // sprintf(text2, "p_{rec} = (%.2f #pm %.2f) GeV", p_rec, p_rec_err);
   // TLatex* latex2 = new TLatex(-2, 0.85*max, text2);
   // latex2->SetTextColor(kRed);
   // latex2->SetTextFont(42);
   // latex2->Draw("SAME");
+  }
 
   m_resHist->GetXaxis()->SetTitle("p_{nom}/p_{rec}");
   m_resHist->GetYaxis()->SetTitle("N");
@@ -616,7 +618,9 @@ void SingleFile::draw()
   canvas13->Draw();
   m_initialPHist->Draw();
   m_initialPHist->Fit("gaus", "EQ");
-  m_initialPHist->GetFunction("gaus")->SetParName(2, "#sigma_{p}/p");
+  TF1* initialFit = m_initialPHist->GetFunction("gaus");
+  if (initialFit)
+    initialFit->SetParName(2, "#sigma_{p}/p");
   //  sprintf(saveName, "%s_initial.%s", stem, "pdf");
   //  canvas13->SaveAs(saveName);
   //sprintf(saveName, "%s_initial.%s", stem, "root");
