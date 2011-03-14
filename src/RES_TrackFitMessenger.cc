@@ -54,6 +54,8 @@ void RES_TrackFitMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
       method = transverse;
     if (newValue == "testbeam")
       method = testbeam;
+    if (newValue == "perdaix")
+      method = perdaix;
 
     m_fitter->SetFitMethod(method);
   }

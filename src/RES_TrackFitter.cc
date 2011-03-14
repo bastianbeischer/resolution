@@ -100,6 +100,9 @@ RES_Event RES_TrackFitter::Fit()
     CalculateStartParameters();
     DoBlobelFit(3);
     break;
+  case perdaix:
+    PerdaixFit();
+    break;
   case testbeam:
     // AddLayerToBeSkipped(0);
     // AddLayerToBeSkipped(10);    
@@ -707,4 +710,197 @@ void RES_TrackFitter::RemoveLayerToBeSkipped(G4int layer)
   std::vector<G4int>::iterator it = std::find(m_layersToBeSkipped.begin(), m_layersToBeSkipped.end(), layer);
   if (it != m_layersToBeSkipped.end())
     m_layersToBeSkipped.erase(it);
+}
+
+void RES_TrackFitter::PerdaixFit()
+{
+  RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
+
+  unsigned int nHits = m_currentGenEvent.GetNbOfHits();
+
+  // basic dimensions of matrices
+  unsigned int nRow = nHits;
+  unsigned int nCol = 5;
+  unsigned int nModules = det->GetNumberOfModules();
+
+  // this parameter is arbitrary. z0 = 0 should minimize correlations...
+  G4float z0 = 0.0;
+
+  // declare matrices for the calculation
+  TMatrixD A(nRow, nCol);
+  TVectorD solution(nCol);
+  TVectorD b(nRow);
+  TMatrixD Uinv(nRow,nRow);
+  TMatrixD CombineXandY(1,2);
+  TMatrixD SolutionToPositions(4*nModules,nCol);
+
+  for (unsigned int i = 0; i < nRow; i++) {
+    G4int iModule = m_currentGenEvent.GetModuleID(i);
+    G4int iLayer  = m_currentGenEvent.GetLayerID(i);
+
+    // get information from detector...
+    RES_Module* module = det->GetModule(iModule);
+    G4double angle = module->GetAngle();
+    if (iLayer > 0) angle += module->GetInternalAngle();
+
+    G4ThreeVector pos = m_smearedHits[i];
+
+    // fill the matrices
+    G4float k = pos.z() - z0;
+    G4bool useTangens = fabs(angle) < M_PI/4. ? true : false;
+    G4float xi = useTangens ? sin(angle)/cos(angle) : cos(angle)/sin(angle);
+
+    int slopeXindex = k > 0. ? 3 : 4;
+
+    for (unsigned int j = 0; j < nCol; j++)
+      A(i,j) = 0.;
+
+    if (useTangens) {
+      CombineXandY(0,0) = -xi;
+      CombineXandY(0,1) = 1.;
+      A(i,0)            = -xi;
+      A(i,1)            = 1.;
+      A(i,2)            = -k*xi;
+      A(i,slopeXindex)  = k;
+      b(i)              = -xi*pos.x() + pos.y();
+    }
+    else {
+      CombineXandY(0,0) = 1.;
+      CombineXandY(0,1) = -xi;
+      A(i,0)            = 1.;
+      A(i,1)            = -xi;
+      A(i,2)            = k;
+      A(i,slopeXindex)  = -k*xi;
+      b(i)              = pos.x() - xi*pos.y();
+    }
+
+    // calculate covariance matrix
+
+    // Rot is the matrix that maps u,v, to x,y (i.e. the backward rotation)
+    TMatrixD Rot(2,2); 
+    Rot(0,0) = cos(angle);
+    Rot(0,1) = sin(angle);
+    Rot(1,0) = -sin(angle);
+    Rot(1,1) = cos(angle);
+    TMatrixD RotTrans(2,2);
+    RotTrans.Transpose(Rot);
+
+    // calculate covariance matrix
+    G4double sigmaV = iLayer==0? module->GetUpperSigmaV() : module->GetLowerSigmaV();
+    TMatrixD V1(2,2);
+    V1(0,0) = 0.;
+    V1(0,1) = 0.;
+    V1(1,0) = 0.;
+    V1(1,1) = sigmaV*sigmaV;
+
+    TMatrixD V2(2,2);
+    V2 = Rot * V1 * RotTrans;
+
+    TMatrixD CombineXandYTrans(2,1);
+    CombineXandYTrans.Transpose(CombineXandY);
+
+    TMatrixD V3 = TMatrixD(1,1);
+    V3 = CombineXandY * V2 * CombineXandYTrans;
+
+    Uinv(i,i) = 1./V3(0,0); // this is the sigma for the i'th measurement
+
+  } // loop over hits
+  
+  // calculate solution
+  TMatrixD ATranspose(nCol,nRow);
+  ATranspose.Transpose(A);
+  TMatrixD M = ATranspose * Uinv * A;
+  TVectorD c = ATranspose * Uinv * b;
+
+  TMatrixD Minv = M;
+  Minv.InvertFast();
+
+  solution = Minv * c;
+
+  // calculate chi2 and track positions from fit parameters
+  TMatrixD residuum(nRow,1);
+  for (unsigned int i = 0; i < nRow; i++)
+    residuum(i,0) = (A*solution - b)(i);
+  TMatrixD residuumTrans(1,nRow);
+  residuumTrans.Transpose(residuum);
+
+  G4double chi2 = (residuumTrans * Uinv * residuum)(0,0);
+  G4int ndf = nRow - nCol;
+
+  // SolutionToPositions is the linear transformation that maps the solution to positions
+  for (unsigned int i = 0; i < 4*nModules; i++){
+    G4double z;
+    if ((i%4) < 2) z = det->GetModule(i/4)->GetUpperZ();
+    else           z = det->GetModule(i/4)->GetLowerZ();
+    if (i%2 == 0) { // x coordinate
+      SolutionToPositions(i,0) = 1.;
+      SolutionToPositions(i,2) = z - z0;
+    }
+    else { // y coordinate
+      SolutionToPositions(i,1) = 1.;
+      if (z >= 0) SolutionToPositions(i,3) = z - z0;
+      else        SolutionToPositions(i,4) = z - z0;
+    }
+  }
+  TVectorD positions = SolutionToPositions*solution;
+
+  // Fill information in m_currentRecEvent (usually done in RES_EventActionReconstruction for other fit methods)
+  m_currentRecEvent = RES_Event();
+  for (unsigned int i = 0; i < 2*nModules; i++) {
+    G4int iModule = i/2;
+    G4int iLayer  = i%2;
+
+    // bool found = false;
+    // for (unsigned int j = 0; j < nHits; j++) {
+    //   G4int genModule = m_currentGenEvent.GetModuleID(j);
+    //   G4int genLayer  = m_currentGenEvent.GetLayerID(j);
+    //   if (iModule == genModule && iLayer == genLayer)
+    //     found = true;
+    // }
+    // if (!found)
+    //   continue;
+
+    G4double z;
+    if (iLayer == 0) z = det->GetModule(iModule)->GetUpperZ();
+    else             z = det->GetModule(iModule)->GetLowerZ();
+    m_currentRecEvent.AddHit(iModule, iLayer, positions(2*i), positions(2*i+1), z);
+  }
+  m_currentRecEvent.SetChi2(chi2);
+  m_currentRecEvent.SetDof(ndf);
+  m_currentRecEvent.SetEventType(reconstructed);
+
+  G4FieldManager* fieldMgr = G4TransportationManager::GetTransportationManager()->GetFieldManager();
+  RES_MagneticField* field = (RES_MagneticField*) fieldMgr->GetDetectorField();
+  if (field) {
+    G4double B_estimate  = field->GetFieldEstimate();
+    G4double magnetHeight = fabs(field->GetZ1() - field->GetZ0());
+    G4double z0_magnet = -magnetHeight/2. + field->GetDisplacement().z();
+    G4double z1_magnet =  magnetHeight/2. + field->GetDisplacement().z();
+
+    //G4double x0 = solution(0);
+    G4double y0 = solution(1);
+    G4double lambda_x = solution(2);
+    G4double lambda_y_top = solution(3);
+    G4double lambda_y_bottom = solution(4);
+
+    G4double phi = atan(lambda_y_top);
+    G4double theta = atan(-lambda_x*cos(phi));
+
+    G4double deltaTheta = lambda_y_top - lambda_y_bottom;
+    G4double y0_magnet = y0 + z0_magnet*lambda_y_bottom;
+    G4double y1_magnet = y0 + z1_magnet*lambda_y_top;
+    G4double L  = sqrt(pow(y1_magnet - y0_magnet, 2.) + pow(z1_magnet - z0_magnet,2.));
+    G4double pt = (0.3*(B_estimate/tesla)*(L/m)/deltaTheta)*GeV;
+
+    // pt is by definition positive for electrons
+    if (m_initialCharge > 0)
+      pt = -pt;
+
+    m_currentRecEvent.SetMomentum(pt/cos(theta));
+    m_currentRecEvent.SetTransverseMomentum(pt);
+  }
+  else {
+    m_currentRecEvent.SetMomentum(DBL_MAX);
+    m_currentRecEvent.SetTransverseMomentum(DBL_MAX);
+  }
 }

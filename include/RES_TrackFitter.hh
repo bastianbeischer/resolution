@@ -12,7 +12,7 @@
 
 enum FitMethod
 {
-  blobel, minuit, oneline, twolines, transverse, testbeam
+  blobel, minuit, oneline, twolines, transverse, testbeam, perdaix
 };
 
 class RES_TrackFitMessenger;
@@ -38,6 +38,7 @@ public:
 public:
   void CopyHits();
   void FitStraightLine(G4int n0, G4int n1, G4double &x0, G4double &y0, G4double &dxdz, G4double &dydz);
+  void PerdaixFit();
 
   void ClearLayersToBeSkipped() {m_layersToBeSkipped.clear();}
   void AddLayerToBeSkipped(G4int layer);
