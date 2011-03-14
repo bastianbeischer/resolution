@@ -120,9 +120,46 @@ void RES_RunManager::StartReconstructionRun()
 
 void RES_RunManager::StartReconstructionRunWithoutLayer(G4int layer)
 {
-  m_trackFitter->AddLayerToBeSkipped(layer);
+  if (layer == 1) {
+    m_trackFitter->AddLayerToBeSkipped(0);
+    m_trackFitter->AddLayerToBeSkipped(2);
+    m_trackFitter->AddLayerToBeSkipped(4);
+  }
+  else if (layer == 2) {
+    m_trackFitter->AddLayerToBeSkipped(1);
+    m_trackFitter->AddLayerToBeSkipped(3);
+    m_trackFitter->AddLayerToBeSkipped(5);
+  }
+  else if (layer == 3) {
+    m_trackFitter->AddLayerToBeSkipped(6);
+    m_trackFitter->AddLayerToBeSkipped(8);
+  }
+  else if (layer == 4) {
+    m_trackFitter->AddLayerToBeSkipped(7);
+    m_trackFitter->AddLayerToBeSkipped(9);
+  }
+  else if (layer == 5) {
+    m_trackFitter->AddLayerToBeSkipped(10);
+    m_trackFitter->AddLayerToBeSkipped(12);
+    m_trackFitter->AddLayerToBeSkipped(14);
+  }
+  else if (layer == 6) {
+    m_trackFitter->AddLayerToBeSkipped(11);
+    m_trackFitter->AddLayerToBeSkipped(13);
+    m_trackFitter->AddLayerToBeSkipped(15);
+  }
+  else if (layer == 7) {
+    m_trackFitter->AddLayerToBeSkipped(16);
+    m_trackFitter->AddLayerToBeSkipped(18);
+  }
+  else if (layer == 8) {
+    m_trackFitter->AddLayerToBeSkipped(17);
+    m_trackFitter->AddLayerToBeSkipped(19);
+  }
+  //  m_trackFitter->AddLayerToBeSkipped(layer);
   StartReconstructionRun();
-  m_trackFitter->RemoveLayerToBeSkipped(layer);
+  m_trackFitter->ClearLayersToBeSkipped();
+  //  m_trackFitter->RemoveLayerToBeSkipped(layer);
 }
 
 void RES_RunManager::ScanChi2Function(G4int iPar, G4int jPar, G4String filename)

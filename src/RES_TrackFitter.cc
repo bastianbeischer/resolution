@@ -737,6 +737,11 @@ void RES_TrackFitter::PerdaixFit()
   for (unsigned int i = 0; i < nRow; i++) {
     G4int iModule = m_currentGenEvent.GetModuleID(i);
     G4int iLayer  = m_currentGenEvent.GetLayerID(i);
+    G4int uniqueLayer = 2*iModule+iLayer;
+
+    std::vector<G4int>::iterator it = std::find(m_layersToBeSkipped.begin(), m_layersToBeSkipped.end(), uniqueLayer);
+    if (it != m_layersToBeSkipped.end())
+      continue;
 
     // get information from detector...
     RES_Module* module = det->GetModule(iModule);
@@ -825,7 +830,7 @@ void RES_TrackFitter::PerdaixFit()
   residuumTrans.Transpose(residuum);
 
   G4double chi2 = (residuumTrans * Uinv * residuum)(0,0);
-  G4int ndf = nRow - nCol;
+  G4int ndf = nRow - nCol + m_layersToBeSkipped.size();
 
   // SolutionToPositions is the linear transformation that maps the solution to positions
   for (unsigned int i = 0; i < 4*nModules; i++){
