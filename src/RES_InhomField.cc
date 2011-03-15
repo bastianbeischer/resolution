@@ -147,8 +147,10 @@ void RES_InhomField::ReadData()
   // read the data (only contains all x, y >= 0, z >= 0)
   G4double x, y, z, f_x, f_y, f_z, dummy;
   G4int nX, nY, nZ;
-  while (!file.eof()) {
+  while (true) {
     file >> x >> y >> z >> dummy >> f_x >> f_y >> f_z >> dummy;
+    if (file.eof())
+      break;
     
     x/=10.;
     y/=10.;
