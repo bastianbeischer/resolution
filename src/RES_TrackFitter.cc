@@ -100,8 +100,8 @@ RES_Event RES_TrackFitter::Fit()
     CalculateStartParameters();
     DoBlobelFit(3);
     break;
-  case perdaix:
-    PerdaixFit();
+  case brokenline:
+    BrokenLineFit();
     break;
   case testbeam:
     // AddLayerToBeSkipped(0);
@@ -712,7 +712,7 @@ void RES_TrackFitter::RemoveLayerToBeSkipped(G4int layer)
     m_layersToBeSkipped.erase(it);
 }
 
-void RES_TrackFitter::PerdaixFit()
+void RES_TrackFitter::BrokenLineFit()
 {
   RES_DetectorConstruction* det = (RES_DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
 
