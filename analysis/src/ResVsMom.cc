@@ -135,16 +135,16 @@ void ResVsMom::processConfigFile(const char* filename)
     return;
   }
 
-  while (!infile.eof()) {
-    
+  while (true) {
     char fileTemplate[128];
     char title[128];
     double momMin, momMax, momStep, guessA, guessB;
     int typeInt;
     infile >> fileTemplate >> title >> typeInt >> momMin >> momMax >> momStep >> guessA >> guessB; 
+    if (infile.eof())
+      break;
     ParticleType type = (ParticleType)typeInt;
     addGraph(fileTemplate, title, type, momMin, momMax, momStep, guessA, guessB);
-
   }
 
   draw();
