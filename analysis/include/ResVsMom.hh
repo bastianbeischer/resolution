@@ -11,7 +11,7 @@ class TGraphErrors;
 class ResVsMom
 {
   
-  enum ParticleType {electron = 0, proton = 1};
+  enum ParticleType {electron = 0, proton = 1, helium = 2};
 
 public:
   ResVsMom();

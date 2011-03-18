@@ -97,6 +97,8 @@ void RES_PhysicsList::ConstructParticle()
   G4Positron::PositronDefinition();
   G4MuonPlus::MuonPlusDefinition();
   G4MuonMinus::MuonMinusDefinition();
+  G4GenericIon::GenericIonDefinition();
+  G4Alpha::AlphaDefinition();
   G4Proton::ProtonDefinition();
 }
 

@@ -159,7 +159,8 @@ void SingleFile::setupHistograms()
   deleteHistograms();
 
   m_genMom = m_genEvent->GetMomentum()/1000.;
-  double momRes = sqrt(pow(m_genMom*0.08, 2.) + pow(0.21,2.));
+  //double momRes = sqrt(pow(m_genMom*0.08, 2.) + pow(0.21,2.));
+  double momRes = 1.0;
   //double momRes = 0.8;
   //double momRes = sqrt(pow(genMom*.8e-3, 2.) + pow(0.04,2.));
 
