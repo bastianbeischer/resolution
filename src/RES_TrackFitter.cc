@@ -895,11 +895,9 @@ void RES_TrackFitter::BrokenLineFit()
     G4double y0_magnet = y0 + z0_magnet*lambda_y_bottom;
     G4double y1_magnet = y0 + z1_magnet*lambda_y_top;
     G4double L  = sqrt(pow(y1_magnet - y0_magnet, 2.) + pow(z1_magnet - z0_magnet,2.));
-    G4double pt = (0.3*(B_estimate/tesla)*(L/m)/deltaTheta)*GeV;
+    G4double transverse_rigidity = (0.3*(B_estimate/tesla)*(L/m)/deltaTheta)*GeV;
 
-    // pt is by definition positive for electrons
-    if (m_initialCharge > 0)
-      pt = -pt;
+    G4double pt = -transverse_rigidity * m_initialCharge;
 
     m_currentRecEvent.SetMomentum(pt/cos(theta));
     m_currentRecEvent.SetTransverseMomentum(pt);
