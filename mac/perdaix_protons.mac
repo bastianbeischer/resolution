@@ -1,0 +1,44 @@
+/control/verbose 1
+/run/verbose 0
+/tracking/verbose 0
+/RES/Fit/Verbose 0
+/RES/Alignment/Verbose 0
+
+/RES/SetSeedToSystemTime
+
+/gun/momentumAmp MOMENTUM GeV
+/gun/particle proton
+#/RES/Gun/RandomOrigin
+#/RES/Gun/RandomDirection
+/gun/position 0 1 30 cm
+/gun/direction 0 0 -1
+
+/control/execute mac/geometry_perdaix.mac
+
+/RES/Field/SetInhomFieldFrom tables/perdaix_measured_15_jul_2010.table
+#/RES/Field/SetDummyField 0.27 0.0 0.0 tesla
+#/RES/Field/SetUniformField 0.3 0.0 0.0 tesla
+
+/RES/Data/OverWriteFile true
+/RES/Data/SetFileName results/perdaix_protons_MOMENTUM_GeV.root
+/RES/Run/StoreResults
+
+/RES/Fit/Method brokenline
+
+/run/initialize
+
+/process/inactivate eIoni
+/process/inactivate eBrem
+/process/inactivate hIoni
+/process/inactivate hBrems
+/process/inactivate hPairProd
+
+# /RES/Alignment/SetYshiftForModule 6 0.2
+# /RES/Alignment/SetYshiftForModule 7 -0.1
+# /RES/Alignment/SetYshiftForModule 8 0.05
+# /RES/Alignment/SetYshiftForModule 9 0.3
+
+/process/activate msc
+/RES/Run/Generate 10000
+/process/inactivate msc
+/RES/Run/Reconstruct
