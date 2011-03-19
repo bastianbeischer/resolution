@@ -30,9 +30,9 @@
 /process/inactivate eIoni
 /process/inactivate eBrem
 /process/inactivate hIoni
-/process/inactivate ionIoni
 /process/inactivate hBrems
 /process/inactivate hPairProd
+/process/inactivate ionIoni
 
 # /RES/Alignment/SetYshiftForModule 6 0.2
 # /RES/Alignment/SetYshiftForModule 7 -0.1
