@@ -16,3 +16,13 @@
 /RES/Det/SetLayerSubtractHoles 1 true
 /RES/Det/SetLayerSubtractHoles 2 true
 /RES/Det/SetLayerSubtractHoles 3 true
+
+/RES/Det/SetLayerUpperSigmaV 0 {fiberResolution}
+/RES/Det/SetLayerUpperSigmaV 1 {fiberResolution}
+/RES/Det/SetLayerUpperSigmaV 2 {fiberResolution}
+/RES/Det/SetLayerUpperSigmaV 3 {fiberResolution}
+
+/RES/Det/SetLayerLowerSigmaV 0 {fiberResolution}
+/RES/Det/SetLayerLowerSigmaV 1 {fiberResolution}
+/RES/Det/SetLayerLowerSigmaV 2 {fiberResolution}
+/RES/Det/SetLayerLowerSigmaV 3 {fiberResolution}
