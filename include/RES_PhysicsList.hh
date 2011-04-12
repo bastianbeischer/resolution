@@ -3,9 +3,9 @@
 #ifndef RES_PhysicsList_hh
 #define RES_PhysicsList_hh
 
-#include "G4VUserPhysicsList.hh"
+#include "G4VModularPhysicsList.hh"
 
-class RES_PhysicsList : public G4VUserPhysicsList
+class RES_PhysicsList : public G4VModularPhysicsList
 {
 
 public:
@@ -13,10 +13,6 @@ public:
   ~RES_PhysicsList();
 
 private:
-  void ConstructEM();
-
-  void ConstructParticle();
-  void ConstructProcess();
   void SetCuts();
 
 };
