@@ -8,7 +8,6 @@
 #include "RES_PrimaryGeneratorAction.hh"
 #include "RES_FieldManager.hh"
 #include "RES_DataHandler.hh"
-#include "RES_AlignmentManager.hh"
 
 #include "G4TransportationManager.hh"
 #include "G4UImanager.hh"
@@ -37,8 +36,6 @@ RES_ApplicationManager::RES_ApplicationManager(int argc, char** argv)
 
   // create a new RunManager
   m_runManager = RES_RunManager::GetRunManager();
-
-  RES_AlignmentManager::GetInstance();
 
   // set user initializations
   RES_DetectorConstruction* detectorConstruction = new RES_DetectorConstruction();

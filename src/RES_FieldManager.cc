@@ -5,7 +5,6 @@
 #include "RES_FieldMessenger.hh"
 #include "RES_StepperMessenger.hh"
 #include "RES_InhomField.hh"
-#include "RES_AMS02Field.hh"
 #include "RES_UniformField.hh"
 
 #include "G4ChordFinder.hh"
@@ -27,12 +26,6 @@ RES_FieldManager::~RES_FieldManager()
 void RES_FieldManager::SwitchOnInhomField(G4String dataFileName)
 {
   SetDetectorField(new RES_InhomField(dataFileName));
-  CreateChordFinder((G4MagneticField*) GetDetectorField());
-}
-
-void RES_FieldManager::SwitchOnAMS02Field(G4String dataFileName)
-{
-  SetDetectorField(new RES_AMS02Field(dataFileName));
   CreateChordFinder((G4MagneticField*) GetDetectorField());
 }
 

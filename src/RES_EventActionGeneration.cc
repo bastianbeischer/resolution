@@ -5,7 +5,6 @@
 #include "RES_DetectorConstruction.hh"
 #include "RES_RunManager.hh"
 #include "RES_DataHandler.hh"
-#include "RES_AlignmentManager.hh"
 #include "RES_SD.hh"
 
 #include "G4Event.hh"
@@ -114,10 +113,6 @@ void RES_EventActionGeneration::SmearHits(RES_Event* event)
     G4double angle = module->GetAngle();
     if (iLayer > 0) angle += module->GetInternalAngle();
 
-    RES_AlignmentManager* alignMgr = RES_AlignmentManager::GetInstance();
-
-    angle += alignMgr->GetAngleShift(iModule);
-    
     // collect hit information
     G4double x = event->GetHitPosition(i).x();
     G4double y = event->GetHitPosition(i).y();
@@ -155,9 +150,6 @@ void RES_EventActionGeneration::SmearHits(RES_Event* event)
     hit.setY(CLHEP::RandGauss::shoot(hit.y(), sigmaV));
     hit.setZ(CLHEP::RandGauss::shoot(hit.z(), sigmaZ));
     hit = backwardRotation*hit;
-
-    hit.setX(hit.x() + alignMgr->GetXshift(2*iModule+iLayer));
-    hit.setY(hit.y() + alignMgr->GetYshift(2*iModule+iLayer));
 
     event->AddSmearedHit(hit.x(), hit.y(), hit.z());
   }

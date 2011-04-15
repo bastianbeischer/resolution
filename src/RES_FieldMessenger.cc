@@ -24,10 +24,6 @@ RES_FieldMessenger::RES_FieldMessenger(RES_FieldManager* manager)
   m_setInhomFieldFromFileCmd->SetGuidance("Read the field map from the specified data file");
   m_setInhomFieldFromFileCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
 
-  m_setAMS02FieldFromFileCmd = new G4UIcmdWithAString("/RES/Field/SetAMS02FieldFrom", this);
-  m_setAMS02FieldFromFileCmd->SetGuidance("Read the field map from the specified AMS02 data file");
-  m_setAMS02FieldFromFileCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
-
   m_setUniformFieldCmd = new G4UIcmdWith3VectorAndUnit("/RES/Field/SetUniformField", this);
   m_setUniformFieldCmd->SetGuidance("Set a uniform magnetic field with the value given by the specified ThreeVector");
   m_setUniformFieldCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
@@ -54,7 +50,6 @@ RES_FieldMessenger::~RES_FieldMessenger()
 {
   delete m_directory;
   delete m_setInhomFieldFromFileCmd;
-  delete m_setAMS02FieldFromFileCmd;
   delete m_setUniformFieldCmd;
   delete m_setDisplacementCmd;
   delete m_setZ0Cmd;
@@ -66,9 +61,6 @@ void RES_FieldMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
 {
   if (command == m_setInhomFieldFromFileCmd) {
     m_manager->SwitchOnInhomField(newValue);
-  }
-  if (command == m_setAMS02FieldFromFileCmd) {
-    m_manager->SwitchOnAMS02Field(newValue);
   }
   if (command == m_setUniformFieldCmd) {
     m_manager->SwitchOnUniformField(m_setUniformFieldCmd->GetNew3VectorValue(newValue));

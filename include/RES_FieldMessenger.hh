@@ -27,7 +27,6 @@ private:
   
   G4UIdirectory*             m_directory;
   G4UIcmdWithAString*        m_setInhomFieldFromFileCmd;
-  G4UIcmdWithAString*        m_setAMS02FieldFromFileCmd;
   G4UIcmdWith3VectorAndUnit* m_setUniformFieldCmd;
   G4UIcmdWith3VectorAndUnit* m_setDisplacementCmd;
   G4UIcmdWithADoubleAndUnit* m_setZ0Cmd;

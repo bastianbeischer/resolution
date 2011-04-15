@@ -20,7 +20,6 @@ public:
 
 public:
   void SwitchOnInhomField(G4String dataFileName);
-  void SwitchOnAMS02Field(G4String dataFileName);
   void SwitchOnUniformField(G4ThreeVector fieldVector);
 
   void SetDisplacement(G4ThreeVector displacement);
