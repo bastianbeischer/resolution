@@ -103,6 +103,7 @@ private:
   G4double      m_foamThickness;
   G4double      m_carbonFiberThickness;
   G4double      m_epoxyThickness;
+  G4double      m_hysolThickness;
   G4double      m_fiberThickness;
 
   G4double      m_kaptonThickness;
@@ -112,6 +113,7 @@ private:
   G4Material*   m_moduleMaterial;
   G4Material*   m_carbonFiberMaterial;
   G4Material*   m_epoxyMaterial;
+  G4Material*   m_hysolMaterial;
   G4Material*   m_foamMaterial;
   G4Material*   m_fiberMaterial;
   G4Material*   m_siliconMaterial;
@@ -126,6 +128,7 @@ private:
   G4PVPlacement* m_secondCarbonFiberPlacement;
   G4PVPlacement* m_thirdCarbonFiberPlacement;
   G4PVPlacement* m_fourthCarbonFiberPlacement;
+  G4PVPlacement* m_hysolPlacement;
   G4PVPlacement* m_firstEpoxyPlacement;
   G4PVPlacement* m_secondEpoxyPlacement;
   G4PVPlacement* m_thirdEpoxyPlacement;
