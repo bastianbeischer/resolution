@@ -21,12 +21,24 @@ RES_InhomField::RES_InhomField(G4String dataFileName) :
 
 RES_InhomField::~RES_InhomField()
 {
+  for (int i = 0; i < m_axis_x->GetNbins(); i++) {
+    for (int j = 0; j < m_axis_y->GetNbins(); j++) {
+      delete [] m_field_x[i][j];
+      delete [] m_field_y[i][j];
+      delete [] m_field_z[i][j];
+    }
+    delete [] m_field_x[i];
+    delete [] m_field_y[i];
+    delete [] m_field_z[i];
+  }
+  delete [] m_field_x;
+  delete [] m_field_y;
+  delete [] m_field_z;
+
+
   delete m_axis_x;
   delete m_axis_y;
   delete m_axis_z;
-  delete m_field_x;
-  delete m_field_y;
-  delete m_field_z;
 }
 
 void RES_InhomField::GetFieldValue(const G4double* x, G4double* B) const
