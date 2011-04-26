@@ -17,5 +17,6 @@ TAGS
 analysis
 macros.tar.gz
 plots
-test
+/test
+/out
 !/mac/geometry_*
