@@ -440,10 +440,11 @@ G4int RES_TrackFitter::DoBlobelFit(G4int npar)
   G4int iter = 0;
   G4double chi2 = 0.;
   while( conv <= 0 ) {
+  G4int maxIter = 100;
     ++iter;
     chi2 = Chi2InModuleFrame();
     DVALLEY(chi2,m_parameter,conv);
-    if (chi2 == DBL_MAX)
+    if (iter == maxIter || chi2 == DBL_MAX)
       break;
   }
 
