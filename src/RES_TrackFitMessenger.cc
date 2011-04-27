@@ -52,8 +52,6 @@ void RES_TrackFitMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
       method = twolines;
     if (newValue == "transverse")
       method = transverse;
-    if (newValue == "testbeam")
-      method = testbeam;
     if (newValue == "brokenline")
       method = brokenline;
 

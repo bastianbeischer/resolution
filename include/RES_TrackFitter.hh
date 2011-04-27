@@ -12,7 +12,7 @@
 
 enum FitMethod
 {
-  blobel, minuit, oneline, twolines, transverse, testbeam, brokenline
+  blobel, minuit, oneline, twolines, transverse, brokenline
 };
 
 class RES_TrackFitMessenger;

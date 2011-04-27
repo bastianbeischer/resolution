@@ -103,13 +103,6 @@ RES_Event RES_TrackFitter::Fit()
   case brokenline:
     BrokenLineFit();
     break;
-  case testbeam:
-    // AddLayerToBeSkipped(0);
-    // AddLayerToBeSkipped(10);    
-    CalculateStartParameters();
-    DoBlobelFit(3);
-    m_layersToBeSkipped.clear();
-    break;
   default:
     break;
   }
@@ -412,52 +405,6 @@ void RES_TrackFitter::CalculateStartParameters()
     m_initialParameter[4] = theta;
 
   } // if (method == blobel,minuit,oneline,twolines)
-
-  if (m_fitMethod == testbeam) {
-
-    G4int nHits = m_currentGenEvent.GetNbOfHits();
-    double x0,y0_top,y0_bottom,lambda_x,lambda_y_top,lambda_y_bottom;
-
-    G4double dummy1,dummy2;
-
-    std::vector<int> alreadyInToBeSkipped;
-    for (std::vector<int>::iterator it = m_layersToBeSkipped.begin(); it != m_layersToBeSkipped.end(); it++)
-      alreadyInToBeSkipped.push_back(*it);
-
-    for (int i = 6; i < 12; i++)
-      if (i != 11)
-        AddLayerToBeSkipped(i);
-    FitStraightLine(0,nHits,x0,y0_top,lambda_x,lambda_y_top);
-    for (int i = 6; i < 12; i++)
-      if ((i != 11) && (std::find(alreadyInToBeSkipped.begin(), alreadyInToBeSkipped.end(), i) == alreadyInToBeSkipped.end()))
-        RemoveLayerToBeSkipped(i);
-
-    for (int i = 0; i < 6; i++)
-      if (i != 1)
-        AddLayerToBeSkipped(i);
-    FitStraightLine(0,nHits,dummy1,y0_bottom,dummy2,lambda_y_bottom);
-    for (int i = 0; i < 6; i++)
-      if ((i != 1) && (std::find(alreadyInToBeSkipped.begin(), alreadyInToBeSkipped.end(), i) == alreadyInToBeSkipped.end()))
-        RemoveLayerToBeSkipped(i);
-
-    G4double deltaTheta = lambda_y_top - lambda_y_bottom;
-    G4double y0_magnet = y0_bottom + z0_magnet*lambda_y_bottom;
-    G4double y1_magnet = y0_top    + z1_magnet*lambda_y_top;
-    G4double L  = sqrt(pow(y1_magnet - y0_magnet, 2.) + pow(z1_magnet - z0_magnet,2.));
-    G4double pt = (0.3*(B_estimate/tesla)*(L/m)/deltaTheta)*GeV;
-
-    G4double phi   = atan(lambda_y_top);
-    G4double theta = atan(-lambda_x*cos(phi));
-    G4double z0 = 0;
-    G4double k0 = m_smearedHits[0].z() - z0;
-
-    m_initialParameter[0] = 1./pt;
-    m_initialParameter[1] = y0_top + k0*lambda_y_top;
-    m_initialParameter[2] = phi;
-    m_initialParameter[3] = x0 + k0*lambda_x;
-    m_initialParameter[4] = theta;
-
-  } // if (method == testbeam)
   
   for (int i = 0; i < 5; i++) {
     m_parameter[i] = m_initialParameter[i];
