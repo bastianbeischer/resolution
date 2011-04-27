@@ -9,6 +9,8 @@ EXTRALIBS += $(shell root-config --libs) -lMinuit
 
 CPPFLAGS += -g
 CPPFLAGS += -Wno-unused-result
+CPPFLAGS += -Wno-unused-but-set-parameter
+CPPFLAGS += -Wno-unused-but-set-variable
 
 RES_EventDir := ./RES_Event
 RES_EventLib := $(RES_EventDir)/libRES_Event.so
