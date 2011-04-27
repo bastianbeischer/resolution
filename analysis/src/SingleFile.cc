@@ -237,7 +237,7 @@ void SingleFile::setupHistograms()
   m_uTotalHist = new TH1D("totalUhist", "totalUhist", 500, -20, 20);
   m_vTotalHist = new TH1D("totalYhist", "totalYhist", 500, -1.0, 1.0);
   sprintf(title, "#chi^{2} Distribution (dof = %d)", m_recEvent->GetDof());
-  m_chi2Hist = new TH1D("#chi^{2} Distribution", title, 200, 0.0, 200.0);
+  m_chi2Hist = new TH1D("#chi^{2} Distribution", title, 200, 0.0, 30.0);
   m_dofHist = new TH1D("n_{dof} Disribution", title, 8, 0, 8);
   m_angleHist = new TH1D("angleHist", "angleHist", 500, -100e-3, 100e-3);
   m_lHist = new TH1D("lHist", "lHist", 100, 0.07, 0.11);
