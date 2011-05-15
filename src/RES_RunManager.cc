@@ -141,18 +141,18 @@ void RES_RunManager::StartReconstructionRunWithoutLayer(G4int layer)
   else if (layer == 5) {
     m_trackFitter->AddLayerToBeSkipped(10);
     m_trackFitter->AddLayerToBeSkipped(12);
-    m_trackFitter->AddLayerToBeSkipped(14);
   }
   else if (layer == 6) {
     m_trackFitter->AddLayerToBeSkipped(11);
     m_trackFitter->AddLayerToBeSkipped(13);
-    m_trackFitter->AddLayerToBeSkipped(15);
   }
   else if (layer == 7) {
+    m_trackFitter->AddLayerToBeSkipped(14);
     m_trackFitter->AddLayerToBeSkipped(16);
     m_trackFitter->AddLayerToBeSkipped(18);
   }
   else if (layer == 8) {
+    m_trackFitter->AddLayerToBeSkipped(15);
     m_trackFitter->AddLayerToBeSkipped(17);
     m_trackFitter->AddLayerToBeSkipped(19);
   }
