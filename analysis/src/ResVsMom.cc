@@ -104,6 +104,7 @@ void ResVsMom::addGraph(const char* fileNameTemplate, const char* title, Particl
 
   // fit
   double m_electron = 5.11e-4;
+  double m_pion     = 1.39e-1;
   double m_proton   = 9.38e-1;
   double m_helium   = 3.73;
 
@@ -121,6 +122,9 @@ void ResVsMom::addGraph(const char* fileNameTemplate, const char* title, Particl
   }
   else if (type == helium) {
     fitMSC.FixParameter(2, m_helium);
+  }
+  else if (type == pion) {
+    fitMSC.FixParameter(2, m_pion);
   }
   graph->Fit("fitMSC", "E");
   graph->GetFunction("fitMSC")->SetLineColor(graph->GetMarkerColor());
