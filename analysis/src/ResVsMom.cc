@@ -169,8 +169,6 @@ void ResVsMom::draw()
     m_graphs.at(i)->PaintStats(m_graphs.at(i)->GetFunction("fitMSC"));
   }
 
-  TPaveStats* pt[m_graphs.size()];
-
   if(m_text) delete m_text;
   m_text = new TLatex(3.1, 0.13, "#sigma_{p} / p = #sqrt{(ap)^{2} + (b/#beta)^{2}}");
 
@@ -180,11 +178,10 @@ void ResVsMom::draw()
   for (unsigned int i = 0; i < m_graphs.size(); i++) {
     TPaveStats* stats = (TPaveStats*) m_graphs.at(i)->GetListOfFunctions()->FindObject("stats");
     stats->SetTextColor(m_graphs.at(i)->GetMarkerColor());
-    pt[i] = stats;
-    pt[i]->SetX1NDC(0.7);
-    pt[i]->SetX2NDC(0.95);
-    pt[i]->SetY1NDC(0.38 - i*0.12);
-    pt[i]->SetY2NDC(0.48 - i*0.12);
+    stats->SetX1NDC(0.7);
+    stats->SetX2NDC(0.95);
+    stats->SetY1NDC(0.38 - i*0.12);
+    stats->SetY2NDC(0.48 - i*0.12);
 
     m_legend->AddEntry(m_graphs.at(i), m_graphs.at(i)->GetTitle(), "P");
   }
